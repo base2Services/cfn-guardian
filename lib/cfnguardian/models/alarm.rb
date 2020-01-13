@@ -56,7 +56,7 @@ module CfnGuardian
     
     class ApplicationTargetGroupAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'ApplicationTargetGroup'
         @namespace = 'AWS/ApplicationELB'
         @dimensions = { 
@@ -68,7 +68,7 @@ module CfnGuardian
     
     class AutoscalingGroupAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'AutoscalingGroup'
         @namespace = 'AWS/EC2'
         @dimensions = { AutoScalingGroupName: resource['Id'] }
@@ -77,7 +77,7 @@ module CfnGuardian
     
     class Ec2InstanceAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'Ec2Instance'
         @namespace = 'AWS/EC2'
         @dimensions = { InstanceId: resource['Id'] }
@@ -86,7 +86,7 @@ module CfnGuardian
     
     class EcsClusterAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'EcsCluster'
         @namespace = 'AWS/ECS'
         @dimensions = { ClusterName: resource['Id'] }
@@ -98,7 +98,7 @@ module CfnGuardian
     
     class ElasticLoadBalancerAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'ElasticLoadBalancer'
         @namespace = 'AWS/ELB'
         @dimensions = { LoadBalancerName: resource['Id'] }
@@ -107,7 +107,7 @@ module CfnGuardian
     
     class HttpAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'Http'
         @namespace = 'HttpCheck'
         @dimensions = { Endpoint: resource['Id'] }
@@ -116,10 +116,21 @@ module CfnGuardian
         @evaluation_periods = 2
       end
     end
+    
+    class NrpeAlarm < Alarm
+      def initialize(resource,environment)
+        super(resource)
+        @class = 'Nrpe'
+        @namespace = 'NRPE'
+        @dimensions = { Host: "#{environment}-#{resource['Id']}" }
+        @treat_missing_data = 'breaching'
+        @evaluation_periods = 2
+      end
+    end
 
     class LambdaAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'Lambda'
         @namespace = 'AWS/Lambda'
         @dimensions = { FunctionName: resource['Id'] }
@@ -128,7 +139,7 @@ module CfnGuardian
     
     class NetworkTargetGroupAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'NetworkTargetGroup'
         @namespace = 'AWS/NetworkELB'
         @dimensions = { 
@@ -140,7 +151,7 @@ module CfnGuardian
     
     class RDSClusterInstanceAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'RDSClusterInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
@@ -149,7 +160,7 @@ module CfnGuardian
     
     class RDSClusterInstanceAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'RDSClusterInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
@@ -158,7 +169,7 @@ module CfnGuardian
     
     class RDSClusterAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'RDSCluster'
         @namespace = 'AWS/RDS'
         @dimensions = { DBClusterIdentifier: resource['Id'] }
@@ -167,7 +178,7 @@ module CfnGuardian
     
     class RDSInstanceAlarm < Alarm
       def initialize(resource)
-        super
+        super(resource)
         @class = 'RDSInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }

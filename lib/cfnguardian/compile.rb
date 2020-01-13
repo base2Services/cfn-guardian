@@ -8,6 +8,7 @@ require 'cfnguardian/resources/application_targetgroup'
 require 'cfnguardian/resources/autoscaling_group'
 require 'cfnguardian/resources/ecs_cluster'
 require 'cfnguardian/resources/http'
+require 'cfnguardian/resources/nrpe'
 require 'cfnguardian/resources/lambda'
 require 'cfnguardian/resources/network_targetgroup'
 require 'cfnguardian/resources/rds_cluster'
@@ -31,6 +32,8 @@ module CfnGuardian
       
       @resources = []
       @stacks = []
+      @checks = []
+      
       @cost = 0
     end
     
@@ -58,8 +61,10 @@ module CfnGuardian
           overides = @templates.has_key?(group) ? @templates[group] : {}
           @resources.concat resource_class.get_alarms(overides)
           @resources.concat resource_class.get_events()
+          @checks.concat resource_class.get_checks()
+          puts @checks
           @cost += resource_class.get_cost
-        end    
+        end
       end
     end
     
@@ -78,7 +83,7 @@ module CfnGuardian
     def compile_templates
       clean_out_directory
       resources = split_resources()
-      stack_yaml = temp_file({stacks: @stacks})
+      stack_yaml = temp_file({stacks: @stacks, checks: @checks, network: @network})
       to_cloudformation('stacks.rb','guardian.compiled.yaml',stack_yaml)
       resources.each_with_index do |resources,index|
         yaml = temp_file({resources: resources})

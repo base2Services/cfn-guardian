@@ -7,6 +7,10 @@ class String
     downcase
   end
   
+  def to_camelcase
+    self.split('_').collect(&:capitalize).join
+  end
+  
   def to_resource_name
     self.split(/(\.|-|_)/).
     map(&:capitalize).join.

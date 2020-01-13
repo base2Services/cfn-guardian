@@ -1,6 +1,7 @@
 require 'cfnguardian/string'
 require 'cfnguardian/models/alarm'
 require 'cfnguardian/models/event'
+require 'cfnguardian/models/check'
 
 module CfnGuardian::Resource
   class Base
@@ -10,10 +11,11 @@ module CfnGuardian::Resource
       @resource = resource
       @alarms = []
       @events = []
+      @checks = []
     end
     
     def default_alarms()
-      @alarms
+      return @alarms
     end
     
     def get_alarms(overides={})
@@ -71,12 +73,21 @@ module CfnGuardian::Resource
     end
     
     def default_events()
-      @events
+      return @events
     end
     
     def get_events()
       default_events()
-      @events.select{|e| e.enabled}.map {|e| e.to_h}
+      return @events.select{|e| e.enabled}.map {|e| e.to_h}
+    end
+    
+    def default_checks()
+      return @checks
+    end
+    
+    def get_checks()
+      default_checks()
+      return @checks.map {|c| c.to_h}
     end
     
     def get_cost()

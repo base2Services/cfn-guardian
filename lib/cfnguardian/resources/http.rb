@@ -33,6 +33,16 @@ module CfnGuardian::Resource
     
     def default_events()
       @events.push(CfnGuardian::Models::HttpEvent.new(@resource))
+      if @resource.has_key?('Ssl') && @resource['Ssl']
+        @events.push(CfnGuardian::Models::SslEvent.new(@resource))
+      end
+    end
+    
+    def default_checks()
+      @checks.push(CfnGuardian::Models::HttpCheck.new(@resource))
+      if @resource.has_key?('Ssl') && @resource['Ssl']
+        @checks.push(CfnGuardian::Models::SslCheck.new(@resource))
+      end
     end
     
   end

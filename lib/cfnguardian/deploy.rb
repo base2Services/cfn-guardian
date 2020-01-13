@@ -81,6 +81,7 @@ module CfnGuardian
       change_set = @client.create_change_set({
         stack_name: @stack_name,
         template_url: @template_url,
+        capabilities: ["CAPABILITY_IAM"],
         parameters: params,
         tags: [
           {

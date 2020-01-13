@@ -38,6 +38,7 @@ CloudFormation do
         ComparisonOperator resource[:comparison_operator]
         Dimensions resource[:dimensions].map {|k,v| {Name: k, Value: v}}
         EvaluationPeriods resource[:evaluation_periods]
+        Statistic resource[:statistic]
         Period resource[:period]
         Threshold resource[:threshold]
         MetricName resource[:metric_name]
@@ -49,15 +50,20 @@ CloudFormation do
       
     when 'Event'
       
+      Parameter(resource[:target]) {
+        Type 'String'
+        Description "Lamba funtion Arn for #{resource[:class]} #{resource[:type]}"
+      }
+      
       Events_Rule("#{resource[:class]}#{resource[:type]}#{resource[:hash]}"[0..255]) {
         State 'ENABLED'
         Description "Guardian scheduled #{resource[:class]} #{resource[:type]}"
         ScheduleExpression "cron(#{resource[:cron]})"
         Targets([
           {
-            Arn: FnImportValue(resource[:target]),
+            Arn: Ref(resource[:target]),
             Id: resource[:hash],
-            Input: resource[:payload]
+            Input: FnSub(resource[:payload])
           }
         ])
       }
