@@ -46,6 +46,10 @@ CloudFormation do
         AlarmActions [Ref(resource[:alarm_action])]
         OKActions [Ref(resource[:alarm_action])]
         TreatMissingData resource[:treat_missing_data] unless resource[:treat_missing_data].nil?
+        DatapointsToAlarm resource[:datapoints_to_alarm] unless resource[:datapoints_to_alarm].nil?
+        ExtendedStatistic resource[:extended_statistic] unless resource[:extended_statistic].nil?
+        EvaluateLowSampleCountPercentile resource[:evaluate_low_sample_count_percentile] unless resource[:evaluate_low_sample_count_percentile].nil?
+        Unit resource[:unit] unless resource[:unit].nil?
       }
       
     when 'Event'

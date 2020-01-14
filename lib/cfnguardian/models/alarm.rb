@@ -20,7 +20,11 @@ module CfnGuardian
         :resource,
         :required,
         :alarm_action,
-        :treat_missing_data
+        :treat_missing_data,
+        :datapoints_to_alarm,
+        :extended_statistic,
+        :evaluate_low_sample_count_percentile,
+        :unit
       
       def initialize(resource)
         @type = 'Alarm'
@@ -35,6 +39,10 @@ module CfnGuardian
         @comparison_operator = 'GreaterThanThreshold'
         @statistic = 'Maximum'
         @actions_enabled = true
+        @datapoints_to_alarm = nil
+        @extended_statistic = nil
+        @evaluate_low_sample_count_percentile = nil
+        @unit = nil
         @enabled = true
         @resource_name = Digest::MD5.hexdigest resource['Id']
         @resource = resource['Id']
@@ -53,6 +61,16 @@ module CfnGuardian
         Hash[instance_variables.map { |name| [name[1..-1].to_sym, instance_variable_get(name)] } ]
       end
       
+    end
+    
+    
+    class ApiGatewayAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'ApiGateway'
+        @namespace = 'AWS/ApiGateway'
+        @dimensions = { ApiName: resource['Id'] }
+      end
     end
     
     class ApplicationTargetGroupAlarm < Alarm
@@ -95,6 +113,15 @@ module CfnGuardian
       end
     end
     
+    class DynamoDBAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'DynamoDB'
+        @namespace = 'AWS/DynamoDB'
+        @dimensions = { TableName: resource['Id'] }
+      end
+    end
+    
     class Ec2InstanceAlarm < Alarm
       def initialize(resource)
         super(resource)
@@ -116,12 +143,42 @@ module CfnGuardian
       end
     end
     
+    class EcsServiceAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'EcsService'
+        @namespace = 'AWS/ECS'
+        @dimensions = {
+          ServiceName: resource['Id'],
+          ClusterName: resource['Cluster'] 
+        }
+      end
+    end
+    
+    class ElastiCacheReplicationGroupAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'ElastiCacheReplicationGroup'
+        @namespace = 'AWS/ElastiCache'
+        @dimensions = { CacheClusterId: resource['Id'] }
+      end
+    end
+    
     class ElasticLoadBalancerAlarm < Alarm
       def initialize(resource)
         super(resource)
         @class = 'ElasticLoadBalancer'
         @namespace = 'AWS/ELB'
         @dimensions = { LoadBalancerName: resource['Id'] }
+      end
+    end
+    
+    class EFSAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'EFS'
+        @namespace = 'AWS/EFS'
+        @dimensions = { FileSystemId: resource['Id'] }
       end
     end
     

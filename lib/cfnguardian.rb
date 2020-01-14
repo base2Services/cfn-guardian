@@ -42,7 +42,7 @@ module CfnGuardian
           logger.info "Clouformation templates were validated successfully"
         end
       end
-      logger.warn "AWS resources defined in the templates will cost roughly $#{'%.2f' % compiler.cost} per month"
+      logger.warn "AWS cloudwatch alarms defined in the templates will cost roughly $#{'%.2f' % compiler.cost} per month"
     end
 
     desc "deploy", "Generates and deploys monitoring CloudFormation templates"
