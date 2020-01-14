@@ -5,21 +5,23 @@ require 'cfnguardian/string'
 require 'cfnguardian/resources/base'
 require 'cfnguardian/resources/apigateway'
 require 'cfnguardian/resources/application_targetgroup'
-require 'cfnguardian/resources/amazonmq'
-require 'cfnguardian/resources/aurora_instance'
+require 'cfnguardian/resources/amazonmq_broker'
+require 'cfnguardian/resources/autoscaling_group'
 require 'cfnguardian/resources/cloudfront'
 require 'cfnguardian/resources/autoscaling_group'
 require 'cfnguardian/resources/domain_expiry'
-require 'cfnguardian/resources/dynamodb'
+require 'cfnguardian/resources/dynamodb_table'
 require 'cfnguardian/resources/ec2_instance'
 require 'cfnguardian/resources/ecs_cluster'
 require 'cfnguardian/resources/ecs_service'
 require 'cfnguardian/resources/efs'
 require 'cfnguardian/resources/elasticache_replication_group'
+require 'cfnguardian/resources/elastic_load_balancer'
 require 'cfnguardian/resources/http'
 require 'cfnguardian/resources/nrpe'
 require 'cfnguardian/resources/lambda'
 require 'cfnguardian/resources/network_targetgroup'
+require 'cfnguardian/resources/rds_cluster_instance'
 require 'cfnguardian/resources/rds_instance'
 require 'cfnguardian/resources/redshift_cluster'
 require 'cfnguardian/resources/sql'
@@ -62,7 +64,7 @@ module CfnGuardian
                 next
               end
             else
-              logger.warn "'#{group}' is a unsupported resource group"
+              logger.error(e)
               next
             end
           end

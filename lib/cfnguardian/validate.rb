@@ -71,7 +71,7 @@ module CfnGuardian
         bucket: @bucket,
         key: prefix
       })
-      logger.debug("deleted s3://#{@bucket}/#{prefix}")
+      logger.debug("removed validated template s3://#{@bucket}/#{prefix}")
       
       return success
     end

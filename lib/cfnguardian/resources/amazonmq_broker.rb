@@ -1,8 +1,8 @@
 module CfnGuardian::Resource
-  class AmazonMQ < Base
+  class AmazonMQBroker < Base
     
     def default_alarms    
-      alarm = CfnGuardian::Models::AmazonMQAlarm.new(@resource)
+      alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
       alarm.name = 'CpuCreditBalanceCritical'
       alarm.metric_name = 'CpuCreditBalance'
       alarm.comparison_operator = 'LessThanThreshold'
@@ -12,7 +12,7 @@ module CfnGuardian::Resource
       alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
-      alarm = CfnGuardian::Models::AmazonMQAlarm.new(@resource)
+      alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
       alarm.name = 'CpuCreditBalanceCritical'
       alarm.metric_name = 'CpuCreditBalance'
       alarm.comparison_operator = 'LessThanThreshold'
@@ -23,7 +23,7 @@ module CfnGuardian::Resource
       alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
       
-      alarm = CfnGuardian::Models::AmazonMQAlarm.new(@resource)
+      alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
       alarm.name = 'CpuUtilizationCritical'
       alarm.metric_name = 'CpuUtilization'
       alarm.threshold = 95
@@ -31,7 +31,7 @@ module CfnGuardian::Resource
       alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
-      alarm = CfnGuardian::Models::AmazonMQAlarm.new(@resource)
+      alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
       alarm.name = 'CpuUtilizationWarning'
       alarm.metric_name = 'CpuUtilization'
       alarm.threshold = 80

@@ -85,10 +85,10 @@ module CfnGuardian
       end
     end
     
-    class AmazonMQAlarm < Alarm
+    class AmazonMQBrokerAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'AmazonMQ'
+        @class = 'AmazonMQBroker'
         @namespace = 'AWS/AmazonMQ'
         @dimensions = { Broker: resource['Id'] }
       end
@@ -127,10 +127,10 @@ module CfnGuardian
       end
     end
     
-    class DynamoDBAlarm < Alarm
+    class DynamoDBTableAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'DynamoDB'
+        @class = 'DynamoDBTable'
         @namespace = 'AWS/DynamoDB'
         @dimensions = { TableName: resource['Id'] }
       end
@@ -243,7 +243,16 @@ module CfnGuardian
       end
     end
     
-    class AuroraInstanceAlarm < Alarm
+    class RedshiftClusterAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'RedshiftCluster'
+        @namespace = 'AWS/Redshift'
+        @dimensions = { ClusterIdentifier: resource['Id'] }
+      end
+    end
+    
+    class RDSClusterInstanceAlarm < Alarm
       def initialize(resource)
         super(resource)
         @class = 'RDSClusterInstance'
