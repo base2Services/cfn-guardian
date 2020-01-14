@@ -67,6 +67,15 @@ module CfnGuardian
       end
     end
     
+    class AmazonMQAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'AmazonMQ'
+        @namespace = 'AWS/AmazonMQ'
+        @dimensions = { Broker: resource['Id'] }
+      end
+    end
+    
     class AutoscalingGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
