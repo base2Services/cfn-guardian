@@ -94,10 +94,10 @@ module CfnGuardian
       end
     end
     
-    class CloudFrontAlarm < Alarm
+    class CloudFrontDistributionAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'CloudFront'
+        @class = 'CloudFrontDistribution'
         @namespace = 'AWS/CloudFront'
         @dimensions = { 
           DistributionId: resource['Id'],
@@ -108,10 +108,10 @@ module CfnGuardian
       end
     end
     
-    class AutoscalingGroupAlarm < Alarm
+    class AutoScalingGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'AutoscalingGroup'
+        @class = 'AutoScalingGroup'
         @namespace = 'AWS/EC2'
         @dimensions = { AutoScalingGroupName: resource['Id'] }
       end
@@ -187,10 +187,10 @@ module CfnGuardian
       end
     end
     
-    class EFSAlarm < Alarm
+    class ElasticFileSystemAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'EFS'
+        @class = 'ElasticFileSystem'
         @namespace = 'AWS/EFS'
         @dimensions = { FileSystemId: resource['Id'] }
       end
@@ -205,7 +205,6 @@ module CfnGuardian
         @comparison_operator = 'LessThanThreshold'
         @threshold = 1
         @evaluation_periods = 2
-        @treat_missing_data = 'notBreaching'
       end
     end
     

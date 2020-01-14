@@ -35,7 +35,7 @@ module CfnGuardian
         @name = 'HttpCheck'
         @package = 'aws-lambda-http-check'
         @handler = 'handler.main'
-        @version = '0.1.0'
+        @version = '0.1'
         @runtime = 'python3.6'
       end
     end
@@ -49,7 +49,7 @@ module CfnGuardian
         @name = 'NrpeCheck'
         @package = 'aws-lambda-nrpe-check'
         @handler = 'main'
-        @version = '0.2.0'
+        @version = '0.2'
         @runtime = 'go1.x'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']

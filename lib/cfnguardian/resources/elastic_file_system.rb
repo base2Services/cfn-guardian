@@ -1,9 +1,9 @@
 module CfnGuardian
   module Resource
-    class EFS < Base
+    class ElasticFileSystem < Base
       
       def default_alarms    
-        alarm = CfnGuardian::Models::EFSAlarm.new(@resource)
+        alarm = CfnGuardian::Models::ElasticFileSystemAlarm.new(@resource)
         alarm.name = 'PercentIOLimitHigh'
         alarm.metric_name = 'PercentIOLimit'
         alarm.comparison_operator = 'GreaterThanThreshold'

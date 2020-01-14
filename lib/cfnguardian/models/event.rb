@@ -63,7 +63,7 @@ module CfnGuardian
         @target = 'HttpCheckFunction'
         @endpoint = resource['Id']
         @method = resource.fetch('Method','GET')
-        @timeout = resource.fetch('Timeout',120)
+        @timeout = resource.fetch('Timeout',50)
         @status_code = resource.fetch('StatusCode',200)
         @body_regex = resource.fetch('BodyRegex',nil)
         @headers = resource.fetch('Headers',nil)

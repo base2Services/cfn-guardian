@@ -87,6 +87,10 @@ module CfnGuardian
           {
             key: "guardian:version",
             value: CfnGuardian::VERSION,
+          },
+          { 
+            key: 'Environment', 
+            value: 'guardian' 
           }
         ],
         change_set_name: change_set_name,
