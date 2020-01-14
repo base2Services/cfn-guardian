@@ -56,7 +56,7 @@ module CfnGuardian
         bucket: @bucket,
         key: prefix
       })
-      logger.info("uploaded #{file} to s3://#{@bucket}/#{prefix}")
+      logger.info("uploaded #{path} to s3://#{@bucket}/#{prefix}")
       
       begin
         response = @client.validate_template({

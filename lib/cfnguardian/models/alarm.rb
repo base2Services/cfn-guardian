@@ -94,6 +94,20 @@ module CfnGuardian
       end
     end
     
+    class CloudFrontAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'CloudFront'
+        @namespace = 'AWS/CloudFront'
+        @dimensions = { 
+          DistributionId: resource['Id'],
+          Region: 'Global'
+        }
+        @statistic = 'Average'
+        @evaluation_periods = 5
+      end
+    end
+    
     class AutoscalingGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
@@ -191,6 +205,7 @@ module CfnGuardian
         @comparison_operator = 'LessThanThreshold'
         @threshold = 1
         @evaluation_periods = 2
+        @treat_missing_data = 'notBreaching'
       end
     end
     
@@ -211,6 +226,8 @@ module CfnGuardian
         @class = 'Lambda'
         @namespace = 'AWS/Lambda'
         @dimensions = { FunctionName: resource['Id'] }
+        @statistic = 'Average'
+        @evaluation_periods = 5
       end
     end
     
@@ -226,30 +243,12 @@ module CfnGuardian
       end
     end
     
-    class RDSClusterInstanceAlarm < Alarm
+    class AuroraInstanceAlarm < Alarm
       def initialize(resource)
         super(resource)
         @class = 'RDSClusterInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
-      end
-    end
-    
-    class RDSClusterInstanceAlarm < Alarm
-      def initialize(resource)
-        super(resource)
-        @class = 'RDSClusterInstance'
-        @namespace = 'AWS/RDS'
-        @dimensions = { DBInstanceIdentifier: resource['Id'] }
-      end
-    end
-    
-    class RDSClusterAlarm < Alarm
-      def initialize(resource)
-        super(resource)
-        @class = 'RDSCluster'
-        @namespace = 'AWS/RDS'
-        @dimensions = { DBClusterIdentifier: resource['Id'] }
       end
     end
     
@@ -270,6 +269,17 @@ module CfnGuardian
         @dimensions = { Host: resource['Id'] }
         @treat_missing_data = 'breaching'
         @evaluation_periods = 1
+      end
+    end
+    
+    class SQSQueueAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'SQSQueue'
+        @namespace = 'AWS/SQS'
+        @dimensions = { QueueName: resource['Id'] }
+        @statistic = 'Average'
+        @period = 300
       end
     end
     
