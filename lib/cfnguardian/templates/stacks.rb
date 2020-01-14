@@ -78,6 +78,10 @@ CloudFormation do
           }
         }
       ])
+      Tags([
+        { Key: 'Name', Value: 'guardian-lambda-role' },
+        { Key: 'Environment', Value: 'guardian' }
+      ])
     }
     
     external_parameters[:checks].each do |check|
@@ -88,6 +92,10 @@ CloudFormation do
         EC2_SecurityGroup("#{check[:name]}SecurityGroup#{check[:environment]}") {
           VpcId check[:vpc]
           GroupDescription "Guardian lambda function #{check[:class]} check"
+          Tags([
+            { Key: 'Name', Value: "guardian-#{check[:name]}-#{check[:class]}" },
+            { Key: 'Environment', Value: 'guardian' }
+          ])
         }
         
         vpc_config[:SecurityGroupIds] = Ref("#{check[:name]}SecurityGroup#{check[:environment]}")
@@ -105,6 +113,10 @@ CloudFormation do
         Timeout 120
         Role FnGetAtt(:LambdaExecutionRole, :Arn)
         VpcConfig vpc_config unless vpc_config.empty?
+        Tags([
+          { Key: 'Name', Value: "guardian-#{check[:name]}-#{check[:class]}" },
+          { Key: 'Environment', Value: 'guardian' }
+        ])
       }
 
       Lambda_Permission("#{check[:name]}Permissions#{check[:environment]}") {
@@ -124,6 +136,9 @@ CloudFormation do
       Parameters stack_parameters
       TemplateURL stack['TemplateURL']
       TimeoutInMinutes 15
+      Tags([
+        { Key: 'Name', Value: "guardian-stack-#{stack['Name']}" }
+      ])
     }
   end
   
