@@ -69,11 +69,11 @@ module CfnGuardian
       end
     end
     
-    class DnsCheck < Check
+    class DomainExpiryCheck < Check
       def initialize(resource)
         super(resource)
-        @class = 'Dns'
-        @name = 'DnsCheck'
+        @class = 'DomainExpiry'
+        @name = 'DomainExpiryCheck'
         @package = 'aws-lambda-dns-check'
         @handler = 'main'
         @version = '0.1'

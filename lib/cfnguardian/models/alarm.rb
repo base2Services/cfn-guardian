@@ -76,6 +76,16 @@ module CfnGuardian
       end
     end
     
+    class DomainExpiryAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'DomainExpiry'
+        @namespace = 'DNS'
+        @dimensions = { Domain: resource['Id'] }
+        @comparison_operator = 'LessThanThreshold'
+      end
+    end
+    
     class Ec2InstanceAlarm < Alarm
       def initialize(resource)
         super(resource)

@@ -125,16 +125,16 @@ module CfnGuardian
       end
     end
     
-    class DnsEvent < Event
+    class DomainExpiryEvent < Event
       
       attr_accessor :domain,
         :region
       
       def initialize(resource)
         super(resource)
-        @class = 'Dns'
-        @name = 'DnsEvent'
-        @target = 'DnsCheckFunction'
+        @class = 'DomainExpiry'
+        @name = 'DomainExpiryEvent'
+        @target = 'DomainExpiryCheckFunction'
         @cron = "0 12 * * ? *" 
         @domain = resource['Id']
         @region = resource.fetch('Region',"${AWS::Region}")
