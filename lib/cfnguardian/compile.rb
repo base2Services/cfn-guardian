@@ -103,7 +103,8 @@ module CfnGuardian
     def to_cloudformation(input,output,yaml)
       CfnDsl.disable_binding
       logger.debug("Compiling cfndsl template #{input} to YAML Cloudformation template #{output}")
-      model = CfnDsl.eval_file_with_extras("lib/cfnguardian/templates/#{input}", [[:yaml, yaml]], false)
+      FileUtils.mkdir_p('out')
+      model = CfnDsl.eval_file_with_extras(File.join(File.dirname(__FILE__), "/templates/#{input}"), [[:yaml, yaml]], false)
       template = JSON.parse(model.to_json).to_yaml
       File.write("out/#{output}", template)
     end
