@@ -15,6 +15,7 @@ require 'cfnguardian/resources/rds_cluster'
 require 'cfnguardian/resources/rds_cluster_instance'
 require 'cfnguardian/resources/rds_instance'
 require 'cfnguardian/resources/redshift_cluster'
+require 'cfnguardian/resources/sql'
 
 module CfnGuardian
   class Compile
@@ -62,7 +63,7 @@ module CfnGuardian
           @resources.concat resource_class.get_alarms(overides)
           @resources.concat resource_class.get_events()
           @checks.concat resource_class.get_checks()
-          puts @checks
+
           @cost += resource_class.get_cost
         end
       end

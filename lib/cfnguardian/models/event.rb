@@ -146,7 +146,7 @@ module CfnGuardian
     end
     
     class SqlEvent < Event
-      def initialize(resource)
+      def initialize(resource,query)
         super(resource)
         @class = 'Sql'
         @name = 'SqlEvent'
@@ -156,7 +156,7 @@ module CfnGuardian
         @port = resource['Port']
         @ssm_username = resource['SSMUsername']
         @ssm_password = resource['SSMPassword']
-        @query = resource['Query']
+        @query = query
         @region = resource.fetch('Region',"${AWS::Region}")
         @test_type = '1-row-1-value-zero-is-good'
       end
@@ -166,6 +166,7 @@ module CfnGuardian
           'Host' => @host,
           'Engine' => @engine,
           'Port' => @port,
+          'SqlCall' => @query,
           'SSMUsername' => @ssm_username,
           'SSMPassword' => @ssm_password,
           'Region' => @region,

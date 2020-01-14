@@ -31,7 +31,7 @@ CloudFormation do
     case resource[:type]
     when 'Alarm'
 
-      CloudWatch_Alarm("#{resource[:resource]}#{resource[:class]}#{resource[:name]}#{resource[:type]}"[0..255]) {
+      CloudWatch_Alarm("#{resource[:resource_name]}#{resource[:class]}#{resource[:name]}#{resource[:type]}"[0..255]) {
         ActionsEnabled true
         AlarmDescription "Guardian alarm #{resource[:class]} #{resource[:resource]} #{resource[:name]}"
         AlarmName "#{resource[:class]}-#{resource[:resource]}-#{resource[:name]}"

@@ -93,7 +93,7 @@ module CfnGuardian
         @version = '0.1'
         @runtime = 'go1.x'
         @subnets = resource['Subnets']
-        @vpc = resource['Vpc']
+        @vpc = resource['VpcId']
         @environment = resource['Environment']
       end
     end

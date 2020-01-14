@@ -36,7 +36,8 @@ module CfnGuardian
         @statistic = 'Maximum'
         @actions_enabled = true
         @enabled = true
-        @resource = resource['Id'].to_resource_name
+        @resource_name = Digest::MD5.hexdigest resource['Id']
+        @resource = resource['Id']
         @required = %w(type class name metric_name namespace dimensions threshold period evaluation_periods 
           comparison_operator statistic actions_enabled resource)
         @alarm_action = 'Critical'
@@ -182,6 +183,17 @@ module CfnGuardian
         @class = 'RDSInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
+      end
+    end
+    
+    class SqlAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'Sql'
+        @namespace = 'SQL'
+        @dimensions = { Host: resource['Id'] }
+        @treat_missing_data = 'breaching'
+        @evaluation_periods = 1
       end
     end
     
