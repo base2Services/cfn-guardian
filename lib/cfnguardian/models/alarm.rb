@@ -145,10 +145,10 @@ module CfnGuardian
       end
     end
     
-    class EcsClusterAlarm < Alarm
+    class ECSClusterAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'EcsCluster'
+        @class = 'ECSCluster'
         @namespace = 'AWS/ECS'
         @dimensions = { ClusterName: resource['Id'] }
         @threshold = 75
@@ -157,10 +157,10 @@ module CfnGuardian
       end
     end
     
-    class EcsServiceAlarm < Alarm
+    class ECSServiceAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'EcsService'
+        @class = 'ECSService'
         @namespace = 'AWS/ECS'
         @dimensions = {
           ServiceName: resource['Id'],
