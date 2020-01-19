@@ -1,7 +1,7 @@
 require 'yaml'
-require 'cfndsl'
-require 'tempfile'
 require 'cfnguardian/string'
+require 'cfnguardian/stacks/resources'
+require 'cfnguardian/stacks/main'
 require 'cfnguardian/resources/base'
 require 'cfnguardian/resources/apigateway'
 require 'cfnguardian/resources/application_targetgroup'
@@ -31,7 +31,7 @@ module CfnGuardian
   class Compile
     include Logging
     
-    attr_reader :cost
+    attr_reader :cost, :resources
     
     def initialize(opts,bucket)
       @prefix = opts.fetch(:stack_name,'guardian')
@@ -80,7 +80,7 @@ module CfnGuardian
     end
     
     def split_resources
-      split = @resources.each_slice(190).to_a
+      split = @resources.each_slice(200).to_a
       split.each_with_index do |resources,index|
         @stacks.push({
           'Name' => "GuardianStack#{index}",
@@ -92,30 +92,20 @@ module CfnGuardian
     end
     
     def compile_templates
-      clean_out_directory
+      clean_out_directory()
       resources = split_resources()
-      stack_yaml = temp_file({stacks: @stacks, checks: @checks, network: @network})
-      to_cloudformation('stacks.rb','guardian.compiled.yaml',stack_yaml)
+      
+      main_stack = CfnGuardian::Stacks::Main.new()
+      template = main_stack.build_template(@stacks,@checks)
+      valid = template.validate
+      File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
+      
       resources.each_with_index do |resources,index|
-        yaml = temp_file({resources: resources})
-        to_cloudformation('nested.rb',"guardian-stack-#{index}.compiled.yaml",yaml)
+        stack = CfnGuardian::Stacks::Resources.new()
+        template = stack.build_template(resources)
+        valid = template.validate
+        File.write("out/guardian-stack-#{index}.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       end
-    end
-    
-    def to_cloudformation(input,output,yaml)
-      CfnDsl.disable_binding
-      logger.debug("Compiling cfndsl template #{input} to YAML Cloudformation template #{output}")
-      FileUtils.mkdir_p('out')
-      model = CfnDsl.eval_file_with_extras(File.join(File.dirname(__FILE__), "/templates/#{input}"), [[:yaml, yaml]], false)
-      template = JSON.parse(model.to_json).to_yaml
-      File.write("out/#{output}", template)
-    end
-    
-    def temp_file(resources)
-      file = Tempfile.new(['cfn-guardian','.yaml'])
-      file.write(resources.to_yaml)
-      file.close
-      return file.path
     end
     
     def clean_out_directory

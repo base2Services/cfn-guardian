@@ -18,7 +18,6 @@ module CfnGuardian
         :actions_enabled,
         :enabled,
         :resource,
-        :required,
         :alarm_action,
         :treat_missing_data,
         :datapoints_to_alarm,
@@ -46,8 +45,6 @@ module CfnGuardian
         @enabled = true
         @resource_name = Digest::MD5.hexdigest resource['Id']
         @resource = resource['Id']
-        @required = %w(type class name metric_name namespace dimensions threshold period evaluation_periods 
-          comparison_operator statistic actions_enabled resource)
         @alarm_action = 'Critical'
         @treat_missing_data = nil
       end

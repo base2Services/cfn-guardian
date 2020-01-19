@@ -11,8 +11,7 @@ module CfnGuardian
         :name,
         :cron,
         :enabled,
-        :resource,
-        :required
+        :resource
       
       def initialize(resource)
         @type = 'Event'
@@ -23,7 +22,6 @@ module CfnGuardian
         @cron = "* * * * ? *"
         @enabled = true
         @resource = resource['Id'].to_resource_name
-        @required = %w()
       end
       
       def to_h

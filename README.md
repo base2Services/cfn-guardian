@@ -79,6 +79,50 @@ Description:
   Generates CloudFormation templates from the alarm configuration and output to the out/ directory. Then copies the files to the s3 bucket and deploys the cloudformation.
 ```
 
+**show-alarms**
+
+```bash
+Usage:
+  cfn-guardian show-alarms c, --config=CONFIG
+
+Options:
+  c, --config=CONFIG        # yaml config file
+  g, [--group=GROUP]        # resource group
+  n, [--name=NAME]          # alarm name
+  r, [--resource=RESOURCE]  # resource id
+
+Description:
+  Displays the configured settings for each alarm. Can be filtered by resource group, resource name and alarm name. Defaults to show all configured alarms.
+```
+
+```bash
+  ECSCluster
++--------------------------------------+-----------------------------------+
+|                    ECSContianerInstancesDisconnected                     |
++--------------------------------------+-----------------------------------+
+| property                             | Value                             |
++--------------------------------------+-----------------------------------+
+| actions_enabled                      | true                              |
+| alarm_action                         | Critical                          |
+| comparison_operator                  | GreaterThanThreshold              |
+| datapoints_to_alarm                  |                                   |
+| dimensions                           | {:ClusterName=>"MyCluster"}       |
+| enabled                              | true                              |
+| evaluate_low_sample_count_percentile |                                   |
+| evaluation_periods                   | 2                                 |
+| extended_statistic                   |                                   |
+| metric_name                          | ECSContianerInstancesDisconnected |
+| namespace                            | EcsCICheck                        |
+| period                               | 300                               |
+| resource                             | MyCluster                         |
+| resource_name                        | 3ccc504543e67a86f3fa43bb64cf592b  |
+| statistic                            | Maximum                           |
+| threshold                            | 0                                 |
+| treat_missing_data                   |                                   |
+| unit                                 |                                   |
++--------------------------------------+-----------------------------------+
+```
+
 ## Configuration
 
 Config is stored in a standard YAML file which will default to `alarms.yaml`. This can be overridden by supplying the `--config` switch.

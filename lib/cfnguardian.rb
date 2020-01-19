@@ -1,4 +1,5 @@
 require 'thor'
+require 'terminal-table'
 require "cfnguardian/log"
 require "cfnguardian/version"
 require "cfnguardian/compile"
@@ -83,6 +84,45 @@ module CfnGuardian
       deployer.wait_for_changeset(change_set.id)
       deployer.execute_change_set(change_set.id)
       deployer.wait_for_execute(change_set_type)
+    end
+    
+    desc "show-alarms", "Shows alarm settings"
+    long_desc <<-LONG
+    Displays the configured settings for each alarm. Can be filtered by resource group and alarm name.
+    Defaults to show all configured alarms.
+    LONG
+    method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
+    method_option :group, aliases: :g, type: :string, desc: "resource group"
+    method_option :name, aliases: :n, type: :string, desc: "alarm name"
+    method_option :resource, aliases: :r, type: :string, desc: "resource id"
+    def show_alarms
+      compiler = CfnGuardian::Compile.new(options,'no-bucket')
+      compiler.get_resources
+      
+      alarms = compiler.resources.select{|h| h[:type] == 'Alarm'}
+      groups = alarms.group_by{|h| h[:class]}
+      
+      if options[:group]
+        groups = groups.fetch(options[:group],{}).group_by{|h| h[:class]}
+        if options[:resource]
+            groups = groups[options[:group]].select{|h| h[:resource] == options[:resource]}.group_by{|h| h[:class]}
+        end
+        if options[:name]
+          groups = groups[options[:group]].select{|h| h[:name] == options[:name]}.group_by{|h| h[:class]}
+        end
+      end
+      
+      groups.each do |grp,alarms|
+        puts "\n\s\s#{grp}\n"
+        alarms.each do |alarm|
+          rows = alarm.reject {|k,v| [:type,:class,:name].include?(k)}
+                      .sort_by {|k,v| k}
+          puts Terminal::Table.new( 
+                  :title => alarm[:name], 
+                  :headings => ['property', 'Value'], 
+                  :rows => rows.map! {|k,v| [k,v.to_s]})
+        end
+      end
     end
     
     private
