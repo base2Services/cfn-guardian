@@ -1,4 +1,6 @@
 class String
+  include Term::ANSIColor
+  
   def to_underscore
     self.gsub(/::/, '/').
     gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').

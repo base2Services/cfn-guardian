@@ -1,10 +1,13 @@
 require 'thor'
 require 'terminal-table'
+require 'term/ansicolor'
 require "cfnguardian/log"
 require "cfnguardian/version"
 require "cfnguardian/compile"
 require "cfnguardian/validate"
 require "cfnguardian/deploy"
+require "cfnguardian/cloudwatch"
+require "cfnguardian/drift"
 
 module CfnGuardian
   class Cli < Thor
@@ -16,6 +19,8 @@ module CfnGuardian
       puts CfnGuardian::VERSION
     end
     
+    class_option :debug, type: :boolean, default: false, desc: "enable debug logging"
+    
     desc "compile", "Generate monitoring CloudFormation templates"
     long_desc <<-LONG
     Generates CloudFormation templates from the alarm configuration and output to the out/ directory.
@@ -26,6 +31,8 @@ module CfnGuardian
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
 
     def compile
+      set_log_level(options[:debug])
+      
       set_region(options[:region],options[:validate])
       s3 = CfnGuardian::S3.new(options[:bucket])
       
@@ -54,13 +61,15 @@ module CfnGuardian
     method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
     method_option :bucket, type: :string, desc: "provide custom bucket name, will create a default bucket if not provided"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    method_option :stack_name, aliases: :r, type: :string, desc: "set the Cloudformation stack name. Defaults to `guardian`"
+    method_option :stack_name, aliases: :s, type: :string, desc: "set the Cloudformation stack name. Defaults to `guardian`"
     method_option :sns_critical, type: :string, desc: "sns topic arn for the critical alamrs"
     method_option :sns_warning, type: :string, desc: "sns topic arn for the warning alamrs"
     method_option :sns_task, type: :string, desc: "sns topic arn for the task alamrs"
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alamrs"
 
     def deploy
+      set_log_level(options[:debug])
+      
       set_region(options[:region],true)
       s3 = CfnGuardian::S3.new(options[:bucket])
       
@@ -86,6 +95,30 @@ module CfnGuardian
       deployer.wait_for_execute(change_set_type)
     end
     
+    desc "show-drift", "Cloudformation drift detection"
+    long_desc <<-LONG
+    Displays any cloudformation drift detection in the cloudwatch alarms from the deployed stacks
+    LONG
+    method_option :stack_name, aliases: :s, type: :string, default: 'guardian', desc: "set the Cloudformation stack name"
+    
+    def show_drift
+      rows = []
+      drift = CfnGuardian::Drift.new(options[:stack_name])
+      nested_stacks = drift.find_nested_stacks
+      nested_stacks.each do |stack|
+        drift.detect_drift(stack)
+        rows << drift.get_drift(stack)
+      end
+      
+      if rows.any?
+        puts Terminal::Table.new( 
+                :title => "Guardian Alarm Drift".green, 
+                :headings => ['Alarm Name', 'Property', 'Expected', 'Actual', 'Type'], 
+                :rows => rows.flatten(1))
+        exit(1)
+      end
+    end
+    
     desc "show-alarms", "Shows alarm settings"
     long_desc <<-LONG
     Displays the configured settings for each alarm. Can be filtered by resource group and alarm name.
@@ -93,34 +126,137 @@ module CfnGuardian
     LONG
     method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
     method_option :group, aliases: :g, type: :string, desc: "resource group"
-    method_option :name, aliases: :n, type: :string, desc: "alarm name"
-    method_option :resource, aliases: :r, type: :string, desc: "resource id"
+    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
+    method_option :id, type: :string, desc: "resource id"
+    method_option :compare, type: :boolean, default: false, desc: "compare config to deployed alarms"
+    
     def show_alarms
+      set_log_level(options[:debug])
+      
       compiler = CfnGuardian::Compile.new(options,'no-bucket')
       compiler.get_resources
-      
-      alarms = compiler.resources.select{|h| h[:type] == 'Alarm'}
-      groups = alarms.group_by{|h| h[:class]}
-      
-      if options[:group]
-        groups = groups.fetch(options[:group],{}).group_by{|h| h[:class]}
-        if options[:resource]
-            groups = groups[options[:group]].select{|h| h[:resource] == options[:resource]}.group_by{|h| h[:class]}
-        end
-        if options[:name]
-          groups = groups[options[:group]].select{|h| h[:name] == options[:name]}.group_by{|h| h[:class]}
-        end
+      alarms = filter_alarms(compiler.alarms,options)
+
+      if alarms.empty?
+        logger.error "No matches found" 
+        exit 1
       end
       
-      groups.each do |grp,alarms|
-        puts "\n\s\s#{grp}\n"
+      if options[:compare]
+        CfnGuardian::CloudWatch.compare_alarms(alarms,compiler.topics)
+      end
+      
+      groups = alarms.group_by{|h| h[:class]}
+      groups.each do |grp,alarms|        
         alarms.each do |alarm|
+          headings = ['Property', 'Config']
           rows = alarm.reject {|k,v| [:type,:class,:name].include?(k)}
                       .sort_by {|k,v| k}
+                      
+          if options[:compare]
+            headings.push('Deployed')
+            rows.select! {|k,v| !v.first.nil? || !v.last.nil?}
+                .map! {|k,v| 
+                  if v.first.to_s == v.last.to_s || v.first.nil? || v.last.nil?
+                    [k.to_s.green,v.first.to_s.green,v.last.to_s.green]
+                  else
+                    [k.to_s.red,v.first.to_s.red,v.last.to_s.red]
+                  end
+                }
+          else
+            rows.select! {|k,v| !v.nil?}.map! {|k,v| [k,v.to_s]}
+          end
+          
           puts Terminal::Table.new( 
-                  :title => alarm[:name], 
-                  :headings => ['property', 'Value'], 
-                  :rows => rows.map! {|k,v| [k,v.to_s]})
+                  :title => "#{grp}::#{alarm[:name]}".green, 
+                  :headings => headings, 
+                  :rows => rows)
+        end
+      end
+    end
+    
+    desc "show-state", "Shows alarm state in cloudwatch"
+    long_desc <<-LONG
+    Displays the current cloudwatch alarm state
+    LONG
+    method_option :config, aliases: :c, type: :string, desc: "yaml config file"
+    method_option :group, aliases: :g, type: :string, desc: "resource group"
+    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
+    method_option :id, type: :string, desc: "resource id"
+    method_option :state, aliases: :s, type: :string, enum: %w(OK ALARM INSUFFICIENT_DATA), desc: "filter by alarm state"
+    method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
+    method_option :alarm_prefix, type: :string, desc: "CloudWatch alarm name prefix if not providing config"
+    
+    def show_state
+      set_log_level(options[:debug])
+      
+      if !options[:config].nil?
+        compiler = CfnGuardian::Compile.new(options,'no-bucket')
+        compiler.get_resources
+        alarms = filter_alarms(compiler.alarms,options)
+        alarms.map! {|alarm| "#{alarm[:class]}-#{alarm[:resource]}-#{alarm[:name]}"}
+        rows = CfnGuardian::CloudWatch.get_alarm_state(alarm_names: alarms, state: options[:state])
+      elsif !options[:alarm_names].nil?
+        rows = CfnGuardian::CloudWatch.get_alarm_state(alarm_names: options[:alarm_names], state: options[:state])
+      elsif !options[:alarm_prefix].nil?
+        rows = CfnGuardian::CloudWatch.get_alarm_state(alarm_prefix: options[:alarm_prefix], state: options[:state])
+      else
+        logger.error "one of `--config` `--alarm-prefix` `--alarm-names` must be supplied"
+        exit 1
+      end
+      
+            
+      puts Terminal::Table.new( 
+              :title => "Alarm State", 
+              :headings => ['Alarm Name', 'State', 'Changed'], 
+              :rows => rows)
+    end
+    
+    desc "show-history", "Shows alarm history for the last 7 days"
+    long_desc <<-LONG
+    Displays the alarm state or config history for the last 7 days
+    LONG
+    method_option :config, aliases: :c, type: :string, desc: "yaml config file"
+    method_option :group, aliases: :g, type: :string, desc: "resource group"
+    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
+    method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
+    method_option :id, type: :string, desc: "resource id"
+    method_option :type, aliases: :t, type: :string, 
+        enum: %w(state config), default: 'state', desc: "filter by alarm state"
+    
+    def show_history
+      set_log_level(options[:debug])
+      
+      if !options[:config].nil?
+        compiler = CfnGuardian::Compile.new(options,'no-bucket')
+        compiler.get_resources
+        alarms = filter_alarms(compiler.alarms,options)
+        alarms.map! {|alarm| "#{alarm[:class]}-#{alarm[:resource]}-#{alarm[:name]}"}
+      elsif !options[:alarm_names].nil?
+        alarms = options[:alarm_names]
+      else
+        logger.error "one of `--config` `--alarm-names` must be supplied"
+        exit 1
+      end
+        
+      
+      case options[:type]
+      when 'state'
+        type = 'StateUpdate'
+        headings = ['Date', 'Summary', 'Reason']
+      when 'config'
+        type = 'ConfigurationUpdate'
+        headings = ['Date', 'Summary', 'Type']
+      end
+      
+      alarms.each do |alarm|
+        rows = CfnGuardian::CloudWatch.get_alarm_history(alarm,type)
+        if rows.any?     
+          puts Terminal::Table.new( 
+                  :title => alarm, 
+                  :headings => headings, 
+                  :rows => rows)
+          puts "\n"
         end
       end
     end
@@ -140,6 +276,17 @@ module CfnGuardian
           exit(1)
         end
       end
+    end
+    
+    def set_log_level(debug)
+      logger.level = debug ? Logger::DEBUG : Logger::INFO
+    end
+    
+    def filter_alarms(alarms,options)
+      alarms = alarms.select{|h| h[:class].downcase == options[:group].downcase} if options[:group]
+      alarms = alarms.select{|h| h[:resource].downcase == options[:id].downcase} if options[:id]
+      alarms = alarms.select{|h| h[:name].downcase.include? options[:alarm].downcase} if options[:alarm]
+      return alarms
     end
     
   end

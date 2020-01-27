@@ -13,7 +13,6 @@ module Logging
     
     def logger
       @logger ||= Logger.new($stdout)
-      @logger.level = Logger::DEBUG
       @logger.formatter = proc do |severity, datetime, progname, msg|
         "\e[#{colors[severity.to_sym]}m#{severity}: #{msg}\e[0m\n"
       end

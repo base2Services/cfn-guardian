@@ -31,8 +31,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "thor", "~> 0.20"
   spec.add_dependency 'cfndsl', '~> 1.0', '<2'
   spec.add_dependency "terminal-table", '~> 1', '<2'
+  spec.add_dependency 'term-ansicolor', '~> 1', '<2'
   spec.add_dependency 'aws-sdk-s3', '~> 1', '<2'
   spec.add_dependency 'aws-sdk-cloudformation', '~> 1', '<2'
+  spec.add_dependency 'aws-sdk-cloudwatch', '~> 1', '<2'
   
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 10.0"

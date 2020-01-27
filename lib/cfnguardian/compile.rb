@@ -31,7 +31,7 @@ module CfnGuardian
   class Compile
     include Logging
     
-    attr_reader :cost, :resources
+    attr_reader :cost, :resources, :topics
     
     def initialize(opts,bucket)
       @prefix = opts.fetch(:stack_name,'guardian')
@@ -40,6 +40,7 @@ module CfnGuardian
       config = YAML.load_file(opts.fetch(:config))
       @resource_groups = config.fetch('Resources',{})
       @templates = config.fetch('Templates',{})
+      @topics = config.fetch('Topics',{})
       
       @resources = []
       @stacks = []
@@ -77,6 +78,10 @@ module CfnGuardian
           @cost += resource_class.get_cost
         end
       end
+    end
+    
+    def alarms
+      @resources.select{|h| h[:type] == 'Alarm'}
     end
     
     def split_resources

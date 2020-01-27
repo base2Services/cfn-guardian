@@ -44,6 +44,8 @@ gem install cfn-guardian
 
 **compile**
 
+Generates CloudFormation templates from the alarm configuration and output to the out/ directory.
+
 ```bash
 Usage:
   cfn-guardian compile c, --config=CONFIG
@@ -54,12 +56,12 @@ Options:
                                      # Default: true
       [--bucket=BUCKET]              # provide custom bucket name, will create a default bucket if not provided
   r, [--region=REGION]               # set the AWS region
-
-Description:
-  Generates CloudFormation templates from the alarm configuration and output to the out/ directory.
+      [--debug], [--no-debug]        # enable debug logging
 ```
 
 **deploy**
+
+Generates CloudFormation templates from the alarm configuration and output to the out/ directory. Then copies the files to the s3 bucket and deploys the Cloudformation.
 
 ```bash
 Usage:
@@ -69,58 +71,94 @@ Options:
   c, --config=CONFIG                           # yaml config file
       [--bucket=BUCKET]                        # provide custom bucket name, will create a default bucket if not provided
   r, [--region=REGION]                         # set the AWS region
-  r, [--stack-name=STACK_NAME]                 # set the Cloudformation stack name. Defaults to `guardian`
+  s, [--stack-name=STACK_NAME]                 # set the Cloudformation stack name. Defaults to `guardian`
       [--sns-critical=SNS_CRITICAL]            # sns topic arn for the critical alamrs
       [--sns-warning=SNS_WARNING]              # sns topic arn for the warning alamrs
       [--sns-task=SNS_TASK]                    # sns topic arn for the task alamrs
       [--sns-informational=SNS_INFORMATIONAL]  # sns topic arn for the informational alamrs
-
-Description:
-  Generates CloudFormation templates from the alarm configuration and output to the out/ directory. Then copies the files to the s3 bucket and deploys the cloudformation.
+      [--debug], [--no-debug]                  # enable debug logging
 ```
 
 **show-alarms**
+
+Displays the configured settings for each alarm. Can be filtered by resource group and alarm name. Defaults to show all configured alarms.
 
 ```bash
 Usage:
   cfn-guardian show-alarms c, --config=CONFIG
 
 Options:
-  c, --config=CONFIG        # yaml config file
-  g, [--group=GROUP]        # resource group
-  n, [--name=NAME]          # alarm name
-  r, [--resource=RESOURCE]  # resource id
-
-Description:
-  Displays the configured settings for each alarm. Can be filtered by resource group, resource name and alarm name. Defaults to show all configured alarms.
+  c, --config=CONFIG               # yaml config file
+  g, [--group=GROUP]               # resource group
+  a, [--alarm=ALARM]               # alarm name
+      [--id=ID]                    # resource id
+      [--compare], [--no-compare]  # compare config to deployed alarms
+      [--debug], [--no-debug]      # enable debug logging
 ```
 
+**show-history**
+
+Displays the alarm state or config history for the last 7 days. Alarms can be described in 2 different ways:
+
+1. Using the config to describe the alarms and filter via the group, alarm and resource id. 
+2. Supplying a list of alarm names with the `--alarm-names` option.
+
+*NOTE: Options 2 may find alarms not in the guardian stack.*
+
 ```bash
-  ECSCluster
-+--------------------------------------+-----------------------------------+
-|                    ECSContianerInstancesDisconnected                     |
-+--------------------------------------+-----------------------------------+
-| property                             | Value                             |
-+--------------------------------------+-----------------------------------+
-| actions_enabled                      | true                              |
-| alarm_action                         | Critical                          |
-| comparison_operator                  | GreaterThanThreshold              |
-| datapoints_to_alarm                  |                                   |
-| dimensions                           | {:ClusterName=>"MyCluster"}       |
-| enabled                              | true                              |
-| evaluate_low_sample_count_percentile |                                   |
-| evaluation_periods                   | 2                                 |
-| extended_statistic                   |                                   |
-| metric_name                          | ECSContianerInstancesDisconnected |
-| namespace                            | EcsCICheck                        |
-| period                               | 300                               |
-| resource                             | MyCluster                         |
-| resource_name                        | 3ccc504543e67a86f3fa43bb64cf592b  |
-| statistic                            | Maximum                           |
-| threshold                            | 0                                 |
-| treat_missing_data                   |                                   |
-| unit                                 |                                   |
-+--------------------------------------+-----------------------------------+
+Usage:
+  cfn-guardian show-history
+
+Options:
+  c, [--config=CONFIG]               # yaml config file
+  g, [--group=GROUP]                 # resource group
+  a, [--alarm=ALARM]                 # alarm name
+      [--alarm-names=one two three]  # CloudWatch alarm name if not providing config
+      [--id=ID]                      # resource id
+  t, [--type=TYPE]                   # filter by alarm state
+                                     # Default: state
+                                     # Possible values: state, config
+      [--debug], [--no-debug]        # enable debug logging
+```
+
+**show-state**
+
+Displays the current CloudWatch alarm state. Alarms can be described in 3 different ways:
+
+1. Using the config to describe the alarms and filter via the group, alarm and resource id. 
+2. Supplying a list of alarm names with the `--alarm-names` option.
+3. Supplying the alarm name prefix using the `--alarm-prefix` option. For example `--alarm-prefix ECS` will find all the ECSCluster related alarms.
+
+*NOTE: Options 2 and 3 may find alarms not in the guardian stack.*
+
+```bash
+Usage:
+  cfn-guardian show-state
+
+Options:
+  c, [--config=CONFIG]               # yaml config file
+  g, [--group=GROUP]                 # resource group
+  a, [--alarm=ALARM]                 # alarm name
+      [--id=ID]                      # resource id
+  s, [--state=STATE]                 # filter by alarm state
+                                     # Possible values: OK, ALARM, INSUFFICIENT_DATA
+      [--alarm-names=one two three]  # CloudWatch alarm name if not providing config
+      [--alarm-prefix=ALARM_PREFIX]  # CloudWatch alarm name prefix if not providing config
+      [--debug], [--no-debug]        # enable debug logging
+```
+
+**show-drift**
+
+Displays any Cloudformation drift detection in the CloudWatch alarms from the deployed stacks.
+
+```bash
+Usage:
+  cfn-guardian show-drift
+
+Options:
+  s, [--stack-name=STACK_NAME]  # set the Cloudformation stack name
+                                # Default: guardian
+      [--debug], [--no-debug]   # enable debug logging
 ```
 
 ## Configuration
