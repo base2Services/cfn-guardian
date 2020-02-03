@@ -155,14 +155,14 @@ module CfnGuardian
                       
           if options[:compare]
             headings.push('Deployed')
-            rows.select! {|k,v| !v.first.nil? || !v.last.nil?}
-                .map! {|k,v| 
-                  if v.first.to_s == v.last.to_s || v.first.nil? || v.last.nil?
-                    [k.to_s.green,v.first.to_s.green,v.last.to_s.green]
-                  else
-                    [k.to_s.red,v.first.to_s.red,v.last.to_s.red]
-                  end
-                }
+            rows.select! {|k,v| !v.first.nil?}
+            rows.map! do |k,v| 
+              if v.first.to_s == v.last.to_s || v.last.nil?
+                [k.to_s.green,v.first.to_s.green,v.last.to_s.green]
+              else
+                [k.to_s.red,v.first.to_s.red,v.last.to_s.red]
+              end
+            end
           else
             rows.select! {|k,v| !v.nil?}.map! {|k,v| [k,v.to_s]}
           end
@@ -283,9 +283,9 @@ module CfnGuardian
     end
     
     def filter_alarms(alarms,options)
-      alarms = alarms.select{|h| h[:class].downcase == options[:group].downcase} if options[:group]
-      alarms = alarms.select{|h| h[:resource].downcase == options[:id].downcase} if options[:id]
-      alarms = alarms.select{|h| h[:name].downcase.include? options[:alarm].downcase} if options[:alarm]
+      alarms.select! {|alarm| alarm[:class].downcase == options[:group].downcase} if options[:group]
+      alarms.select! {|alarm| alarm[:resource].downcase == options[:id].downcase} if options[:id]
+      alarms.select! {|alarm| alarm[:name].downcase.include? options[:alarm].downcase} if options[:alarm]
       return alarms
     end
     

@@ -5,30 +5,32 @@ module CfnGuardian
   class CloudWatch
     include Logging
     
-    def self.compare_alarms(alarms,topics)
+    def self.compare_alarms(alarms,topics)      
       alarm_names = alarms.map {|a| "#{a[:class]}-#{a[:resource]}-#{a[:name]}"}
       client = Aws::CloudWatch::Client.new()
       resp = client.describe_alarms({alarm_names: alarm_names, max_records: 100})
       
-      resp.metric_alarms.each do |ma|
-        details = ma.alarm_name.split('-')
-        alarm = alarms.find {|a| a[:class] == details[0] && a[:resource] == details[1] && a[:name] == details[2]}
-        ma_hash = ma.to_h
+      alarms.each do |alarm|
+        alarm_name = "#{alarm[:class]}-#{alarm[:resource]}-#{alarm[:name]}"
+        metric_alarm = resp.metric_alarms.find {|ma| ma.alarm_name == alarm_name}        
         
-        alarm.each do |k,v|
-          if k == :dimensions
-            alarm[k] = [v,ma_hash[k].map {|h| {h[:name].to_sym => h[:value]}}.first]
-          elsif k == :alarm_action
-            alarm[:alarm_action] = [topics[v],ma_hash[:alarm_actions].join("\n")]
-          elsif k == :threshold
-            alarm[k] = [v.to_f,ma_hash[k]]
-          elsif ![:class,:name].include? k
-            alarm[k] = [v,ma_hash[k]]
+        if metric_alarm
+          ma_hash = metric_alarm.to_h
+          alarm.each do |k,v|
+            if k == :dimensions
+              alarm[k] = [v,ma_hash[k].map {|h| {h[:name].to_sym => h[:value]}}.first]
+            elsif k == :alarm_action
+              alarm[:alarm_action] = [topics[v],ma_hash[:alarm_actions].join("\n")]
+            elsif k == :threshold
+              alarm[k] = [v.to_f,ma_hash[k]]
+            elsif ![:class,:name].include? k
+              alarm[k] = [v,ma_hash[k]]
+            end
           end
+        else
+          alarm.each {|k,v| alarm[k] = [v,"Not Found"] unless [:class,:name].include?(k)}
         end
       end
-      
-      return alarms
     end
     
     def self.get_alarm_state(alarm_names: [], alarm_prefix: nil, state: nil)

@@ -1,4 +1,5 @@
 require 'yaml'
+require 'fileutils'
 require 'cfnguardian/string'
 require 'cfnguardian/stacks/resources'
 require 'cfnguardian/stacks/main'
@@ -103,6 +104,7 @@ module CfnGuardian
       main_stack = CfnGuardian::Stacks::Main.new()
       template = main_stack.build_template(@stacks,@checks)
       valid = template.validate
+      FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       
       resources.each_with_index do |resources,index|
