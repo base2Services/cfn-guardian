@@ -205,6 +205,16 @@ module CfnGuardian
       end
     end
     
+    class SslAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'Ssl'
+        @namespace = 'SSL'
+        @dimensions = { URL: resource['Id'] }
+        @comparison_operator = 'LessThanThreshold'
+      end
+    end
+    
     class NrpeAlarm < Alarm
       def initialize(resource,environment)
         super(resource)

@@ -14,7 +14,7 @@ module CfnGuardian::Resource
       alarm.metric_name = 'StatusCodeMatch'
       @alarms.push(alarm)
             
-      alarm = CfnGuardian::Models::ElasticLoadBalancerAlarm.new(@resource)
+      alarm = CfnGuardian::Models::HttpAlarm.new(@resource)
       alarm.name = 'EndpointTimeTaken'
       alarm.metric_name = 'TimeTaken'
       alarm.statistic = 'Minimum'
@@ -27,6 +27,20 @@ module CfnGuardian::Resource
         alarm = CfnGuardian::Models::HttpAlarm.new(@resource)
         alarm.name = 'EndpointBodyRegexMatch'
         alarm.metric_name = 'ResponseBodyRegexMatch'
+        @alarms.push(alarm)
+      end
+      
+      if @resource.has_key?('Ssl') && @resource['Ssl']
+        alarm = CfnGuardian::Models::SslAlarm.new(@resource)
+        alarm.name = 'ExpiresInDaysCritical'
+        alarm.metric_name = 'ExpiresInDays'
+        alarm.threshold = 5
+        @alarms.push(alarm)
+        
+        alarm = CfnGuardian::Models::SslAlarm.new(@resource)
+        alarm.name = 'ExpiresInDaysTask'
+        alarm.metric_name = 'ExpiresInDays'
+        alarm.threshold = 30
         @alarms.push(alarm)
       end
     end

@@ -40,6 +40,19 @@ module CfnGuardian
       end
     end
     
+    class InternalHttpCheck < HttpCheck
+      attr_accessor :subnets, :vpc
+       
+      def initialize(resource)
+        super(resource)
+        @class = 'InternalHttp'
+        @name = 'InternalHttpCheck'
+        @subnets = resource['Subnets']
+        @vpc = resource['VpcId']
+        @environment = resource['Environment']
+      end
+    end
+    
     class NrpeCheck < Check
       attr_accessor :subnets, :vpc
       
