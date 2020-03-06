@@ -8,11 +8,15 @@ module CfnGuardian
     def self.compare_alarms(alarms,topics)      
       alarm_names = alarms.map {|a| "#{a[:class]}-#{a[:resource]}-#{a[:name]}"}
       client = Aws::CloudWatch::Client.new()
-      resp = client.describe_alarms({alarm_names: alarm_names, max_records: 100})
+      cw_alarms = []
+      alarm_names.each_slice(100) do |batch|
+        resp = client.describe_alarms({alarm_names: batch, max_records: 100})
+        cw_alarms.push(*resp.metric_alarms)
+      end
       
       alarms.each do |alarm|
         alarm_name = "#{alarm[:class]}-#{alarm[:resource]}-#{alarm[:name]}"
-        metric_alarm = resp.metric_alarms.find {|ma| ma.alarm_name == alarm_name}        
+        metric_alarm = cw_alarms.find {|ma| ma.alarm_name == alarm_name}
         
         if metric_alarm
           ma_hash = metric_alarm.to_h
