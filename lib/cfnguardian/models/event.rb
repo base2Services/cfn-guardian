@@ -82,6 +82,28 @@ module CfnGuardian
       end
     end
     
+    class PortEvent < Event      
+      def initialize(resource)
+        super(resource)
+        @class = 'Http'
+        @name = 'HttpEvent'
+        @target = 'HttpCheckFunction'
+        @hostname = resource['Id']
+        @port = resource['Port']
+        @timeout = resource.fetch('Timeout',120)
+      end
+      
+      def event_payload
+        payload = {
+          'HOSTNAME' => @hostname,
+          'PORT' => @port,
+          'TIMEOUT' => @timeout,
+          'STATUS_CODE_MATCH' => @status_code
+        }
+        return payload.to_json
+      end
+    end
+    
     class NrpeEvent < Event
       def initialize(resource,environment,command)
         super(resource)

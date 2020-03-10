@@ -33,9 +33,21 @@ module CfnGuardian
         super(resource)
         @class = 'Http'
         @name = 'HttpCheck'
-        @package = 'aws-lambda-http-check'
+        @package = 'http-check'
         @handler = 'handler.main'
-        @version = '0.1'
+        @version = '702701918413c40b461843832fc2d3b1e80c0866'
+        @runtime = 'python3.6'
+      end
+    end
+    
+    class PortCheck < Check      
+      def initialize(resource)
+        super(resource)
+        @class = 'Port'
+        @name = 'PortCheck'
+        @package = 'port-check'
+        @handler = 'handler.main'
+        @version = '356203b2a720ba0730622f978e677b88f8d0c328'
         @runtime = 'python3.6'
       end
     end
@@ -62,7 +74,7 @@ module CfnGuardian
         @name = 'NrpeCheck'
         @package = 'aws-lambda-nrpe-check'
         @handler = 'main'
-        @version = '0.2'
+        @version = 'aa51a0ad497a6c012a3639da0eb3446e4c0f9540'
         @runtime = 'go1.x'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']
@@ -77,7 +89,7 @@ module CfnGuardian
         @name = 'SslCheck'
         @package = 'aws-lambda-ssl-check'
         @handler = 'main'
-        @version = '0.1'
+        @version = 'a25fd4006d1f95c06f3c098188543f5eea1986da'
         @runtime = 'go1.x'
       end
     end
@@ -89,7 +101,7 @@ module CfnGuardian
         @name = 'DomainExpiryCheck'
         @package = 'aws-lambda-dns-check'
         @handler = 'main'
-        @version = '0.1'
+        @version = '9db96ca32379faddc47e55849b7e296b7b70a48e'
         @runtime = 'go1.x'
       end
     end
@@ -103,7 +115,7 @@ module CfnGuardian
         @name = 'SqlCheck'
         @package = 'aws-lambda-sql-check'
         @handler = 'main'
-        @version = '0.1'
+        @version = '83bd6399c0376c98df90dd5f29e49d629c556cee'
         @runtime = 'go1.x'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']
@@ -116,9 +128,9 @@ module CfnGuardian
         super(resource)
         @class = 'ContainerInstance'
         @name = 'ContainerInstanceCheck'
-        @package = 'aws-lambda-ecs-container-instance-check'
+        @package = 'ecs-containder-instance-check'
         @handler = 'handler.run_check'
-        @version = '0.1'
+        @version = '4f650d5846d6e8d19f0139bccdeeb147f03f0dd6'
         @runtime = 'python3.6'
       end
     end

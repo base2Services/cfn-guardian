@@ -204,6 +204,18 @@ module CfnGuardian
         @evaluation_periods = 2
       end
     end
+
+    class PortAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'Port'
+        @namespace = 'PortCheck'
+        @dimensions = { Endpoint: "#{resource['Id']}:#{resource['Port']}" }
+        @comparison_operator = 'LessThanThreshold'
+        @threshold = 1
+        @evaluation_periods = 2
+      end
+    end
     
     class SslAlarm < Alarm
       def initialize(resource)
