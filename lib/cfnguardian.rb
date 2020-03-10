@@ -293,7 +293,7 @@ module CfnGuardian
     LONG
     method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    method_option :repository, type: :string, desc: "codecommit repository name"
+    method_option :repository, type: :string, default: 'guardian', desc: "codecommit repository name"
     
     def show_config_history
       set_region(options[:region],true)
