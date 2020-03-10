@@ -8,6 +8,7 @@ require "cfnguardian/validate"
 require "cfnguardian/deploy"
 require "cfnguardian/cloudwatch"
 require "cfnguardian/drift"
+require "cfnguardian/codecommit"
 
 module CfnGuardian
   class Cli < Thor
@@ -100,8 +101,11 @@ module CfnGuardian
     Displays any cloudformation drift detection in the cloudwatch alarms from the deployed stacks
     LONG
     method_option :stack_name, aliases: :s, type: :string, default: 'guardian', desc: "set the Cloudformation stack name"
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     
     def show_drift
+      set_region(options[:region],true)
+      
       rows = []
       drift = CfnGuardian::Drift.new(options[:stack_name])
       nested_stacks = drift.find_nested_stacks
@@ -125,6 +129,7 @@ module CfnGuardian
     Defaults to show all configured alarms.
     LONG
     method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :group, aliases: :g, type: :string, desc: "resource group"
     method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
     method_option :id, type: :string, desc: "resource id"
@@ -132,6 +137,8 @@ module CfnGuardian
     
     def show_alarms
       set_log_level(options[:debug])
+      
+      set_region(options[:region],options[:compare])
       
       compiler = CfnGuardian::Compile.new(options,'no-bucket')
       compiler.get_resources
@@ -141,6 +148,8 @@ module CfnGuardian
         logger.error "No matches found" 
         exit 1
       end
+      
+      differences = 0
       
       if options[:compare]
         CfnGuardian::CloudWatch.compare_alarms(alarms,compiler.topics)
@@ -154,15 +163,19 @@ module CfnGuardian
                       .sort_by {|k,v| k}
                       
           if options[:compare]
+            show = false
             headings.push('Deployed')
             rows.select! {|k,v| !v.first.nil?}
             rows.map! do |k,v| 
-              if v.first.to_s == v.last.to_s || v.last.nil?
+              if v.first == v.last || v.last.nil?
                 [k.to_s.green,v.first.to_s.green,v.last.to_s.green]
               else
+                show = true
+                differences += 1
                 [k.to_s.red,v.first.to_s.red,v.last.to_s.red]
               end
             end
+            next unless show
           else
             rows.select! {|k,v| !v.nil?}.map! {|k,v| [k,v.to_s]}
           end
@@ -173,6 +186,15 @@ module CfnGuardian
                   :rows => rows)
         end
       end
+      
+      if options[:compare]
+        if differences > 0
+          say "Found #{differences} difference(s) between the config and what is in AWS", :red
+          exit 2
+        end
+        say "Your config matches what is in AWS", :green
+      end
+      
     end
     
     desc "show-state", "Shows alarm state in cloudwatch"
@@ -180,6 +202,7 @@ module CfnGuardian
     Displays the current cloudwatch alarm state
     LONG
     method_option :config, aliases: :c, type: :string, desc: "yaml config file"
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :group, aliases: :g, type: :string, desc: "resource group"
     method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
     method_option :id, type: :string, desc: "resource id"
@@ -189,6 +212,7 @@ module CfnGuardian
     
     def show_state
       set_log_level(options[:debug])
+      set_region(options[:region],true)
       
       if !options[:config].nil?
         compiler = CfnGuardian::Compile.new(options,'no-bucket')
@@ -217,6 +241,7 @@ module CfnGuardian
     Displays the alarm state or config history for the last 7 days
     LONG
     method_option :config, aliases: :c, type: :string, desc: "yaml config file"
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :group, aliases: :g, type: :string, desc: "resource group"
     method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
     method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
@@ -226,6 +251,7 @@ module CfnGuardian
     
     def show_history
       set_log_level(options[:debug])
+      set_region(options[:region],true)
       
       if !options[:config].nil?
         compiler = CfnGuardian::Compile.new(options,'no-bucket')
@@ -259,6 +285,23 @@ module CfnGuardian
           puts "\n"
         end
       end
+    end
+    
+    desc "show-config-history", "Shows the last 10 commits made to the codecommit repo"
+    long_desc <<-LONG
+    Shows the last 10 commits made to the codecommit repo
+    LONG
+    method_option :config, aliases: :c, type: :string, desc: "yaml config file"
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :repository, type: :string, desc: "codecommit repository name"
+    
+    def show_config_history
+      set_region(options[:region],true)
+    
+      history = CfnGuardian::CodeCommit.new(options[:repository]).get_commit_history()
+      puts Terminal::Table.new(
+        :headings => history.first.keys, 
+        :rows => history.map {|h| h.values })
     end
     
     private

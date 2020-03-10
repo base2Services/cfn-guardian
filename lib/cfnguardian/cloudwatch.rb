@@ -22,9 +22,7 @@ module CfnGuardian
           ma_hash = metric_alarm.to_h
           alarm.each do |k,v|
             if k == :dimensions
-              alarm[k] = [v,ma_hash[k].map {|h| {h[:name].to_sym => h[:value]}}.first]
-            elsif k == :alarm_action
-              alarm[:alarm_action] = [topics[v],ma_hash[:alarm_actions].join("\n")]
+              alarm[k] = [v,ma_hash[k].map {|a| {a[:name].to_sym => a[:value]}}.inject(:merge)]
             elsif k == :threshold
               alarm[k] = [v.to_f,ma_hash[k]]
             elsif ![:class,:name].include? k
@@ -41,11 +39,23 @@ module CfnGuardian
       rows = []
       client = Aws::CloudWatch::Client.new()
       
-      data = !alarm_prefix.nil? ? {alarm_name_prefix: alarm_prefix} : {alarm_names: alarm_names}
-      data[:state_value] = state if !state.nil?
-      resp = client.describe_alarms(data)
+      options = {max_records: 100}
+      options[:state_value] = state if !state.nil?
       
-      resp.metric_alarms.each do |ma|
+      cw_alarms = []
+      if !alarm_prefix.nil?
+        options[:alarm_name_prefix] = alarm_prefix
+        resp = client.describe_alarms(options)
+        cw_alarms = resp.metric_alarms
+      else
+        alarm_names.each_slice(100) do |batch|
+          options[:alarm_names] = batch
+          resp = client.describe_alarms(options)
+          cw_alarms.push(*resp.metric_alarms)
+        end
+      end
+      
+      cw_alarms.each do |ma|
         details = ma.alarm_name.split('-')
         
         if ma.state_value == 'ALARM'
