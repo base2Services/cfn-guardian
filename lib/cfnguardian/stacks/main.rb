@@ -106,7 +106,7 @@ module CfnGuardian
             end
           end
           
-          vpc_config[:SecurityGroupIds] = Ref("#{check[:name]}SecurityGroup#{check[:environment]}")
+          vpc_config[:SecurityGroupIds] = [Ref("#{check[:name]}SecurityGroup#{check[:environment]}")]
           vpc_config[:SubnetIds] = check[:subnets]
         end
         
