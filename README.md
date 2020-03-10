@@ -234,6 +234,65 @@ Resources:
     BodyRegex: 'helloworld'
 ```
 
+**InternalHttp**
+
+Cloudwatch NameSpace: `InternalHttpCheck`
+
+```yaml
+Resources:
+  InternalHttp:
+  # Array of host groups with the uniq identifier of Environment.
+  # This will create a nrpe lambda per group attach to the defined vpc and subnets
+  - Environment: Prod
+    # VPC id for the vpc the EC2 hosts are running in
+    VpcId: vpc-1234
+    # Array of subnets to attach to the lambda function. Supply multiple if you want to be multi AZ. 
+    # Multiple subnets from the same AZ cannot be used!
+    Subnets:
+      - subnet-abcd
+    Hosts:
+    # Array of resources defining the http endpoint with the Id: key
+    # All the same options as Http
+    - Id: http://api.example.com
+```
+
+**Port**
+
+Cloudwatch NameSpace: `PortCheck`
+
+```yaml
+Resources:
+  Port:
+  # Array of resources defining the endpoint with the Id: key and Port: Int
+  - Id: api.example.com
+    Port: 443
+    # can override the default timeout of 120 seconds
+    Timeout: 60
+```
+
+**InternalPort**
+
+Cloudwatch NameSpace: `InternalPortCheck`
+
+```yaml
+Resources:
+  InternalPort:
+  # Array of host groups with the uniq identifier of Environment.
+  # This will create a nrpe lambda per group attach to the defined vpc and subnets
+  - Environment: Prod
+    # VPC id for the vpc the EC2 hosts are running in
+    VpcId: vpc-1234
+    # Array of subnets to attach to the lambda function. Supply multiple if you want to be multi AZ. 
+    # Multiple subnets from the same AZ cannot be used!
+    Subnets:
+      - subnet-abcd
+    Hosts:
+    # Array of resources defining the endpoint with the Id: key and Port: Int
+    # All the same options as Port
+    - Id: api.example.com
+      Port: 8080
+```
+
 **DomainExpiry**
 
 Cloudwatch NameSpace: `DNS`
@@ -436,6 +495,23 @@ Topics:
   Task: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Task
   Informational: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Informational
 ``` 
+
+## Maintenance
+
+Each alarm has a maintenance property which defines weather that alarm can be disabled during a maintenance window.
+The maintenance property can be set using the template section.
+
+```yaml
+Templates:
+  Ec2Instance:
+    # setting it at the group allies the change to all alarms in that group
+    Maintenance: true
+    CPUUtilizationHigh:
+      # setting it at the alarm level applies it to just that alarm and overrides the group setting
+      Maintenance: false
+```
+
+The cloudformation parameter `EnableMaintenance` can then be set to `true` to disable the alarms which have the maintenance property set to true. This will disable those alarms until the cloudformation parameter is set back to `false`.
 
 ## Severities
 
