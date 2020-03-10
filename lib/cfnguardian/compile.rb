@@ -41,7 +41,13 @@ module CfnGuardian
       @prefix = opts.fetch(:stack_name,'guardian')
       @bucket = bucket
       
-      config = YAML.load_file(opts.fetch(:config))
+      begin
+        config = YAML.load_file(opts.fetch(:config))
+      rescue
+        logger.error("Failed to load config file #{opts.fetch(:config)}")
+        exit 1
+      end
+      
       @resource_groups = config.fetch('Resources',{})
       @templates = config.fetch('Templates',{})
       @topics = config.fetch('Topics',{})
