@@ -14,11 +14,18 @@ module CfnGuardian
           parameter.Description "SNS topic ARN for #{name} notifications"
         end
         
+        maintenance_parameter = @template.Parameter('EnableMaintenance')
+        maintenance_parameter.Type 'String'
+        maintenance_parameter.Description 'Enable alarm maintenance'
+        maintenance_parameter.AllowedValues ['true','false']
+        maintenance_parameter.Default 'false'
+        
         parameters = {
           Critical: Ref(:Critical),
           Warning: Ref(:Warning),
           Task: Ref(:Task),
-          Informational: Ref(:Informational)
+          Informational: Ref(:Informational),
+          EnableMaintenance: Ref(:EnableMaintenance)
         }
         
         build_iam_role()

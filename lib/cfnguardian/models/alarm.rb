@@ -8,6 +8,7 @@ module CfnGuardian
       attr_reader :type
       attr_accessor :class,
         :name,
+        :maintenance,
         :metric_name,
         :namespace,
         :dimensions,
@@ -30,6 +31,7 @@ module CfnGuardian
         @type = 'Alarm'
         @class = nil
         @name = ''
+        @maintenance = false
         @metric_name = nil
         @namespace = nil
         @dimensions = {}
@@ -198,6 +200,7 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @class = 'Http'
+        @maintenance = true
         @namespace = 'HttpCheck'
         @dimensions = { Endpoint: resource['Id'] }
         @comparison_operator = 'LessThanThreshold'
@@ -210,6 +213,7 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @class = 'Port'
+        @maintenance = true
         @namespace = 'TcpPortCheck'
         @dimensions = { Endpoint: "#{resource['Id']}:#{resource['Port']}" }
         @comparison_operator = 'LessThanThreshold'
