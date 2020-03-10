@@ -82,10 +82,10 @@ module CfnGuardian
       end
     end
     
-    class InternalHttpEvent < HttpEvent
-      def initialize(resource)
+    class InternalHttpEvent < HttpEvent      
+      def initialize(resource,environment)
         super(resource)
-        @target = 'InternalHttpCheckFunction'
+        @target = "InternalHttpCheckFunction#{environment}"
       end
     end
     
@@ -111,14 +111,14 @@ module CfnGuardian
       end
     end
     
-    class InternalPortEvent < PortEvent
-      def initialize(resource)
+    class InternalPortEvent < PortEvent    
+      def initialize(resource,environment)
         super(resource)
-        @target = 'InternalPortCheckFunction'
+        @target = "InternalPortCheckFunction#{environment}"
       end
     end
     
-    class NrpeEvent < Event
+    class NrpeEvent < Event      
       def initialize(resource,environment,command)
         super(resource)
         @class = 'Nrpe'
@@ -180,11 +180,11 @@ module CfnGuardian
     end
     
     class SqlEvent < Event
-      def initialize(resource,query)
+      def initialize(resource,query,environment)
         super(resource)
         @class = 'Sql'
         @name = 'SqlEvent'
-        @target = 'SqlCheckFunction'
+        @target = "SqlCheckFunction#{environment}"
         @host = resource['Id']
         @engine = resource['Engine']
         @port = resource['Port']

@@ -61,7 +61,7 @@ module CfnGuardian
       
       def add_event(resource)
         @template.declare do
-          Parameter(resource[:target]) do
+          Parameter("#{resource[:target]}#{resource[:environment]}") do
             Type 'String'
             Description "Lamba funtion Arn for #{resource[:class]} #{resource[:type]}"
           end

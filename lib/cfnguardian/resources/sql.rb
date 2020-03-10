@@ -24,7 +24,7 @@ module CfnGuardian::Resource
     def default_events()
       @resource_list.each do |host|
         host['Queries'].each do |query|
-          @events.push(CfnGuardian::Models::SqlEvent.new(host,query['Query']))
+          @events.push(CfnGuardian::Models::SqlEvent.new(host,query['Query'],@environment))
         end
       end
     end
