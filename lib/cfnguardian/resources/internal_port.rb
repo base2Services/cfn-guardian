@@ -22,7 +22,7 @@ module CfnGuardian::Resource
     end
     
     def default_events()
-      @resource_list.each {|host| @events.push(CfnGuardian::Models::PortEvent.new(host))}
+      @resource_list.each {|host| @events.push(CfnGuardian::Models::InternalPortEvent.new(host))}
     end
     
     def default_checks()

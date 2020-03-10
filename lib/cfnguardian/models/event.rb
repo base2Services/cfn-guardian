@@ -82,12 +82,19 @@ module CfnGuardian
       end
     end
     
+    class InternalHttpEvent < HttpEvent
+      def initialize(resource)
+        super(resource)
+        @target = 'InternalHttpCheckFunction'
+      end
+    end
+    
     class PortEvent < Event      
       def initialize(resource)
         super(resource)
-        @class = 'Http'
-        @name = 'HttpEvent'
-        @target = 'HttpCheckFunction'
+        @class = 'Port'
+        @name = 'PortEvent'
+        @target = 'PortCheckFunction'
         @hostname = resource['Id']
         @port = resource['Port']
         @timeout = resource.fetch('Timeout',120)
@@ -101,6 +108,13 @@ module CfnGuardian
           'STATUS_CODE_MATCH' => @status_code
         }
         return payload.to_json
+      end
+    end
+    
+    class InternalPortEvent < PortEvent
+      def initialize(resource)
+        super(resource)
+        @target = 'InternalPortCheckFunction'
       end
     end
     

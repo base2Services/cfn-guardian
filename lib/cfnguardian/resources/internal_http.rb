@@ -40,7 +40,7 @@ module CfnGuardian::Resource
     end
     
     def default_events()
-      @resource_list.each {|host| @events.push(CfnGuardian::Models::HttpEvent.new(host))}
+      @resource_list.each {|host| @events.push(CfnGuardian::Models::InternalHttpEvent.new(host))}
     end
     
     def default_checks()
