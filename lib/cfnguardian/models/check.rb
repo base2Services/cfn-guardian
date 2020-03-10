@@ -40,6 +40,19 @@ module CfnGuardian
       end
     end
     
+    class InternalHttpCheck < HttpCheck
+      attr_accessor :subnets, :vpc
+       
+      def initialize(resource)
+        super(resource)
+        @class = 'InternalHttp'
+        @name = 'InternalHttpCheck'
+        @subnets = resource['Subnets']
+        @vpc = resource['VpcId']
+        @environment = resource['Environment']
+      end
+    end
+    
     class PortCheck < Check      
       def initialize(resource)
         super(resource)
@@ -52,13 +65,13 @@ module CfnGuardian
       end
     end
     
-    class InternalHttpCheck < HttpCheck
+    class InternalPortCheck < PortCheck
       attr_accessor :subnets, :vpc
        
       def initialize(resource)
         super(resource)
-        @class = 'InternalHttp'
-        @name = 'InternalHttpCheck'
+        @class = 'InternalPort'
+        @name = 'InternalPortCheck'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']
         @environment = resource['Environment']

@@ -1,4 +1,5 @@
 require 'cfnguardian/string'
+require 'digest/md5'
 
 module CfnGuardian
   module Models
@@ -209,7 +210,7 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @class = 'Port'
-        @namespace = 'PortCheck'
+        @namespace = 'TcpPortCheck'
         @dimensions = { Endpoint: "#{resource['Id']}:#{resource['Port']}" }
         @comparison_operator = 'LessThanThreshold'
         @threshold = 1
