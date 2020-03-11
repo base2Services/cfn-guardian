@@ -111,7 +111,7 @@ module CfnGuardian
       resources = split_resources()
       
       main_stack = CfnGuardian::Stacks::Main.new()
-      template = main_stack.build_template(@stacks,@checks)
+      template = main_stack.build_template(@stacks,@checks,@topics)
       valid = template.validate
       FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
