@@ -14,12 +14,6 @@ module CfnGuardian
           parameter.Description "SNS topic ARN for #{name} notifications"
         end
         
-        maintenance_parameter = @template.Parameter('EnableMaintenance')
-        maintenance_parameter.Type 'String'
-        maintenance_parameter.Description 'Enable alarm maintenance'
-        maintenance_parameter.AllowedValues ['true','false']
-        maintenance_parameter.Default 'false'
-        
         resources.each do |resource|
           case resource[:type]
           when 'Alarm'
@@ -37,7 +31,7 @@ module CfnGuardian
       def add_alarm(resource)
         @template.declare do
           CloudWatch_Alarm("#{resource[:resource_name]}#{resource[:class]}#{resource[:name]}#{resource[:type]}"[0..255]) do
-            ActionsEnabled resource[:maintenance] ? Ref('EnableMaintenance') : true
+            ActionsEnabled true
             AlarmDescription "Guardian alarm #{resource[:class]} #{resource[:resource]} #{resource[:name]}"
             AlarmName "#{resource[:class]}-#{resource[:resource]}-#{resource[:name]}"
             ComparisonOperator resource[:comparison_operator]

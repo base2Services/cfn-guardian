@@ -5,27 +5,21 @@ module CfnGuardian
     class Main
       include CfnDsl::CloudFormation
       
-      def build_template(stacks,checks)
+      def build_template(stacks,checks,topics)
         @template = CloudFormation("Guardian main stack")
         
         %w(Critical Warning Task Informational).each do |name|
           parameter = @template.Parameter(name)
           parameter.Type 'String'
           parameter.Description "SNS topic ARN for #{name} notifications"
+          parameter.Default topics[name] if topics.has_key?(name)
         end
-        
-        maintenance_parameter = @template.Parameter('EnableMaintenance')
-        maintenance_parameter.Type 'String'
-        maintenance_parameter.Description 'Enable alarm maintenance'
-        maintenance_parameter.AllowedValues ['true','false']
-        maintenance_parameter.Default 'false'
-        
+                
         parameters = {
           Critical: Ref(:Critical),
           Warning: Ref(:Warning),
           Task: Ref(:Task),
-          Informational: Ref(:Informational),
-          EnableMaintenance: Ref(:EnableMaintenance)
+          Informational: Ref(:Informational)
         }
         
         build_iam_role()
@@ -47,7 +41,7 @@ module CfnGuardian
                 Action: [ 'sts:AssumeRole' ]
               }]
             })
-            Path '/'
+            Path '/guardian/'
             Policies([
               {
                 PolicyName: 'logging',
