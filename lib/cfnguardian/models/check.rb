@@ -34,7 +34,7 @@ module CfnGuardian
         @class = 'Http'
         @name = 'HttpCheck'
         @package = 'http-check'
-        @handler = 'handler.main'
+        @handler = 'handler.http_check'
         @version = '702701918413c40b461843832fc2d3b1e80c0866'
         @runtime = 'python3.6'
       end
@@ -59,7 +59,7 @@ module CfnGuardian
         @class = 'Port'
         @name = 'PortCheck'
         @package = 'port-check'
-        @handler = 'handler.main'
+        @handler = 'handler.port_check'
         @version = '356203b2a720ba0730622f978e677b88f8d0c328'
         @runtime = 'python3.6'
       end
