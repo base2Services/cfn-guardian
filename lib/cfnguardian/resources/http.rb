@@ -16,6 +16,7 @@ module CfnGuardian::Resource
             
       alarm = CfnGuardian::Models::HttpAlarm.new(@resource)
       alarm.name = 'EndpointTimeTaken'
+      alarm.comparison_operator = 'GreaterThanThreshold'
       alarm.metric_name = 'TimeTaken'
       alarm.statistic = 'Minimum'
       alarm.threshold = 1000
