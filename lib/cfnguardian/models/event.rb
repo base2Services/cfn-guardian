@@ -85,6 +85,7 @@ module CfnGuardian
     class InternalHttpEvent < HttpEvent      
       def initialize(resource,environment)
         super(resource)
+        @class = 'InternalHttp'
         @target = "InternalHttpCheckFunction#{environment}"
       end
     end
@@ -114,6 +115,7 @@ module CfnGuardian
     class InternalPortEvent < PortEvent    
       def initialize(resource,environment)
         super(resource)
+        @class = 'InternalPort'
         @target = "InternalPortCheckFunction#{environment}"
       end
     end

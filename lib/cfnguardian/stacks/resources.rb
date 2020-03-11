@@ -57,7 +57,7 @@ module CfnGuardian
         @template.declare do
           Parameter("#{resource[:target]}#{resource[:environment]}") do
             Type 'String'
-            Description "Lamba funtion Arn for #{resource[:class]} #{resource[:type]}"
+            Description "Lambda function Arn for #{resource[:class]} #{resource[:type]}"
           end
           
           Events_Rule("#{resource[:class]}#{resource[:type]}#{resource[:hash]}"[0..255]) do
