@@ -8,7 +8,7 @@ module CfnGuardian
         alarm.metric_name = 'MemoryUtilization'
         alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         alarm.statistic = 'SampleCount'
-        alarm.threshold = 15
+        alarm.threshold = 0
         alarm.evaluation_periods = 10
         alarm.treat_missing_data = 'breaching'
         alarm.datapoints_to_alarm = 8
@@ -19,7 +19,7 @@ module CfnGuardian
         alarm.metric_name = 'MemoryUtilization'
         alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         alarm.statistic = 'SampleCount'
-        alarm.threshold = 15
+        alarm.threshold = 1
         alarm.evaluation_periods = 10
         alarm.treat_missing_data = 'breaching'
         alarm.datapoints_to_alarm = 8
