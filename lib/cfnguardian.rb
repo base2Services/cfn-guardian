@@ -204,7 +204,6 @@ module CfnGuardian
     method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :group, aliases: :g, type: :string, desc: "resource group"
-    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
     method_option :id, type: :string, desc: "resource id"
     method_option :state, aliases: :s, type: :string, enum: %w(OK ALARM INSUFFICIENT_DATA), desc: "filter by alarm state"
     method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
@@ -229,11 +228,14 @@ module CfnGuardian
         exit 1
       end
       
-            
-      puts Terminal::Table.new( 
+      if rows.any?
+        puts Terminal::Table.new( 
               :title => "Alarm State", 
               :headings => ['Alarm Name', 'State', 'Changed'], 
               :rows => rows)
+      else
+        logger.error "No alarms found"
+      end
     end
     
     desc "show-history", "Shows alarm history for the last 7 days"
