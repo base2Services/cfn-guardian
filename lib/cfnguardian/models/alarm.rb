@@ -8,7 +8,6 @@ module CfnGuardian
       attr_reader :type
       attr_accessor :class,
         :name,
-        :maintenance,
         :metric_name,
         :namespace,
         :dimensions,
@@ -19,19 +18,20 @@ module CfnGuardian
         :statistic,
         :actions_enabled,
         :enabled,
+        :resource_name,
         :resource,
         :alarm_action,
         :treat_missing_data,
         :datapoints_to_alarm,
         :extended_statistic,
         :evaluate_low_sample_count_percentile,
-        :unit
+        :unit,
+        :maintenance_groups
       
       def initialize(resource)
         @type = 'Alarm'
         @class = nil
         @name = ''
-        @maintenance = false
         @metric_name = nil
         @namespace = nil
         @dimensions = {}
@@ -50,17 +50,13 @@ module CfnGuardian
         @resource = resource['Id']
         @alarm_action = 'Critical'
         @treat_missing_data = nil
+        @maintenance_groups = []
       end
       
       def metric_name=(metric_name)
         raise ArgumentError.new("metric_name '#{metric_name}' must be of type String, provided type '#{metric_name.class}'") unless metric_name.is_a?(String)
         @metric_name=metric_name
-      end
-      
-      def to_h
-        Hash[instance_variables.map { |name| [name[1..-1].to_sym, instance_variable_get(name)] } ]
-      end
-      
+      end      
     end
     
     
@@ -200,7 +196,6 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @class = 'Http'
-        @maintenance = true
         @namespace = 'HttpCheck'
         @dimensions = { Endpoint: resource['Id'] }
         @comparison_operator = 'LessThanThreshold'
@@ -213,7 +208,6 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @class = 'Port'
-        @maintenance = true
         @namespace = 'TcpPortCheck'
         @dimensions = { Endpoint: "#{resource['Id']}:#{resource['Port']}" }
         @comparison_operator = 'LessThanThreshold'

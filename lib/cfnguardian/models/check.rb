@@ -7,10 +7,13 @@ module CfnGuardian
       attr_reader :type
       attr_accessor :class,
         :name,
+        :package,
         :handler,
         :version,
         :runtime,
-        :environment
+        :environment,
+        :subnets, 
+        :vpc
         
       def initialize(resource)
         @type = 'Check'
@@ -21,10 +24,8 @@ module CfnGuardian
         @version = nil
         @runtime = nil
         @environment = ''
-      end
-      
-      def to_h
-        Hash[instance_variables.map { |name| [name[1..-1].to_sym, instance_variable_get(name)] } ]
+        @subnets = nil
+        @vpc = nil
       end
     end
     
@@ -41,8 +42,6 @@ module CfnGuardian
     end
     
     class InternalHttpCheck < HttpCheck
-      attr_accessor :subnets, :vpc
-       
       def initialize(resource)
         super(resource)
         @class = 'InternalHttp'
@@ -66,8 +65,6 @@ module CfnGuardian
     end
     
     class InternalPortCheck < PortCheck
-      attr_accessor :subnets, :vpc
-       
       def initialize(resource)
         super(resource)
         @class = 'InternalPort'
@@ -79,8 +76,6 @@ module CfnGuardian
     end
     
     class NrpeCheck < Check
-      attr_accessor :subnets, :vpc
-      
       def initialize(resource)
         super(resource)
         @class = 'Nrpe'
@@ -120,8 +115,6 @@ module CfnGuardian
     end
     
     class SqlCheck < Check
-      attr_accessor :subnets, :vpc
-      
       def initialize(resource)
         super(resource)
         @class = 'Sql'

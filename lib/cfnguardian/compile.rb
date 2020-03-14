@@ -3,6 +3,7 @@ require 'fileutils'
 require 'cfnguardian/string'
 require 'cfnguardian/stacks/resources'
 require 'cfnguardian/stacks/main'
+require 'cfnguardian/models/composite'
 require 'cfnguardian/resources/base'
 require 'cfnguardian/resources/apigateway'
 require 'cfnguardian/resources/application_targetgroup'
@@ -41,6 +42,7 @@ module CfnGuardian
       @prefix = opts.fetch(:stack_name,'guardian')
       @bucket = bucket
       
+      # Load in the alarms YAML config
       begin
         config = YAML.load_file(opts.fetch(:config))
       rescue
@@ -49,6 +51,7 @@ module CfnGuardian
       end
       
       @resource_groups = config.fetch('Resources',{})
+      @composites = config.fetch('Composites',{})
       @templates = config.fetch('Templates',{})
       @topics = config.fetch('Topics',{})
       
@@ -87,6 +90,11 @@ module CfnGuardian
 
           @cost += resource_class.get_cost
         end
+      end
+      
+      @composites.each do |name,params|
+        @resources.push CfnGuardian::Models::Composite.new(name,params)
+        @cost += 0.50
       end
     end
     

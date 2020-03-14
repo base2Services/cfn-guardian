@@ -14,6 +14,7 @@ module CfnGuardian::Resource
       @checks = []
     end
     
+    # Overidden by inheritted classes to define default alarms
     def default_alarms()
       return @alarms
     end
@@ -71,25 +72,27 @@ module CfnGuardian::Resource
         
       end
       
-      return @alarms.select{|a| a.enabled}.map {|a| a.to_h}
+      return @alarms.select{|a| a.enabled}
     end
     
+    # Overidden by inheritted classes to define default events
     def default_events()
       return @events
     end
     
     def get_events()
       default_events()
-      return @events.select{|e| e.enabled}.map {|e| e.to_h}
+      return @events.select{|e| e.enabled}
     end
     
+    # Overidden by inheritted classes to define default checks
     def default_checks()
       return @checks
     end
     
     def get_checks()
       default_checks()
-      return @checks.map {|c| c.to_h}
+      return @checks
     end
     
     def get_cost()

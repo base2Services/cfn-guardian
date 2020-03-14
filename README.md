@@ -496,22 +496,30 @@ Topics:
   Informational: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Informational
 ``` 
 
-## Maintenance
+## Composite Alarms
 
-Each alarm has a maintenance property which defines weather that alarm can be disabled during a maintenance window.
-The maintenance property can be set using the template section.
+Composite alarms take into account a combination of alarm states and only alarm when all conditions in the rule are met. See AWS (documentation)[https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_PutCompositeAlarm.html] for rule syntax.
+
+Using the `Composites:` top level key, create the alarm using the following syntax. 
+
+**NOTE:** Each composite alarm cost $0.50/month
 
 ```yaml
-Templates:
-  Ec2Instance:
-    # setting it at the group allies the change to all alarms in that group
-    Maintenance: true
-    CPUUtilizationHigh:
-      # setting it at the alarm level applies it to just that alarm and overrides the group setting
-      Maintenance: false
+Composites:
+  
+  # the key is used as the alarm name
+  AlarmName:
+    # Set the notification SNS topic, defaults to no notifications
+    Action: Informational
+    # Set a meaningful alarm description
+    Description: test
+    # Set the alarm rule by providing the alarm names. See above for rule syntax.
+    # Use the show-state command to get a list of the alarm names.
+    Rule: >-
+      ALARM(guardian-alarm-1)
+      AND
+      ALARM(guardian-alarm-2)
 ```
-
-The cloudformation parameter `EnableMaintenance` can then be set to `true` to disable the alarms which have the maintenance property set to true. This will disable those alarms until the cloudformation parameter is set back to `false`.
 
 ## Severities
 

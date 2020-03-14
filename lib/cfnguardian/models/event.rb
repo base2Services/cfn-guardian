@@ -11,7 +11,9 @@ module CfnGuardian
         :name,
         :cron,
         :enabled,
-        :resource
+        :resource,
+        :environment,
+        :payload
       
       def initialize(resource)
         @type = 'Event'
@@ -22,26 +24,9 @@ module CfnGuardian
         @cron = "* * * * ? *"
         @enabled = true
         @resource = resource['Id'].to_resource_name
-      end
-      
-      def to_h
-        return {
-          type: @type,
-          class: @class,
-          target: @target,
-          hash: @hash,
-          name: @name,
-          cron: @cron,
-          enabled: @enabled,
-          resource: @resource,
-          payload: event_payload()
-        }
-      end
-      
-      def event_payload
-        {}.to_json
-      end
-      
+        @environment = ""
+        @payload = {}.to_json
+      end      
     end
     
     class HttpEvent < Event
@@ -68,7 +53,7 @@ module CfnGuardian
         @payload = resource.fetch('Payload',nil)
       end
       
-      def event_payload
+      def payload
         payload = {
           'ENDPOINT' => @endpoint,
           'METHOD' => @method,
@@ -87,6 +72,7 @@ module CfnGuardian
         super(resource)
         @class = 'InternalHttp'
         @target = "InternalHttpCheckFunction#{environment}"
+        @environment = environment
       end
     end
     
@@ -101,14 +87,13 @@ module CfnGuardian
         @timeout = resource.fetch('Timeout',120)
       end
       
-      def event_payload
-        payload = {
+      def payload
+        return {
           'HOSTNAME' => @hostname,
           'PORT' => @port,
           'TIMEOUT' => @timeout,
           'STATUS_CODE_MATCH' => @status_code
-        }
-        return payload.to_json
+        }.to_json
       end
     end
     
@@ -117,6 +102,7 @@ module CfnGuardian
         super(resource)
         @class = 'InternalPort'
         @target = "InternalPortCheckFunction#{environment}"
+        @environment = environment
       end
     end
     
@@ -132,7 +118,7 @@ module CfnGuardian
         @command = command
       end
       
-      def event_payload
+      def payload
         return {
           'host' => @host,
           'environment' => @environment,
@@ -153,7 +139,7 @@ module CfnGuardian
         @region = resource.fetch('Region',"${AWS::Region}")
       end
       
-      def event_payload
+      def payload
         return {
           'Url' => @url,
           'Region' => @region
@@ -176,8 +162,8 @@ module CfnGuardian
         @region = resource.fetch('Region',"${AWS::Region}")
       end
       
-      def event_payload
-        {'Domain' => @domain}.to_json
+      def payload
+        return {'Domain' => @domain}.to_json
       end
     end
     
@@ -195,9 +181,10 @@ module CfnGuardian
         @query = query
         @region = resource.fetch('Region',"${AWS::Region}")
         @test_type = '1-row-1-value-zero-is-good'
+        @environment = environment
       end
       
-      def event_payload
+      def payload
         return {
           'Host' => @host,
           'Engine' => @engine,
@@ -221,8 +208,8 @@ module CfnGuardian
         @cluster = resource['Id']
       end
       
-      def event_payload
-        {'CLUSTER' => @cluster}.to_json
+      def payload
+        return {'CLUSTER' => @cluster}.to_json
       end
     end
 
