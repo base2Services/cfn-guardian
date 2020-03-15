@@ -32,7 +32,7 @@ module CfnGuardian::Resource
           
           if !alarm.nil?
             alarm.enabled = false 
-            logger.debug "Disabling alarm '#{name}' for resource #{alarm.resource}"
+            logger.debug "Disabling alarm '#{name}' for resource #{alarm.resource_id}"
             next
           end
         end
@@ -110,7 +110,7 @@ module CfnGuardian::Resource
         alarm.send("#{attr.to_underscore}=",value)
       rescue NoMethodError => e
         if !e.message.match?(/inherit/)
-          logger.warn "Unknown key '#{attr}' for #{alarm.resource} alarm #{alarm.name}"
+          logger.warn "Unknown key '#{attr}' for #{alarm.resource_id} alarm #{alarm.name}"
         end
       end
     end

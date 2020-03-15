@@ -208,6 +208,19 @@ Resources:
 | CloudFrontDistribution      | Id               |
 | SQSQueue                    | Id               |
 
+### Friendly Resource Names
+
+You can set a friendly name which will replace the resource id in the alarm name.
+The resource id will still be available in the alarm description.
+
+```yaml
+Resources:
+  ApplicationTargetGroup:
+  - Id: target-group-id
+    Loadbalancer: app/application-loadbalancer-id
+    Name: webapp
+```
+
 ### Custom Metric Resources
 
 These are also defined under the resources key but more detail is required and differs per group.

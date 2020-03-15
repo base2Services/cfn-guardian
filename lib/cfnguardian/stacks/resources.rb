@@ -29,67 +29,68 @@ module CfnGuardian
         
         return @template
       end
-      
-      def add_alarm(resource)
+
+      def add_alarm(alarm)
+        alarm_id = alarm.resource_name.nil? ? alarm.resource_id : alarm.resource_name
         @template.declare do
-          CloudWatch_Alarm("#{resource.resource_name}#{resource.class}#{resource.name}#{resource.type}"[0..255]) do
+          CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.class}#{alarm.name}#{alarm.type}"[0..255]) do
             ActionsEnabled true
-            AlarmDescription "Guardian alarm #{resource.class} #{resource.resource} #{resource.name}"
-            AlarmName "guardian-#{resource.class}-#{resource.resource}-#{resource.name}"
-            ComparisonOperator resource.comparison_operator
-            Dimensions resource.dimensions.map {|k,v| {Name: k, Value: v}}
-            EvaluationPeriods resource.evaluation_periods
-            Statistic resource.statistic
-            Period resource.period
-            Threshold resource.threshold
-            MetricName resource.metric_name
-            Namespace resource.namespace
-            AlarmActions [Ref(resource.alarm_action)]
-            OKActions [Ref(resource.alarm_action)]
-            TreatMissingData resource.treat_missing_data unless resource.treat_missing_data.nil?
-            DatapointsToAlarm resource.datapoints_to_alarm unless resource.datapoints_to_alarm.nil?
-            ExtendedStatistic resource.extended_statistic unless resource.extended_statistic.nil?
-            EvaluateLowSampleCountPercentile resource.evaluate_low_sample_count_percentile unless resource.evaluate_low_sample_count_percentile.nil?
-            Unit resource.unit unless resource.unit.nil?
+            AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.class}"
+            AlarmName "guardian-#{alarm.class}-#{alarm_id}-#{alarm.name}"
+            ComparisonOperator alarm.comparison_operator
+            Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}}
+            EvaluationPeriods alarm.evaluation_periods
+            Statistic alarm.statistic
+            Period alarm.period
+            Threshold alarm.threshold
+            MetricName alarm.metric_name
+            Namespace alarm.namespace
+            AlarmActions [Ref(alarm.alarm_action)]
+            OKActions [Ref(alarm.alarm_action)]
+            TreatMissingData alarm.treat_missing_data unless alarm.treat_missing_data.nil?
+            DatapointsToAlarm alarm.datapoints_to_alarm unless alarm.datapoints_to_alarm.nil?
+            ExtendedStatistic alarm.extended_statistic unless alarm.extended_statistic.nil?
+            EvaluateLowSampleCountPercentile alarm.evaluate_low_sample_count_percentile unless alarm.evaluate_low_sample_count_percentile.nil?
+            Unit alarm.unit unless alarm.unit.nil?
           end
         end
       end
       
-      def add_event(resource)
+      def add_event(event)
         @template.declare do
-          Parameter(resource.target) do
+          Parameter(event.target) do
             Type 'String'
-            Description "Lambda function Arn for #{resource.class} #{resource.type}"
+            Description "Lambda function Arn for #{event.class} #{event.type}"
           end
           
-          Events_Rule("#{resource.class}#{resource.type}#{resource.hash}"[0..255]) do
+          Events_Rule("#{event.class}#{event.type}#{event.hash}"[0..255]) do
             State 'ENABLED'
-            Description "Guardian scheduled #{resource.class} #{resource.type}"
-            ScheduleExpression "cron(#{resource.cron})"
+            Description "Guardian scheduled #{event.class} #{event.type}"
+            ScheduleExpression "cron(#{event.cron})"
             Targets([
               { 
-                Arn: Ref(resource.target),
-                Id: resource.hash,
-                Input: FnSub(resource.payload)
+                Arn: Ref(event.target),
+                Id: event.hash,
+                Input: FnSub(event.payload)
               }
             ])
           end
         end
       end
       
-      def add_composite_alarm(resource)
+      def add_composite_alarm(alarm)
         @template.declare do
-          CloudWatch_CompositeAlarm(resource.name) do
+          CloudWatch_CompositeAlarm(alarm.name) do
             
-            AlarmDescription resource.description
-            AlarmName "guardian-#{resource.name}"
-            AlarmRule resource.rule
+            AlarmDescription alarm.description
+            AlarmName "guardian-#{alarm.name}"
+            AlarmRule alarm.rule
             
-            unless resource.alarm_action.nil?
+            unless alarm.alarm_action.nil?
               ActionsEnabled true
-              AlarmActions [Ref(resource.alarm_action)]
-              # InsufficientDataActions [Ref(resource.alarm_action)]
-              # OKActions [Ref(resource.alarm_action)]
+              AlarmActions [Ref(alarm.alarm_action)]
+              # InsufficientDataActions [Ref(alarm.alarm_action)]
+              # OKActions [Ref(alarm.alarm_action)]
             end
             
           end

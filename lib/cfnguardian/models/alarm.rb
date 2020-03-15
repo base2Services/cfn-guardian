@@ -5,7 +5,9 @@ module CfnGuardian
   module Models
     class Alarm
       
-      attr_reader :type
+      attr_reader :type,
+        :resource_hash
+        
       attr_accessor :class,
         :name,
         :metric_name,
@@ -18,8 +20,8 @@ module CfnGuardian
         :statistic,
         :actions_enabled,
         :enabled,
+        :resource_id,
         :resource_name,
-        :resource,
         :alarm_action,
         :treat_missing_data,
         :datapoints_to_alarm,
@@ -46,8 +48,9 @@ module CfnGuardian
         @evaluate_low_sample_count_percentile = nil
         @unit = nil
         @enabled = true
-        @resource_name = Digest::MD5.hexdigest resource['Id']
-        @resource = resource['Id']
+        @resource_hash = Digest::MD5.hexdigest resource['Id']
+        @resource_id = resource['Id']
+        @resource_name = resource.fetch('Name', nil)
         @alarm_action = 'Critical'
         @treat_missing_data = nil
         @maintenance_groups = []
