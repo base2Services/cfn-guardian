@@ -55,9 +55,7 @@ module CfnGuardian
         end
       end
       
-      cw_alarms.each do |ma|
-        details = ma.alarm_name.split('-')
-        
+      cw_alarms.each do |ma|      
         if ma.state_value == 'ALARM'
           state_value = ma.state_value.to_s.red
         elsif ma.state_value == 'INSUFFICIENT_DATA'
@@ -69,7 +67,8 @@ module CfnGuardian
         rows << [
           ma.alarm_name, 
           state_value, 
-          ma.state_updated_timestamp.localtime
+          ma.state_updated_timestamp.localtime,
+          ma.actions_enabled ? 'ENABLED'.green : 'DISABLED'.red
         ]
       end
       # sort by state_value
@@ -119,6 +118,55 @@ module CfnGuardian
       end
       
       return rows
+    end
+    
+    def self.get_alarm_names(action_prefix=nil,alarm_name_prefix='guardian')
+      alarms = []
+      client = Aws::CloudWatch::Client.new
+      
+      options = {
+        alarm_types: ["CompositeAlarm","MetricAlarm"],
+        alarm_name_prefix: alarm_name_prefix
+      }
+      
+      unless action_prefix.nil?
+        options[:action_prefix] = "arn:aws:sns:#{Aws.config[:region]}:#{aws_account_id()}:#{action_prefix}"
+      end
+      
+      client.describe_alarms(options).each do |response|
+        alarms.concat response.composite_alarms.map(&:alarm_name)
+        alarms.concat response.metric_alarms.map(&:alarm_name)
+      end
+      
+      return alarms
+    end
+    
+    def self.disable_alarms(alarms)
+      client = Aws::CloudWatch::Client.new
+      alarms.each_slice(100) do |batch|
+        client.disable_alarm_actions({alarm_names: batch})
+      end
+    end
+    
+    def self.enable_alarms(alarms)
+      client = Aws::CloudWatch::Client.new
+      alarms.each_slice(100) do |batch|
+        client.enable_alarm_actions({alarm_names: batch})
+      end
+      
+      alarms.each do |alarm|
+        client.set_alarm_state({
+          alarm_name: alarm,
+          state_value: "OK",
+          state_reason: "End of guardian maintenance peroid"
+        })
+      end
+    end
+    
+    def self.aws_account_id()
+      sts = Aws::STS::Client.new
+      account = sts.get_caller_identity().account
+      return account
     end
     
   end

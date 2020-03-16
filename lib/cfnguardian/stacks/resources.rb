@@ -6,11 +6,16 @@ module CfnGuardian
     class Resources
       include CfnDsl::CloudFormation
       
-      def build_template(resources)
+      def build_template(resources,maintenance_groups)
         @template = CloudFormation("Guardian nested stack")
         
         %w(Critical Warning Task Informational).each do |name|
           parameter = @template.Parameter(name)
+          parameter.Type 'String'
+        end
+        
+        maintenance_groups.each do |group|
+          parameter = @template.Parameter(group)
           parameter.Type 'String'
         end
         
@@ -32,6 +37,9 @@ module CfnGuardian
 
       def add_alarm(alarm)
         alarm_id = alarm.resource_name.nil? ? alarm.resource_id : alarm.resource_name
+        actions = [Ref(alarm.alarm_action)]
+        actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
+
         @template.declare do
           CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.class}#{alarm.name}#{alarm.type}"[0..255]) do
             ActionsEnabled true
@@ -45,8 +53,8 @@ module CfnGuardian
             Threshold alarm.threshold
             MetricName alarm.metric_name
             Namespace alarm.namespace
-            AlarmActions [Ref(alarm.alarm_action)]
-            OKActions [Ref(alarm.alarm_action)]
+            AlarmActions actions
+            OKActions actions
             TreatMissingData alarm.treat_missing_data unless alarm.treat_missing_data.nil?
             DatapointsToAlarm alarm.datapoints_to_alarm unless alarm.datapoints_to_alarm.nil?
             ExtendedStatistic alarm.extended_statistic unless alarm.extended_statistic.nil?

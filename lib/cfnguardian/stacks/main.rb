@@ -5,7 +5,7 @@ module CfnGuardian
     class Main
       include CfnDsl::CloudFormation
       
-      def build_template(stacks,checks,topics)
+      def build_template(stacks,checks,topics,maintenance_groups)
         @template = CloudFormation("Guardian main stack")
         
         parameters = {}
@@ -17,8 +17,15 @@ module CfnGuardian
           parameter.Default topics[name] if topics.has_key?(name)
           parameters[name] = Ref(name)
         end
-              
-        build_iam_role()
+        
+        maintenance_groups.each do |group|
+          topic = @template.SNS_Topic(group)
+          topic.TopicName group
+          topic.Tags([{ Key: 'Environment', Value: 'guardian' }])
+          parameters[group] = Ref(group)
+        end
+        
+        add_iam_role()
         
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
         stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters)}
@@ -26,7 +33,7 @@ module CfnGuardian
         return @template
       end
       
-      def build_iam_role()
+      def add_iam_role()
         @template.declare do
           IAM_Role(:LambdaExecutionRole) do
             AssumeRolePolicyDocument({

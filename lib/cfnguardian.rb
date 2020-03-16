@@ -205,6 +205,7 @@ module CfnGuardian
     method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :group, aliases: :g, type: :string, desc: "resource group"
+    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
     method_option :id, type: :string, desc: "resource id"
     method_option :state, aliases: :s, type: :string, enum: %w(OK ALARM INSUFFICIENT_DATA), desc: "filter by alarm state"
     method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
@@ -232,7 +233,7 @@ module CfnGuardian
       if rows.any?
         puts Terminal::Table.new( 
               :title => "Alarm State", 
-              :headings => ['Alarm Name', 'State', 'Changed'], 
+              :headings => ['Alarm Name', 'State', 'Changed', 'Notifications'], 
               :rows => rows)
       else
         logger.error "No alarms found"
@@ -346,6 +347,43 @@ module CfnGuardian
       puts Terminal::Table.new(
         :title => "Stage: #{deploy[:stage]}",
         :rows => deploy[:rows])
+    end
+    
+    desc "disable-alarms", "Disable cloudwatch alarm notifications"
+    long_desc <<-LONG
+    Disable cloudwatch alarm notifications for a maintenance group or for specific alarms.
+    LONG
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :group, aliases: :g, type: :string, desc: "name of the maintenance group defined in the config"
+    method_option :alarm_prefix, type: :string, desc: "cloud watch alarm name prefix"
+    method_option :alarms, type: :array, desc: "List of cloudwatch alarm names"
+    
+    def disable_alarms
+      set_region(options[:region],true)
+      
+      alarm_names = CfnGuardian::CloudWatch.get_alarm_names(options[:group],options[:alarm_prefix])
+      CfnGuardian::CloudWatch.disable_alarms(alarm_names)
+      
+      logger.info "Disabled #{alarm_names.length} alarms"
+    end
+    
+    desc "enable-alarms", "Enable cloudwatch alarm notifications"
+    long_desc <<-LONG
+    Enable cloudwatch alarm notifications for a maintenance group or for specific alarms.
+    Once alarms are enable the state is set back to OK to re send notifications of any failed alarms.
+    LONG
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :group, aliases: :g, type: :string, desc: "name of the maintenance group defined in the config"
+    method_option :alarm_prefix, type: :string, desc: "cloud watch alarm name prefix"
+    method_option :alarms, type: :array, desc: "List of cloudwatch alarm names"
+    
+    def enable_alarms
+      set_region(options[:region],true)
+      
+      alarm_names = CfnGuardian::CloudWatch.get_alarm_names(options[:group],options[:alarm_prefix])
+      CfnGuardian::CloudWatch.enable_alarms(alarm_names)
+      
+      logger.info "#{alarm_names.length} alarms enabled"
     end
     
     private

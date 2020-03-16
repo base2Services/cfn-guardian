@@ -54,7 +54,9 @@ module CfnGuardian
       @composites = config.fetch('Composites',{})
       @templates = config.fetch('Templates',{})
       @topics = config.fetch('Topics',{})
+      @maintenance_groups = config.fetch('MaintenaceGroups', {})
       
+      @maintenance_group_list = @maintenance_groups.keys.map {|group| "#{group}MaintenanceGroup"}
       @resources = []
       @stacks = []
       @checks = []
@@ -92,6 +94,22 @@ module CfnGuardian
         end
       end
       
+      @maintenance_groups.each do |maintenance_group,resource_groups|
+        resource_groups.each do |group, alarms|
+          alarms.each do |alarm, resources|
+            resources.each do |resource|
+              res = @resources.find {|r| 
+                (r.type == 'Alarm') && 
+                (r.class == group && r.name == alarm) &&
+                (r.resource_id == resource['Id'] || r.resource_name == resource['Name'])}
+              unless res.nil?
+                res.maintenance_groups.append("#{maintenance_group}MaintenanceGroup")
+              end
+            end
+          end
+        end
+      end
+      
       @composites.each do |name,params|
         @resources.push CfnGuardian::Models::Composite.new(name,params)
         @cost += 0.50
@@ -119,14 +137,14 @@ module CfnGuardian
       resources = split_resources()
       
       main_stack = CfnGuardian::Stacks::Main.new()
-      template = main_stack.build_template(@stacks,@checks,@topics)
+      template = main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list)
       valid = template.validate
       FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       
       resources.each_with_index do |resources,index|
         stack = CfnGuardian::Stacks::Resources.new()
-        template = stack.build_template(resources)
+        template = stack.build_template(resources,@maintenance_group_list)
         valid = template.validate
         File.write("out/guardian-stack-#{index}.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       end
