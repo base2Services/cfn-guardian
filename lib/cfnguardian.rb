@@ -9,6 +9,7 @@ require "cfnguardian/deploy"
 require "cfnguardian/cloudwatch"
 require "cfnguardian/drift"
 require "cfnguardian/codecommit"
+require "cfnguardian/codepipeline"
 
 module CfnGuardian
   class Cli < Thor
@@ -302,8 +303,49 @@ module CfnGuardian
     
       history = CfnGuardian::CodeCommit.new(options[:repository]).get_commit_history()
       puts Terminal::Table.new(
-        :headings => history.first.keys, 
-        :rows => history.map {|h| h.values })
+        :headings => history.first.keys.map{|h| h.to_s.to_heading}, 
+        :rows => history.map(&:values))
+    end
+    
+    desc "show-pipeline", "Shows the current state of the AWS code pipeline"
+    long_desc <<-LONG
+    Shows the current state of the AWS code pipeline
+    LONG
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :pipeline, aliases: :p, type: :string, default: 'guardian', desc: "codepipeline name"
+    
+    def show_pipeline
+      set_region(options[:region],true)
+      pipeline = CfnGuardian::CodePipeline.new(options[:pipeline])
+      source = pipeline.get_source()
+      build = pipeline.get_build()
+      create = pipeline.get_create_changeset()
+      deploy = pipeline.get_deploy_changeset()
+
+      puts Terminal::Table.new(
+        :title => "Stage: #{source[:stage]}",
+        :rows => source[:rows])
+        
+      puts "\t|"
+      puts "\t|"
+      
+      puts Terminal::Table.new(
+        :title => "Stage: #{build[:stage]}",
+        :rows => build[:rows])
+        
+      puts "\t|"
+      puts "\t|"
+      
+      puts Terminal::Table.new(
+        :title => "Stage: #{create[:stage]}",
+        :rows => create[:rows])
+        
+      puts "\t|"
+      puts "\t|"
+      
+      puts Terminal::Table.new(
+        :title => "Stage: #{deploy[:stage]}",
+        :rows => deploy[:rows])
     end
     
     private

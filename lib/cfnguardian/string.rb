@@ -18,4 +18,8 @@ class String
     map(&:capitalize).join.
     gsub(/[^0-9A-Za-z]/, '')
   end
+  
+  def to_heading
+    self.split('_').collect(&:capitalize).join(' ')
+  end
 end

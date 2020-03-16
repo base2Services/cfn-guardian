@@ -1,6 +1,6 @@
 FROM ruby:2.7-alpine
 
-ARG GUARDIAN_VERSION="0.1.0"
+ARG GUARDIAN_VERSION="0.2.0"
 
 COPY . /src
 
@@ -16,4 +16,4 @@ RUN addgroup -g 1000 guardian && \
 
 USER guardian
 
-RUN cfndsl -u 11.3.0
+RUN cfndsl -u 11.5.0

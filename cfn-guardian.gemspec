@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'aws-sdk-cloudformation', '~> 1.31', '<2'
   spec.add_dependency 'aws-sdk-cloudwatch', '~> 1.28', '<2'
   spec.add_dependency 'aws-sdk-codecommit', '~> 1.28', '<2'
+  spec.add_dependency 'aws-sdk-codepipeline', '~> 1.28', '<2'
   
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 10.0"
