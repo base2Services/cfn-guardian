@@ -41,7 +41,7 @@ module CfnGuardian::Resource
         
         unless properties.is_a?(Hash)
           if name != 'Inherit'
-            logger.warn "Incorrect format for alarm '#{name}'. Should be of type 'Hash', instead got type '#{properties.class}'"
+            logger.warn "Incorrect format for alarm '#{name}'. Should be of type 'Hash', instead got type '#{properties.group}'"
           end
           next
         end

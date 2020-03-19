@@ -8,7 +8,7 @@ module CfnGuardian
       attr_reader :type,
         :resource_hash
         
-      attr_accessor :class,
+      attr_accessor :group,
         :name,
         :metric_name,
         :namespace,
@@ -32,7 +32,7 @@ module CfnGuardian
       
       def initialize(resource)
         @type = 'Alarm'
-        @class = nil
+        @group = nil
         @name = ''
         @metric_name = nil
         @namespace = nil
@@ -66,7 +66,7 @@ module CfnGuardian
     class ApiGatewayAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ApiGateway'
+        @group = 'ApiGateway'
         @namespace = 'AWS/ApiGateway'
         @dimensions = { ApiName: resource['Id'] }
       end
@@ -75,7 +75,7 @@ module CfnGuardian
     class ApplicationTargetGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ApplicationTargetGroup'
+        @group = 'ApplicationTargetGroup'
         @namespace = 'AWS/ApplicationELB'
         @dimensions = { 
           TargetGroup: resource['Id'],
@@ -87,7 +87,7 @@ module CfnGuardian
     class AmazonMQBrokerAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'AmazonMQBroker'
+        @group = 'AmazonMQBroker'
         @namespace = 'AWS/AmazonMQ'
         @dimensions = { Broker: resource['Id'] }
       end
@@ -96,7 +96,7 @@ module CfnGuardian
     class CloudFrontDistributionAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'CloudFrontDistribution'
+        @group = 'CloudFrontDistribution'
         @namespace = 'AWS/CloudFront'
         @dimensions = { 
           DistributionId: resource['Id'],
@@ -110,7 +110,7 @@ module CfnGuardian
     class AutoScalingGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'AutoScalingGroup'
+        @group = 'AutoScalingGroup'
         @namespace = 'AWS/EC2'
         @dimensions = { AutoScalingGroupName: resource['Id'] }
       end
@@ -119,7 +119,7 @@ module CfnGuardian
     class DomainExpiryAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'DomainExpiry'
+        @group = 'DomainExpiry'
         @namespace = 'DNS'
         @dimensions = { Domain: resource['Id'] }
         @comparison_operator = 'LessThanThreshold'
@@ -129,7 +129,7 @@ module CfnGuardian
     class DynamoDBTableAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'DynamoDBTable'
+        @group = 'DynamoDBTable'
         @namespace = 'AWS/DynamoDB'
         @dimensions = { TableName: resource['Id'] }
       end
@@ -138,7 +138,7 @@ module CfnGuardian
     class Ec2InstanceAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'Ec2Instance'
+        @group = 'Ec2Instance'
         @namespace = 'AWS/EC2'
         @dimensions = { InstanceId: resource['Id'] }
       end
@@ -147,7 +147,7 @@ module CfnGuardian
     class ECSClusterAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ECSCluster'
+        @group = 'ECSCluster'
         @namespace = 'AWS/ECS'
         @dimensions = { ClusterName: resource['Id'] }
         @threshold = 75
@@ -159,7 +159,7 @@ module CfnGuardian
     class ECSServiceAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ECSService'
+        @group = 'ECSService'
         @namespace = 'AWS/ECS'
         @dimensions = {
           ServiceName: resource['Id'],
@@ -171,7 +171,7 @@ module CfnGuardian
     class ElastiCacheReplicationGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ElastiCacheReplicationGroup'
+        @group = 'ElastiCacheReplicationGroup'
         @namespace = 'AWS/ElastiCache'
         @dimensions = { CacheClusterId: resource['Id'] }
       end
@@ -180,7 +180,7 @@ module CfnGuardian
     class ElasticLoadBalancerAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ElasticLoadBalancer'
+        @group = 'ElasticLoadBalancer'
         @namespace = 'AWS/ELB'
         @dimensions = { LoadBalancerName: resource['Id'] }
       end
@@ -189,7 +189,7 @@ module CfnGuardian
     class ElasticFileSystemAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'ElasticFileSystem'
+        @group = 'ElasticFileSystem'
         @namespace = 'AWS/EFS'
         @dimensions = { FileSystemId: resource['Id'] }
       end
@@ -198,7 +198,7 @@ module CfnGuardian
     class HttpAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'Http'
+        @group = 'Http'
         @namespace = 'HttpCheck'
         @dimensions = { Endpoint: resource['Id'] }
         @comparison_operator = 'LessThanThreshold'
@@ -210,7 +210,7 @@ module CfnGuardian
     class PortAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'Port'
+        @group = 'Port'
         @namespace = 'TcpPortCheck'
         @dimensions = { Endpoint: "#{resource['Id']}:#{resource['Port']}" }
         @comparison_operator = 'LessThanThreshold'
@@ -222,7 +222,7 @@ module CfnGuardian
     class SslAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'Ssl'
+        @group = 'Ssl'
         @namespace = 'SSL'
         @dimensions = { URL: resource['Id'] }
         @comparison_operator = 'LessThanThreshold'
@@ -232,7 +232,7 @@ module CfnGuardian
     class NrpeAlarm < Alarm
       def initialize(resource,environment)
         super(resource)
-        @class = 'Nrpe'
+        @group = 'Nrpe'
         @namespace = 'NRPE'
         @dimensions = { Host: "#{environment}-#{resource['Id']}" }
         @treat_missing_data = 'breaching'
@@ -243,7 +243,7 @@ module CfnGuardian
     class LambdaAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'Lambda'
+        @group = 'Lambda'
         @namespace = 'AWS/Lambda'
         @dimensions = { FunctionName: resource['Id'] }
         @statistic = 'Average'
@@ -254,7 +254,7 @@ module CfnGuardian
     class NetworkTargetGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'NetworkTargetGroup'
+        @group = 'NetworkTargetGroup'
         @namespace = 'AWS/NetworkELB'
         @dimensions = { 
           TargetGroup: resource['Id'],
@@ -266,7 +266,7 @@ module CfnGuardian
     class RedshiftClusterAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'RedshiftCluster'
+        @group = 'RedshiftCluster'
         @namespace = 'AWS/Redshift'
         @dimensions = { ClusterIdentifier: resource['Id'] }
       end
@@ -275,7 +275,7 @@ module CfnGuardian
     class RDSClusterInstanceAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'RDSClusterInstance'
+        @group = 'RDSClusterInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
       end
@@ -284,7 +284,7 @@ module CfnGuardian
     class RDSInstanceAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'RDSInstance'
+        @group = 'RDSInstance'
         @namespace = 'AWS/RDS'
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
       end
@@ -293,7 +293,7 @@ module CfnGuardian
     class SqlAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'Sql'
+        @group = 'Sql'
         @namespace = 'SQL'
         @dimensions = { Host: resource['Id'] }
         @treat_missing_data = 'breaching'
@@ -304,7 +304,7 @@ module CfnGuardian
     class SQSQueueAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'SQSQueue'
+        @group = 'SQSQueue'
         @namespace = 'AWS/SQS'
         @dimensions = { QueueName: resource['Id'] }
         @statistic = 'Average'
@@ -315,7 +315,7 @@ module CfnGuardian
     class LogGroupAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @class = 'LogGroup'
+        @group = 'LogGroup'
         @namespace = "MetricFilters"
         @statistic = 'Sum'
         @threshold = 1

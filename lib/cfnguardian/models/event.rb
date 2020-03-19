@@ -5,7 +5,7 @@ module CfnGuardian
     class Event
       
       attr_reader :type
-      attr_accessor :class,
+      attr_accessor :group,
         :target,
         :hash,
         :name,
@@ -17,7 +17,7 @@ module CfnGuardian
       
       def initialize(resource)
         @type = 'Event'
-        @class = nil
+        @group = nil
         @target = nil
         @hash = Digest::MD5.hexdigest resource['Id']
         @name = @hash
@@ -41,7 +41,7 @@ module CfnGuardian
       
       def initialize(resource)
         super(resource)
-        @class = 'Http'
+        @group = 'Http'
         @name = 'HttpEvent'
         @target = 'HttpCheckFunction'
         @endpoint = resource['Id']
@@ -70,7 +70,7 @@ module CfnGuardian
     class InternalHttpEvent < HttpEvent      
       def initialize(resource,environment)
         super(resource)
-        @class = 'InternalHttp'
+        @group = 'InternalHttp'
         @target = "InternalHttpCheckFunction#{environment}"
         @environment = environment
       end
@@ -79,7 +79,7 @@ module CfnGuardian
     class PortEvent < Event      
       def initialize(resource)
         super(resource)
-        @class = 'Port'
+        @group = 'Port'
         @name = 'PortEvent'
         @target = 'PortCheckFunction'
         @hostname = resource['Id']
@@ -100,7 +100,7 @@ module CfnGuardian
     class InternalPortEvent < PortEvent    
       def initialize(resource,environment)
         super(resource)
-        @class = 'InternalPort'
+        @group = 'InternalPort'
         @target = "InternalPortCheckFunction#{environment}"
         @environment = environment
       end
@@ -109,7 +109,7 @@ module CfnGuardian
     class NrpeEvent < Event      
       def initialize(resource,environment,command)
         super(resource)
-        @class = 'Nrpe'
+        @group = 'Nrpe'
         @name = 'NrpeEvent'
         @target = "NrpeCheckFunction#{environment}"
         @host = resource['Id']
@@ -131,7 +131,7 @@ module CfnGuardian
     class SslEvent < Event
       def initialize(resource)
         super(resource)
-        @class = 'Ssl'
+        @group = 'Ssl'
         @name = 'SslEvent'
         @target = 'SslCheckFunction'
         @cron = "0 12 * * ? *" 
@@ -154,7 +154,7 @@ module CfnGuardian
       
       def initialize(resource)
         super(resource)
-        @class = 'DomainExpiry'
+        @group = 'DomainExpiry'
         @name = 'DomainExpiryEvent'
         @target = 'DomainExpiryCheckFunction'
         @cron = "0 12 * * ? *" 
@@ -170,7 +170,7 @@ module CfnGuardian
     class SqlEvent < Event
       def initialize(resource,query,environment)
         super(resource)
-        @class = 'Sql'
+        @group = 'Sql'
         @name = 'SqlEvent'
         @target = "SqlCheckFunction#{environment}"
         @host = resource['Id']
@@ -201,7 +201,7 @@ module CfnGuardian
     class ContainerInstanceEvent < Event
       def initialize(resource)
         super(resource)
-        @class = 'ContainerInstance'
+        @group = 'ContainerInstance'
         @name = 'ContainerInstanceEvent'
         @target = 'ContainerInstanceCheckFunction'
         @cron = "0/5 * * * ? *"

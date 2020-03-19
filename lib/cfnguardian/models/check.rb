@@ -5,7 +5,7 @@ module CfnGuardian
     class Check
       
       attr_reader :type
-      attr_accessor :class,
+      attr_accessor :group,
         :name,
         :package,
         :handler,
@@ -17,7 +17,7 @@ module CfnGuardian
         
       def initialize(resource)
         @type = 'Check'
-        @class = nil
+        @group = nil
         @name = nil
         @package = nil
         @handler = nil
@@ -32,7 +32,7 @@ module CfnGuardian
     class HttpCheck < Check      
       def initialize(resource)
         super(resource)
-        @class = 'Http'
+        @group = 'Http'
         @name = 'HttpCheck'
         @package = 'http-check'
         @handler = 'handler.http_check'
@@ -44,7 +44,7 @@ module CfnGuardian
     class InternalHttpCheck < HttpCheck
       def initialize(resource)
         super(resource)
-        @class = 'InternalHttp'
+        @group = 'InternalHttp'
         @name = 'InternalHttpCheck'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']
@@ -55,7 +55,7 @@ module CfnGuardian
     class PortCheck < Check      
       def initialize(resource)
         super(resource)
-        @class = 'Port'
+        @group = 'Port'
         @name = 'PortCheck'
         @package = 'port-check'
         @handler = 'handler.port_check'
@@ -67,7 +67,7 @@ module CfnGuardian
     class InternalPortCheck < PortCheck
       def initialize(resource)
         super(resource)
-        @class = 'InternalPort'
+        @group = 'InternalPort'
         @name = 'InternalPortCheck'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']
@@ -78,7 +78,7 @@ module CfnGuardian
     class NrpeCheck < Check
       def initialize(resource)
         super(resource)
-        @class = 'Nrpe'
+        @group = 'Nrpe'
         @name = 'NrpeCheck'
         @package = 'aws-lambda-nrpe-check'
         @handler = 'main'
@@ -93,7 +93,7 @@ module CfnGuardian
     class SslCheck < Check
       def initialize(resource)
         super(resource)
-        @class = 'Ssl'
+        @group = 'Ssl'
         @name = 'SslCheck'
         @package = 'aws-lambda-ssl-check'
         @handler = 'main'
@@ -105,7 +105,7 @@ module CfnGuardian
     class DomainExpiryCheck < Check
       def initialize(resource)
         super(resource)
-        @class = 'DomainExpiry'
+        @group = 'DomainExpiry'
         @name = 'DomainExpiryCheck'
         @package = 'aws-lambda-dns-check'
         @handler = 'main'
@@ -117,7 +117,7 @@ module CfnGuardian
     class SqlCheck < Check
       def initialize(resource)
         super(resource)
-        @class = 'Sql'
+        @group = 'Sql'
         @name = 'SqlCheck'
         @package = 'aws-lambda-sql-check'
         @handler = 'main'
@@ -132,7 +132,7 @@ module CfnGuardian
     class ContainerInstanceCheck < Check
       def initialize(resource)
         super(resource)
-        @class = 'ContainerInstance'
+        @group = 'ContainerInstance'
         @name = 'ContainerInstanceCheck'
         @package = 'ecs-containder-instance-check'
         @handler = 'handler.run_check'

@@ -94,7 +94,7 @@ module CfnGuardian
           @template.declare do
             EC2_SecurityGroup("#{check.name}SecurityGroup#{check.environment}") do
               VpcId check.vpc
-              GroupDescription "Guardian lambda function #{check.class} check"
+              GroupDescription "Guardian lambda function #{check.group} check"
               Tags([
                 { Key: 'Name', Value: "guardian-#{check.name}-#{check.environment}" },
                 { Key: 'Environment', Value: 'guardian' }
@@ -119,7 +119,7 @@ module CfnGuardian
             Role FnGetAtt(:LambdaExecutionRole, :Arn)
             VpcConfig vpc_config unless vpc_config.empty?
             Tags([
-              { Key: 'Name', Value: "guardian-#{check.name}-#{check.class}" },
+              { Key: 'Name', Value: "guardian-#{check.name}-#{check.group}" },
               { Key: 'Environment', Value: 'guardian' }
             ])
           end

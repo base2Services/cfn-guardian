@@ -43,10 +43,10 @@ module CfnGuardian
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
 
         @template.declare do
-          CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.class}#{alarm.name}#{alarm.type}"[0..255]) do
+          CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name}#{alarm.type}"[0..255]) do
             ActionsEnabled true
-            AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.class}"
-            AlarmName "guardian-#{alarm.class}-#{alarm_id}-#{alarm.name}"
+            AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
+            AlarmName "guardian-#{alarm.group}-#{alarm_id}-#{alarm.name}"
             ComparisonOperator alarm.comparison_operator
             Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} if alarm.dimensions.any?
             EvaluationPeriods alarm.evaluation_periods
@@ -70,12 +70,12 @@ module CfnGuardian
         @template.declare do
           Parameter(event.target) do
             Type 'String'
-            Description "Lambda function Arn for #{event.class} #{event.type}"
+            Description "Lambda function Arn for #{event.group} #{event.type}"
           end
           
-          Events_Rule("#{event.class}#{event.type}#{event.hash}"[0..255]) do
+          Events_Rule("#{event.group}#{event.type}#{event.hash}"[0..255]) do
             State 'ENABLED'
-            Description "Guardian scheduled #{event.class} #{event.type}"
+            Description "Guardian scheduled #{event.group} #{event.type}"
             ScheduleExpression "cron(#{event.cron})"
             Targets([
               { 
