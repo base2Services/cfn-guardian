@@ -31,6 +31,7 @@ require 'cfnguardian/resources/rds_instance'
 require 'cfnguardian/resources/redshift_cluster'
 require 'cfnguardian/resources/sql'
 require 'cfnguardian/resources/sqs_queue'
+require 'cfnguardian/resources/log_group'
 
 module CfnGuardian
   class Compile
@@ -87,6 +88,7 @@ module CfnGuardian
           
           overides = @templates.has_key?(group) ? @templates[group] : {}
           @resources.concat resource_class.get_alarms(overides)
+          @resources.concat resource_class.get_metric_filters()
           @resources.concat resource_class.get_events()
           @checks.concat resource_class.get_checks()
 

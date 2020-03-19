@@ -2,6 +2,7 @@ require 'cfnguardian/string'
 require 'cfnguardian/models/alarm'
 require 'cfnguardian/models/event'
 require 'cfnguardian/models/check'
+require 'cfnguardian/models/metric_filter'
 
 module CfnGuardian::Resource
   class Base
@@ -12,6 +13,7 @@ module CfnGuardian::Resource
       @alarms = []
       @events = []
       @checks = []
+      @metric_filters = []
     end
     
     # Overidden by inheritted classes to define default alarms
@@ -93,6 +95,16 @@ module CfnGuardian::Resource
     def get_checks()
       default_checks()
       return @checks
+    end
+    
+    # Overidden by inheritted classes to define default checks
+    def default_metric_filters()
+      return @metric_filters
+    end
+    
+    def get_metric_filters()
+      default_metric_filters()
+      return @metric_filters
     end
     
     def get_cost()

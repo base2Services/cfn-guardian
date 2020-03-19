@@ -5,6 +5,7 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
 - creates cloudwatch alarms through cloudformation based upon resources defined in a YAML config
 - alerting through SNS using 4 levels of severity [ Critical, Warning, Task, Informational ]  
 - has a standard set of default alarms across many AWS resources
+- creates cloudwatch log metric filters with default alarms
 - creates custom metrics for external checks through lambda functions such as
     - http endpoint availability
     - http status code matching 
@@ -33,6 +34,7 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
 - RDS Instances
 - Redshift Cluster
 - SQS Queues
+- LogGroup Metric Filters
 
 ## Installation
 
@@ -219,6 +221,34 @@ Resources:
   - Id: target-group-id
     Loadbalancer: app/application-loadbalancer-id
     Name: webapp
+```
+
+### Log Group Metric Filters
+
+Metric filters creates the metric filter and a corresponding alarm.
+Cloudwatch NameSpace: `MetricFilters`
+
+AWS [documentation](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html) of pattern syntax
+
+```yaml
+Resources:
+  LogGroup:
+  # Log group name
+  - Id: /aws/lambda/myfuntion
+    # List of metric filters
+    MetricFilters:
+    # Name of the cloud watch metric
+    - MetricName: MyFunctionErrors
+      # search pattern, see aws docs for syntax
+      Pattern: error
+      # metric to push to cloudwatch. Optional as it defaults to 1
+      MetricValue: 1
+      
+Templates:
+  LogGroup:
+    # use the MetricName name to override the alarm defaults
+    MyFunctionErrors:
+      Threshold: 10
 ```
 
 ### Custom Metric Resources

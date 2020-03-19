@@ -312,5 +312,17 @@ module CfnGuardian
       end
     end
     
+    class LogGroupAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @class = 'LogGroup'
+        @namespace = "MetricFilters"
+        @statistic = 'Sum'
+        @threshold = 1
+        @period = 300
+        @alarm_action = 'Informational'
+      end
+    end
+    
   end
 end

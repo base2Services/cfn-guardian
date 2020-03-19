@@ -27,6 +27,8 @@ module CfnGuardian
             add_event(resource)
           when 'Composite'
             add_composite_alarm(resource)
+          when 'MetricFilter'
+            add_metric_filter(resource)
           else
             puts "Warn: #{resource.type} is a unsuported resource type"
           end
@@ -46,7 +48,7 @@ module CfnGuardian
             AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.class}"
             AlarmName "guardian-#{alarm.class}-#{alarm_id}-#{alarm.name}"
             ComparisonOperator alarm.comparison_operator
-            Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}}
+            Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} if alarm.dimensions.any?
             EvaluationPeriods alarm.evaluation_periods
             Statistic alarm.statistic
             Period alarm.period
@@ -101,6 +103,22 @@ module CfnGuardian
               # OKActions [Ref(alarm.alarm_action)]
             end
             
+          end
+        end
+      end
+      
+      def add_metric_filter(filter)
+        @template.declare do
+          Logs_MetricFilter("#{filter.name}#{filter.type}") do
+            LogGroupName filter.log_group
+            FilterPattern filter.pattern
+            MetricTransformations([
+              {
+                MetricValue: filter.metric_value,
+                MetricName: filter.metric_name,
+                MetricNamespace: filter.metric_namespace
+              }
+            ])
           end
         end
       end
