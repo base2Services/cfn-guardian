@@ -48,7 +48,7 @@ module CfnGuardian
             AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
             AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
             ComparisonOperator alarm.comparison_operator
-            Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} if alarm.dimensions.any?
+            Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
             EvaluationPeriods alarm.evaluation_periods
             Statistic alarm.statistic
             Period alarm.period
