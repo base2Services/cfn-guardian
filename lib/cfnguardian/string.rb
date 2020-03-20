@@ -22,4 +22,10 @@ class String
   def to_heading
     self.split('_').collect(&:capitalize).join(' ')
   end
+  
+  def word_wrap(with=100)
+    self.scan(/\S.{0,#{with}}\S(?=\s|$)|\S+/).
+    map {|line| line + "\n"}.
+    join('')
+  end
 end

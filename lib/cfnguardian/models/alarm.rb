@@ -36,7 +36,7 @@ module CfnGuardian
         @name = ''
         @metric_name = nil
         @namespace = nil
-        @dimensions = {}
+        @dimensions = nil
         @threshold = 0
         @period = 60
         @evaluation_periods = 1

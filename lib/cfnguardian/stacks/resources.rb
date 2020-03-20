@@ -1,5 +1,6 @@
 require 'cfndsl'
 require 'digest/md5'
+require 'cfnguardian/cloudwatch'
 
 module CfnGuardian
   module Stacks
@@ -38,7 +39,6 @@ module CfnGuardian
       end
 
       def add_alarm(alarm)
-        alarm_id = alarm.resource_name.nil? ? alarm.resource_id : alarm.resource_name
         actions = [Ref(alarm.alarm_action)]
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
 
@@ -46,7 +46,7 @@ module CfnGuardian
           CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name}#{alarm.type}"[0..255]) do
             ActionsEnabled true
             AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
-            AlarmName "guardian-#{alarm.group}-#{alarm_id}-#{alarm.name}"
+            AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
             ComparisonOperator alarm.comparison_operator
             Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} if alarm.dimensions.any?
             EvaluationPeriods alarm.evaluation_periods

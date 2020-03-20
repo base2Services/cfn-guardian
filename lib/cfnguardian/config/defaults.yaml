@@ -1,0 +1,94 @@
+Resources:
+  AmazonMQBroker:
+  - Id: Default
+  ApiGateway:
+  - Id: Default
+  ApplicationTargetGroup:
+  - Id: Default
+    LoadBalancer: Default
+  AutoScalingGroup:
+  - Id: Default
+  CloudFrontDistribution:
+  - Id: Default
+  DomainExpiry:
+  - Id: Default
+  DynamoDBTable:
+  - Id: Default
+  Ec2Instance:
+  - Id: Default
+  ECSCluster:
+  - Id: Default
+  ECSService:
+  - Id: Default
+    Cluster: Default
+  ElasticFileSystem:
+  - Id: Default
+  ElasticLoadBalancer:
+  - Id: Default
+  ElastiCacheReplicationGroup:
+  - Id: Default
+  Http:
+  - Id: Default
+    StatusCode: 200
+    Ssl: true
+    BodyRegex: Default
+  InternalHttp:
+  - Environment: Default
+    VpcId: vpc-default
+    Subnets:
+    - subnet-default
+    Hosts:
+    - Id: Default
+      StatusCode: 200
+      BodyRegex: Default
+  Port:
+  - Id: Default
+    Port: 0
+  InternalPort:
+  - Environment: Default
+    VpcId: vpc-default
+    Subnets:
+    - subnet-default
+    Hosts:
+    - Id: Default
+      Port: 0
+  Lambda:
+  - Id: Default
+  LogGroup:
+  - Id: Default
+    MetricFilters:
+    - MetricName: Default
+      Pattern: Default
+  NetworkTargetGroup:
+  - Id: Default
+    LoadBalancer: Default
+  Nrpe:
+  - Environment: Default
+    VpcId: vpc-default
+    Subnets:
+    - subnet-default
+    Hosts:
+    - Id: Default
+      Commands:
+      - default
+  RDSClusterInstance:
+  - Id: Default
+  RDSInstance:
+  - Id: Default
+  RedshiftCluster:
+  - Id: Default
+  Sql:
+  - Environment: Default
+    VpcId: vpc-default
+    Subnets:
+    - subnet-default
+    Hosts:
+    - Id: Default
+      SecretId: Default
+      Engine: default
+      Queries:
+      - MetricName: Default
+        Query: Default
+  SQSQueue:
+  - Id: Default
+  

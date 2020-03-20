@@ -39,18 +39,9 @@ module CfnGuardian
     
     attr_reader :cost, :resources, :topics
     
-    def initialize(opts,bucket)
-      @prefix = opts.fetch(:stack_name,'guardian')
-      @bucket = bucket
-      
-      # Load in the alarms YAML config
-      begin
-        config = YAML.load_file(opts.fetch(:config))
-      rescue
-        logger.error("Failed to load config file #{opts.fetch(:config)}")
-        exit 1
-      end
-      
+    def initialize(config_file)
+      config = YAML.load_file(config_file)
+            
       @resource_groups = config.fetch('Resources',{})
       @composites = config.fetch('Composites',{})
       @templates = config.fetch('Templates',{})
@@ -119,24 +110,24 @@ module CfnGuardian
     end
     
     def alarms
-      @resources.select{|h| h[:type] == 'Alarm'}
+      @resources.select {|resource| resource.type == 'Alarm'}
     end
     
-    def split_resources
+    def split_resources(bucket,path)
       split = @resources.each_slice(200).to_a
       split.each_with_index do |resources,index|
         @stacks.push({
           'Name' => "GuardianStack#{index}",
-          'TemplateURL' => "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/guardian-stack-#{index}.compiled.yaml",
+          'TemplateURL' => "https://#{bucket}.s3.amazonaws.com/#{path}/guardian-stack-#{index}.compiled.yaml",
           'Reference' => index
         })
       end
       return split
     end
     
-    def compile_templates
+    def compile_templates(bucket,path)
       clean_out_directory()
-      resources = split_resources()
+      resources = split_resources(bucket,path)
       
       main_stack = CfnGuardian::Stacks::Main.new()
       template = main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list)

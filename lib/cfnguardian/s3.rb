@@ -4,10 +4,11 @@ module CfnGuardian
   class S3
     include Logging
 
-    attr_reader :bucket
+    attr_reader :bucket, :path
 
-    def initialize(bucket)
+    def initialize(bucket,path='')
       @bucket = set_bucket_name(bucket)
+      @path = path
     end
 
     def set_bucket_name(bucket)

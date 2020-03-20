@@ -5,38 +5,31 @@ module CfnGuardian
   class CloudWatch
     include Logging
     
-    def self.compare_alarms(alarms,topics)      
-      alarm_names = alarms.map {|a| "#{a[:class]}-#{a[:resource]}-#{a[:name]}"}
-      client = Aws::CloudWatch::Client.new()
-      cw_alarms = []
-      alarm_names.each_slice(100) do |batch|
-        resp = client.describe_alarms({alarm_names: batch, max_records: 100})
-        cw_alarms.push(*resp.metric_alarms)
-      end
-      
-      alarms.each do |alarm|
-        alarm_name = "#{alarm[:class]}-#{alarm[:resource]}-#{alarm[:name]}"
-        metric_alarm = cw_alarms.find {|ma| ma.alarm_name == alarm_name}
-        
-        if metric_alarm
-          ma_hash = metric_alarm.to_h
-          alarm.each do |k,v|
-            if k == :dimensions
-              alarm[k] = [v,ma_hash[k].map {|a| {a[:name].to_sym => a[:value]}}.inject(:merge)]
-            elsif k == :threshold
-              alarm[k] = [v.to_f,ma_hash[k]]
-            elsif ![:class,:name].include? k
-              alarm[k] = [v,ma_hash[k]]
-            end
-          end
-        else
-          alarm.each {|k,v| alarm[k] = [v,"Not Found"] unless [:class,:name].include?(k)}
-        end
-      end
+    def self.get_alarm_name(alarm)
+      alarm_id = alarm.resource_name.nil? ? alarm.resource_id : alarm.resource_name
+      return "guardian-#{alarm.group}-#{alarm_id}-#{alarm.name}"
     end
     
-    def self.get_alarm_state(alarm_names: [], alarm_prefix: nil, state: nil)
+    def self.get_alarms(alarms)
+      alarm_names = alarms.map {|alarm| self.get_alarm_name(alarm)}
+      
+      client = Aws::CloudWatch::Client.new()
+      metric_alarms = []
+      alarm_names.each_slice(100) do |batch|
+        resp = client.describe_alarms({alarm_names: batch, max_records: 100})
+        metric_alarms.push(*resp.metric_alarms)
+      end
+      
+      return metric_alarms
+    end
+    
+    def self.get_alarm_state(config_alarms: [], alarm_names: [], alarm_prefix: nil, state: nil)
       rows = []
+      
+      if config_alarms.any?
+        alarm_names = config_alarms.map {|alarm| self.get_alarm_name(alarm)}
+      end
+      
       client = Aws::CloudWatch::Client.new()
       
       options = {max_records: 100}
@@ -55,24 +48,7 @@ module CfnGuardian
         end
       end
       
-      cw_alarms.each do |ma|      
-        if ma.state_value == 'ALARM'
-          state_value = ma.state_value.to_s.red
-        elsif ma.state_value == 'INSUFFICIENT_DATA'
-          state_value = ma.state_value.to_s.yellow
-        else
-          state_value = ma.state_value.to_s.green
-        end
-        
-        rows << [
-          ma.alarm_name, 
-          state_value, 
-          ma.state_updated_timestamp.localtime,
-          ma.actions_enabled ? 'ENABLED'.green : 'DISABLED'.red
-        ]
-      end
-      # sort by state_value
-      return rows.sort_by {|r| r[3]}
+      return cw_alarms
     end
     
     def self.get_alarm_history(alarm_name,type)
@@ -89,35 +65,7 @@ module CfnGuardian
         max_records: 100
       })
       
-      
-      resp.alarm_history_items.each do |history|
-        data = JSON.load(history.history_data)
-        
-        case type
-        when "StateUpdate" 
-          rows << [
-            history.timestamp.localtime, 
-            history.history_summary, 
-            data['newState']['stateReason']
-          ]
-        when "ConfigurationUpdate"
-          updated = []
-          if data['type'] == 'Update'
-            data['originalUpdatedFields'].each do |k,v|
-              unless k == 'alarmConfigurationUpdatedTimestamp'
-                updated << "#{k}: #{v} -> #{data['updatedAlarm'][k]}"
-              end
-            end
-          end
-          rows << [
-            history.timestamp.localtime, 
-            data['type'],
-            updated.join("\n")
-          ]
-        end
-      end
-      
-      return rows
+      return resp.alarm_history_items
     end
     
     def self.get_alarm_names(action_prefix=nil,alarm_name_prefix='guardian')
