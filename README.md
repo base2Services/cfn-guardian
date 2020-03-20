@@ -90,12 +90,13 @@ Usage:
   cfn-guardian show-alarms c, --config=CONFIG
 
 Options:
-  c, --config=CONFIG               # yaml config file
-  g, [--group=GROUP]               # resource group
-  a, [--alarm=ALARM]               # alarm name
-      [--id=ID]                    # resource id
-      [--compare], [--no-compare]  # compare config to deployed alarms
-      [--debug], [--no-debug]      # enable debug logging
+  c, --config=CONFIG                 # yaml config file
+  g, [--group=GROUP]                 # resource group
+  a, [--alarm=ALARM]                 # alarm name
+      [--id=ID]                      # resource id
+      [--compare], [--no-compare]    # compare config to deployed alarms
+      [--defaults], [--no-defaults]  # show default alarm and properites
+      [--debug], [--no-debug]        # enable debug logging
 ```
 
 **show-history**
@@ -209,6 +210,36 @@ Resources:
 | Lambda                      | Id               |
 | CloudFrontDistribution      | Id               |
 | SQSQueue                    | Id               |
+
+### Alarm Defaults
+
+To list the default alarms use the `show-alarms` command with the `--defaults` switch.
+The list can be filtered using the `--group ApplicationTargetGroup` and `--alarm TargetResponseTime` optional switches
+
+```sh
+cfn-guardian show-alarms --defaults --group ApplicationTargetGroup --alarm TargetResponseTime
+
++-------------------------+----------------------------------+
+|         ApplicationTargetGroup::TargetResponseTime         |
+| guardian-ApplicationTargetGroup-Default-TargetResponseTime |
++-------------------------+----------------------------------+
+| Property                | Config                           |
++-------------------------+----------------------------------+
+| ResourceId              | Default                          |
+| ResourceHash            | 7a1920d61156abc05a60135aefe8bc67 |
+| Enabled                 | true                             |
+| MetricName              | TargetResponseTime               |
+| Dimensions              |                                  |
+| Threshold               | 5                                |
+| Period                  | 60                               |
+| EvaluationPeriods       | 5                                |
+| ComparisonOperator      | GreaterThanThreshold             |
+| Statistic               | Maximum                          |
+| ActionsEnabled          | true                             |
+| AlarmAction             | Critical                         |
+| TreatMissingData        | notBreaching                     |
++-------------------------+----------------------------------+
+```
 
 ### Friendly Resource Names
 
