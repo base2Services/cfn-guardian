@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cfn-guardian (0.2.0)
+    cfn-guardian (0.2.2)
       aws-sdk-cloudformation (~> 1.31, < 2)
       aws-sdk-cloudwatch (~> 1.28, < 2)
       aws-sdk-codecommit (~> 1.28, < 2)
