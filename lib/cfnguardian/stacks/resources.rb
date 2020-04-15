@@ -7,19 +7,17 @@ module CfnGuardian
     class Resources
       include CfnDsl::CloudFormation
       
-      def build_template(resources,maintenance_groups)
+      attr_reader :template
+      
+      def initialize(parameters)
         @template = CloudFormation("Guardian nested stack")
-        
-        %w(Critical Warning Task Informational).each do |name|
+        parameters.each do |name|
           parameter = @template.Parameter(name)
           parameter.Type 'String'
         end
-        
-        maintenance_groups.each do |group|
-          parameter = @template.Parameter(group)
-          parameter.Type 'String'
-        end
-        
+      end
+      
+      def build_template(resources)
         resources.each do |resource|
           case resource.type
           when 'Alarm'
@@ -34,8 +32,6 @@ module CfnGuardian
             puts "Warn: #{resource.type} is a unsuported resource type"
           end
         end
-        
-        return @template
       end
 
       def add_alarm(alarm)
@@ -67,12 +63,7 @@ module CfnGuardian
       end
       
       def add_event(event)
-        @template.declare do
-          Parameter(event.target) do
-            Type 'String'
-            Description "Lambda function Arn for #{event.group} #{event.type}"
-          end
-          
+        @template.declare do          
           Events_Rule("#{event.group}#{event.type}#{event.hash}"[0..255]) do
             State 'ENABLED'
             Description "Guardian scheduled #{event.group} #{event.type}"

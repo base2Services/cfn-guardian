@@ -130,15 +130,15 @@ module CfnGuardian
       resources = split_resources(bucket,path)
       
       main_stack = CfnGuardian::Stacks::Main.new()
-      template = main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list)
-      valid = template.validate
+      main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list)
+      valid = main_stack.template.validate
       FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       
       resources.each_with_index do |resources,index|
-        stack = CfnGuardian::Stacks::Resources.new()
-        template = stack.build_template(resources,@maintenance_group_list)
-        valid = template.validate
+        stack = CfnGuardian::Stacks::Resources.new(main_stack.parameters)
+        stack.build_template(resources)
+        valid = stack.template.validate
         File.write("out/guardian-stack-#{index}.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       end
     end

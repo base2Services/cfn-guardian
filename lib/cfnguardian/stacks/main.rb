@@ -5,11 +5,16 @@ module CfnGuardian
     class Main
       include CfnDsl::CloudFormation
       
-      def build_template(stacks,checks,topics,maintenance_groups)
+      attr_reader :parameters, :template
+      
+      def initialize()
+        @parameters = []
         @template = CloudFormation("Guardian main stack")
-        
+      end
+      
+      def build_template(stacks,checks,topics,maintenance_groups)     
         parameters = {}
-        
+           
         %w(Critical Warning Task Informational).each do |name|
           parameter = @template.Parameter(name)
           parameter.Type 'String'
@@ -30,7 +35,7 @@ module CfnGuardian
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
         stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters)}
         
-        return @template
+        @parameters = parameters.keys
       end
       
       def add_iam_role()
