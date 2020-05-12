@@ -324,5 +324,31 @@ module CfnGuardian
       end
     end
     
+    class SFTPAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @group = 'SFTP'
+        @namespace = 'SftpCheck'
+        @period = 300
+        @comparison_operator = 'LessThanThreshold'
+        @threshold = 1
+        @dimensions = { Host: resource['Id'], User: resource['User'] }
+      end
+    end
+    
+    class TLSAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @group = 'TLS'
+        @namespace = 'TLSVersionCheck'
+        @period = 300
+        @port = resource.fetch('Port', 443)
+        @dimensions = { Endpoint: "#{resource['Id']}:#{@port}" }
+        @comparison_operator = 'LessThanThreshold'
+        @threshold = 1
+        @evaluation_periods = 1
+      end
+    end
+    
   end
 end

@@ -13,7 +13,8 @@ module CfnGuardian
         :enabled,
         :resource,
         :environment,
-        :payload
+        :payload,
+        :ssm_parameters
       
       def initialize(resource)
         @type = 'Event'
@@ -26,6 +27,7 @@ module CfnGuardian
         @resource = resource['Id'].to_resource_name
         @environment = ""
         @payload = {}.to_json
+        @ssm_parameters = []
       end      
     end
     
@@ -51,6 +53,7 @@ module CfnGuardian
         @body_regex = resource.fetch('BodyRegex',nil)
         @headers = resource.fetch('Headers',nil)
         @payload = resource.fetch('Payload',nil)
+        @compressed = resource.fetch('Compressed',false)
       end
       
       def payload
@@ -63,6 +66,7 @@ module CfnGuardian
         payload['BODY_REGEX_MATCH'] = @body_regex unless @body_regex.nil?
         payload['HEADERS'] = @headers unless @headers.nil?
         payload['PAYLOAD'] = @payload unless @payload.nil?
+        payload['COMPRESSED'] = '1' if @compressed
         return payload.to_json
       end
     end
@@ -71,6 +75,7 @@ module CfnGuardian
       def initialize(resource,environment)
         super(resource)
         @group = 'InternalHttp'
+        @name = 'InternalHttpEvent'
         @target = "InternalHttpCheckFunction#{environment}"
         @environment = environment
       end
@@ -101,6 +106,7 @@ module CfnGuardian
       def initialize(resource,environment)
         super(resource)
         @group = 'InternalPort'
+        @name = 'InternalPortEvent'
         @target = "InternalPortCheckFunction#{environment}"
         @environment = environment
       end
@@ -196,6 +202,13 @@ module CfnGuardian
           'TestType' => @test_type
         }.to_json
       end
+      
+      def ssm_parameters
+        params = []
+        params << @ssm_username
+        params << @ssm_password
+        return params
+      end
     end
     
     class ContainerInstanceEvent < Event
@@ -210,6 +223,82 @@ module CfnGuardian
       
       def payload
         return {'CLUSTER' => @cluster}.to_json
+      end
+    end
+    
+    class SFTPEvent < Event
+      def initialize(resource)
+        super(resource)
+        @group = 'SFTP'
+        @name = 'SFTPEvent'
+        @target = 'SFTPCheckFunction'
+        @cron = "0/5 * * * ? *"
+        @host = resource['Id']
+        @user = resource['User']
+        @port = resource.fetch('Port', nil)
+        @server_key = resource.fetch('ServerKey', nil)
+        @password = resource.fetch('Password', nil)
+        @private_key = resource.fetch('PrivateKey', nil)
+        @private_key_pass = resource.fetch('PrivateKeyPass', nil)
+        @file = resource.fetch('File', nil)
+        @file_regex_match = resource.fetch('FileRegexMatch', nil)
+      end
+      
+      def payload
+        payload = {
+          'HOSTNAME' => @host,
+          'USERNAME' => @user
+        }
+        payload['PORT'] = @port unless @port.nil?
+        payload['SERVER_KEY'] = @server_key unless @server_key.nil?
+        payload['PASSWORD'] = @password unless @password.nil?
+        payload['PRIVATEKEY'] = @private_key unless @private_key.nil?
+        payload['PRIVATEKEY_PASSWORD'] = @private_key_pass unless @private_key_pass.nil?
+        payload['FILE'] = @file unless @file.nil?
+        payload['FILE_REGEX_MATCH'] = @file_regex_match unless @file_regex_match.nil?
+        return payload.to_json
+      end
+      
+      def ssm_parameters
+        params = []
+        params << @password unless @password.nil?
+        params << @private_key unless @private_key.nil?
+        params << @private_key_pass unless @private_key_pass.nil?
+        return params
+      end
+    end
+    
+    class InternalSFTPEvent < SFTPEvent    
+      def initialize(resource,environment)
+        super(resource)
+        @group = 'InternalSFTP'
+        @name = 'InternalSFTPEvent'
+        @target = "InternalSFTPCheckFunction#{environment}"
+        @environment = environment
+      end
+    end
+    
+    class TLSEvent < Event
+      def initialize(resource)
+        super(resource)
+        @group = 'TLS'
+        @name = 'TLSEvent'
+        @target = 'TLSCheckFunction'
+        @cron = "0/5 * * * ? *"
+        @host = resource['Id']
+        @port = resource.fetch('Port', 443)
+        @check_max = resource.fetch('MaxSupported', nil)
+        @versions =  resource.fetch('Versions', ['SSLv2','SSLv3','TLSv1','TLSv1.1','TLSv1.2'])
+      end
+      
+      def payload
+        payload = {
+          'HOSTNAME' => @host,
+          'PORT' => @port
+        }
+        payload['CHECK_MAX_SUPPORTED'] = @check_max.nil?
+        payload['PROTOCOLS'] = @versions unless @versions.nil?
+        return payload.to_json
       end
     end
 

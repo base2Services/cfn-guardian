@@ -12,7 +12,7 @@ module CfnGuardian
         @template = CloudFormation("Guardian main stack")
       end
       
-      def build_template(stacks,checks,topics,maintenance_groups)     
+      def build_template(stacks,checks,topics,maintenance_groups,ssm_parameters)     
         parameters = {}
            
         %w(Critical Warning Task Informational).each do |name|
@@ -30,7 +30,7 @@ module CfnGuardian
           parameters[group] = Ref(group)
         end
         
-        add_iam_role()
+        add_iam_role(ssm_parameters)
         
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
         stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters)}
@@ -38,7 +38,54 @@ module CfnGuardian
         @parameters = parameters.keys
       end
       
-      def add_iam_role()
+      def add_iam_role(ssm_parameters)
+        policies = []
+        policies << {
+          PolicyName: 'logging',
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+              Effect: 'Allow',
+              Action: [ 'logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents' ],
+              Resource: 'arn:aws:logs:*:*:*'
+            }]
+          }
+        }
+        policies << {
+          PolicyName: 'metrics',
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+              Effect: 'Allow',
+              Action: [ 'cloudwatch:PutMetricData' ],
+              Resource: '*'
+            }]
+          }
+        }
+        policies << {
+          PolicyName: 'attach-network-interface',
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+              Effect: 'Allow',
+              Action: [ 'ec2:CreateNetworkInterface', 'ec2:DescribeNetworkInterfaces', 'ec2:DeleteNetworkInterface' ],
+              Resource: '*'
+            }]
+          }
+        }
+        if ssm_parameters.any?
+          policies << {
+            PolicyName: 'ssm-parameters',
+            PolicyDocument: {
+              Version: '2012-10-17',
+              Statement: [{
+                Effect: 'Allow',
+                Action: [ 'ssm:GetParameter', 'ssm:GetParametersByPath', 'ssm:GetParameters' ],
+                Resource: ssm_parameters.map {|param| FnSub("arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter#{param}") }
+              }]
+            }
+          }
+        end
         @template.declare do
           IAM_Role(:LambdaExecutionRole) do
             AssumeRolePolicyDocument({
@@ -50,41 +97,7 @@ module CfnGuardian
               }]
             })
             Path '/guardian/'
-            Policies([
-              {
-                PolicyName: 'logging',
-                PolicyDocument: {
-                  Version: '2012-10-17',
-                  Statement: [{
-                    Effect: 'Allow',
-                    Action: [ 'logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents' ],
-                    Resource: 'arn:aws:logs:*:*:*'
-                  }]
-                }
-              },
-              {
-                PolicyName: 'metrics',
-                PolicyDocument: {
-                  Version: '2012-10-17',
-                  Statement: [{
-                    Effect: 'Allow',
-                    Action: [ 'cloudwatch:PutMetricData' ],
-                    Resource: '*'
-                  }]
-                }
-              },
-              {
-                PolicyName: 'attach-network-interface',
-                PolicyDocument: {
-                  Version: '2012-10-17',
-                  Statement: [{
-                    Effect: 'Allow',
-                    Action: [ 'ec2:CreateNetworkInterface', 'ec2:DescribeNetworkInterfaces', 'ec2:DeleteNetworkInterface' ],
-                    Resource: '*'
-                  }]
-                }
-              }
-            ])
+            Policies(policies)
             Tags([
               { Key: 'Name', Value: 'guardian-lambda-role' },
               { Key: 'Environment', Value: 'guardian' }

@@ -140,6 +140,41 @@ module CfnGuardian
         @runtime = 'python3.6'
       end
     end
+    
+    class TLSCheck < Check
+      def initialize(resource)
+        super(resource)
+        @group = 'TLS'
+        @name = 'TLSCheck'
+        @package = 'tls-version-check'
+        @handler = 'handler.run_check'
+        @version = 'de83afdde0d976364af37ad7552a8496c3c94ab5'
+        @runtime = 'python3.7'
+      end
+    end
+    
+    class SFTPCheck < Check
+      def initialize(resource)
+        super(resource)
+        @group = 'SFTP'
+        @name = 'SFTPCheck'
+        @package = 'sftp-check'
+        @handler = 'handler.sftp_check'
+        @version = '987e71f2607347e13e3f156535059d6d3ce1ceed'
+        @runtime = 'python3.7'
+      end
+    end
+    
+    class InternalSFTPCheck < SFTPCheck
+      def initialize(resource)
+        super(resource)
+        @group = 'InternalSFTP'
+        @name = 'InternalSFTPCheck'
+        @subnets = resource['Subnets']
+        @vpc = resource['VpcId']
+        @environment = resource['Environment']
+      end
+    end
 
   end
 end

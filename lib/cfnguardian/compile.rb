@@ -32,6 +32,9 @@ require 'cfnguardian/resources/redshift_cluster'
 require 'cfnguardian/resources/sql'
 require 'cfnguardian/resources/sqs_queue'
 require 'cfnguardian/resources/log_group'
+require 'cfnguardian/resources/sftp'
+require 'cfnguardian/resources/internal_sftp'
+require 'cfnguardian/resources/tls'
 
 module CfnGuardian
   class Compile
@@ -52,6 +55,7 @@ module CfnGuardian
       @resources = []
       @stacks = []
       @checks = []
+      @ssm_parameters = []
       
       @cost = 0
     end
@@ -107,6 +111,8 @@ module CfnGuardian
         @resources.push CfnGuardian::Models::Composite.new(name,params)
         @cost += 0.50
       end
+      
+      @ssm_parameters = @resources.select {|resource| resource.type == 'Event'}.map {|event| event.ssm_parameters}.flatten.uniq
     end
     
     def alarms
@@ -130,7 +136,7 @@ module CfnGuardian
       resources = split_resources(bucket,path)
       
       main_stack = CfnGuardian::Stacks::Main.new()
-      main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list)
+      main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list,@ssm_parameters)
       valid = main_stack.template.validate
       FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)

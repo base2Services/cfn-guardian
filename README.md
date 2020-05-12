@@ -14,6 +14,9 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
     - ssl expiry
     - sql query
     - nrpe
+    - sftp availability
+    - sftp file download
+    - tls version checking
 
 **Supported AWS Resources**
 
@@ -286,7 +289,7 @@ Templates:
 
 These are also defined under the resources key but more detail is required and differs per group.
 
-**Http**
+#### Http
 
 Cloudwatch NameSpace: `HttpCheck`
 
@@ -299,6 +302,8 @@ Resources:
     StatusCode: 200
     # enables the SSL check
     Ssl: true
+    # boolean tp request a compressed response
+    Compressed: true
   - Id: https://www.example.com
     StatusCode: 301
   - Id: https://example.com
@@ -306,9 +311,13 @@ Resources:
     Ssl: true
     # enables the body regex check
     BodyRegex: 'helloworld'
+  - Id: http://www.example.com/images/cat.jpg
+    StatusCode: 200
+    # md5 hash of the image
+    BodyRegex: ae49b4246a89efcb5c639f00a013e812
 ```
 
-**InternalHttp**
+#### InternalHttp
 
 Cloudwatch NameSpace: `InternalHttpCheck`
 
@@ -330,7 +339,7 @@ Resources:
     - Id: http://api.example.com
 ```
 
-**Port**
+#### Port
 
 Cloudwatch NameSpace: `PortCheck`
 
@@ -344,7 +353,7 @@ Resources:
     Timeout: 60
 ```
 
-**InternalPort**
+#### InternalPort
 
 Cloudwatch NameSpace: `InternalPortCheck`
 
@@ -367,7 +376,7 @@ Resources:
       Port: 8080
 ```
 
-**DomainExpiry**
+#### DomainExpiry
 
 Cloudwatch NameSpace: `DNS`
 
@@ -378,7 +387,7 @@ Resources:
   - Id: example.com
 ```
 
-**Nrpe**
+#### Nrpe
 
 Cloudwatch NameSpace: `NRPE`
 
@@ -408,7 +417,7 @@ Resources:
         - check_disk
 ```
 
-**Sql**
+#### Sql
 
 Cloudwatch NameSpace: `SQL`
 
@@ -451,6 +460,90 @@ Create secretmanager secret:
 aws secretsmanager create-secret --name MyTestDatabaseSecret \
     --description "My test database secret for use with guardian sql check" \
     --secret-string '{"connectionString":"sql://username:password@mydb:3306/information_schema"}'
+```
+
+#### SFTP
+
+CloudWatch Namespace: `SftpCheck`
+
+```yaml
+Resources:
+  SFTP:
+    # sftp endpoint, can accept both ip address or dns endpoint
+  - Id: example.com
+    # sftp user to test connection with
+    User: user
+    # optionally set port, defaults to port 22
+    Port: 22
+    # for added security you can use allowed hosts when creating a 
+    # connection to the sftp by supplying the public key of the sftp server.
+    # this removes the security risk for man in the middle attacks.
+    ServerKey: public-server-key
+    # ssm parameter path for the password for the SFTP user. 
+    Password: /ssm/path/password
+    # ssm parameter path for the private key for the SFTP user
+    PrivateKey: /ssm/path/privatekey
+    # ssm parameter path for the password for the private key
+    PrivateKeyPass: /ssm/path/privatekey/password
+    # optionally set a file to check its existence and test the time it takes to get the file
+    File: file.txt
+    # optionally check for a regex match pattern in the body of the file
+    FileRegexMatch: ok
+```
+
+#### InternalSFTP
+
+CloudWatch Namespace: `InternalSftpCheck`
+
+```yaml
+Resources:
+  InternalSFTP:
+  # Array of host groups with the uniq identifier of Environment.
+  # This will create a sql lambda per group attach to the defined vpc and subnets
+  - Environment: Prod
+    # VPC id for the vpc the EC2 hosts are running in
+    VpcId: vpc-1234
+    # Array of subnets to attach to the lambda function. Supply multiple if you want to be multi AZ. 
+    # Multiple subnets from the same AZ cannot be used!
+    Subnets:
+      - subnet-1234
+    Hosts:
+    # Array of sftp hosts with the Id: key defining the host private ip address
+    - Id: example.com
+      User: user
+      Port: 22
+      ServerKey: public-server-key
+      Password: /ssm/path/password
+      PrivateKey: /ssm/path/privatekey
+      PrivateKeyPass: /ssm/path/privatekey/password
+      File: file.txt
+      FileRegexMatch: ok
+```
+
+#### TLS
+
+CloudWatch Namespace: `TLSVersionCheck`
+
+```yaml
+Resources:
+  TLS:
+    # endpoint
+  - Id: example.com
+    # port to check, defaults to 443
+    Port: 443
+    # list of tls versions to validate against
+    # there is a metric for each version with a 0 being no supported and 1 for supported
+    # alarm thresholds will have to be adjusted to suit your checking requirements
+    # defaults to all versions shown below
+    Versions:
+      - SSLv2
+      - SSLv3
+      - TLSv1
+      - TLSv1.1
+      - TLSv1.2
+    # checks and reports the max tls version supported as an int
+    # ['SSLv2 => 1', 'SSLv3 => 2', 'TLSv1 => 3','TLSv1.1 => 4', 'TLSv1.2 => 5']
+    MaxSupported: '1'
 ```
 
 ## Alarm Templates

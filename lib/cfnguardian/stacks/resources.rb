@@ -39,7 +39,7 @@ module CfnGuardian
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
 
         @template.declare do
-          CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name}#{alarm.type}"[0..255]) do
+          CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name.gsub(/[^0-9a-zA-Z]/i, '')}#{alarm.type}"[0..255]) do
             ActionsEnabled true
             AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
             AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
@@ -81,7 +81,7 @@ module CfnGuardian
       
       def add_composite_alarm(alarm)
         @template.declare do
-          CloudWatch_CompositeAlarm(alarm.name) do
+          CloudWatch_CompositeAlarm(alarm.name.gsub(/[^0-9a-zA-Z]/i, '')) do
             
             AlarmDescription alarm.description
             AlarmName "guardian-#{alarm.name}"
@@ -100,7 +100,7 @@ module CfnGuardian
       
       def add_metric_filter(filter)
         @template.declare do
-          Logs_MetricFilter("#{filter.name}#{filter.type}") do
+          Logs_MetricFilter("#{filter.name.gsub(/[^0-9a-zA-Z]/i, '')}#{filter.type}") do
             LogGroupName filter.log_group
             FilterPattern filter.pattern
             MetricTransformations([
