@@ -5,6 +5,7 @@ module CfnGuardian::Resource
       alarm = CfnGuardian::Models::NetworkTargetGroupAlarm.new(@resource)
       alarm.name = 'HealthyHosts'
       alarm.metric_name = 'HealthyHostCount'
+      alarm.comparison_operator = 'LessThanThreshold'
       alarm.statistic = 'Minimum'
       alarm.threshold = 2
       alarm.evaluation_periods = 1
