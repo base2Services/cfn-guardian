@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cfn-guardian (0.2.2)
+    cfn-guardian (0.3.1)
       aws-sdk-cloudformation (~> 1.31, < 2)
       aws-sdk-cloudwatch (~> 1.28, < 2)
       aws-sdk-codecommit (~> 1.28, < 2)
@@ -43,7 +43,7 @@ GEM
       aws-sigv4 (~> 1.1)
     aws-sigv4 (1.1.1)
       aws-eventstream (~> 1.0, >= 1.0.2)
-    cfndsl (1.0.3)
+    cfndsl (1.0.5)
       hana (~> 1.3)
     hana (1.3.5)
     jmespath (1.4.0)
