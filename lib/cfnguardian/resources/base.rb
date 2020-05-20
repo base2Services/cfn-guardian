@@ -1,4 +1,5 @@
 require 'cfnguardian/string'
+require 'cfnguardian/cloudwatch'
 require 'cfnguardian/models/alarm'
 require 'cfnguardian/models/event'
 require 'cfnguardian/models/check'
@@ -39,6 +40,7 @@ module CfnGuardian::Resource
           end
         end
         
+        # continue if the override is in the incorrect format
         unless properties.is_a?(Hash)
           if name != 'Inherit'
             logger.warn "Incorrect format for alarm '#{name}'. Should be of type 'Hash', instead got type '#{properties.group}'"
@@ -46,6 +48,7 @@ module CfnGuardian::Resource
           next
         end
         
+        # Create a new alarm inheriting the defaults of an existing alarm
         if properties.has_key?('Inherit')
           alarm = find_alarm(properties['Inherit'])
           if !alarm.nil?
@@ -62,16 +65,14 @@ module CfnGuardian::Resource
         alarm = find_alarm(name)
         
         if alarm.nil?
+          # if alarm doesn't exist create a new one
           alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(properties)
+          alarm.name = name if alarm.name.nil?
+          @alarms.push(alarm)
+        else
+          # if there is an existing alarm update the properties
+          properties.each {|attr,value| update_alarm(alarm,attr,value)}
         end
-        
-        if alarm.name.nil?
-          alarm.name = name
-        end
-        
-        properties.each {|attr,value| update_alarm(alarm,attr,value)}
-        @alarms.push(alarm)
-        
       end
       
       return @alarms.select{|a| a.enabled}
