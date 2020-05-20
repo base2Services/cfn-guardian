@@ -9,8 +9,9 @@ module CfnGuardian::Resource
   class Base
     include Logging
     
-    def initialize(resource)
+    def initialize(resource, override_group = nil)
       @resource = resource
+      @override_group = override_group
       @alarms = []
       @events = []
       @checks = []
@@ -73,6 +74,10 @@ module CfnGuardian::Resource
           # if there is an existing alarm update the properties
           properties.each {|attr,value| update_alarm(alarm,attr,value)}
         end
+      end
+      
+      unless @override_group.nil?
+        @alarms.each {|a| a.group = @override_group}
       end
       
       return @alarms.select{|a| a.enabled}
