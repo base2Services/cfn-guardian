@@ -663,6 +663,22 @@ Topics:
   Informational: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Informational
 ``` 
 
+## M Out Of N Metric Data Points
+
+This can be good to alert on groups of spikes with in a certain time frame without getting alerts for individual spikes.
+It works by setting the `EvaluationPeriods` as N value and `DatapointsToAlarm` as the M value. 
+The following example will trigger the alarm if 6 out of 10 data points crossed the threshold of 90% CPU utilisation in a 10 minute period.
+
+```yaml
+Templates:
+  Ec2Instance:
+    CPUUtilizationHigh:
+      Threshold: 90
+      Period: 60
+      EvaluationPeriods: 10
+      DatapointsToAlarm: 6
+```
+
 ## Composite Alarms
 
 Composite alarms take into account a combination of alarm states and only alarm when all conditions in the rule are met. See AWS (documentation)[https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_PutCompositeAlarm.html] for rule syntax.
