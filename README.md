@@ -335,7 +335,7 @@ Resources:
       - subnet-abcd
     Hosts:
     # Array of resources defining the http endpoint with the Id: key
-    # All the same options as Http
+    # All the same options as Http including ssl check on the internal endpoint
     - Id: http://api.example.com
 ```
 

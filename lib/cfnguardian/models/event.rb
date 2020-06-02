@@ -153,6 +153,16 @@ module CfnGuardian
       end
     end
     
+    class InternalSslEvent < SslEvent    
+      def initialize(resource,environment)
+        super(resource)
+        @group = 'InternalSsl'
+        @name = 'InternalSslEvent'
+        @target = "InternalSslCheckFunction#{environment}"
+        @environment = environment
+      end
+    end
+    
     class DomainExpiryEvent < Event
       
       attr_accessor :domain,

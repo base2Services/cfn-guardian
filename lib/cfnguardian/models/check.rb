@@ -102,6 +102,17 @@ module CfnGuardian
       end
     end
     
+    class InternalSslCheck < SslCheck
+      def initialize(resource)
+        super(resource)
+        @group = 'InternalSsl'
+        @name = 'InternalSslCheck'
+        @subnets = resource['Subnets']
+        @vpc = resource['VpcId']
+        @environment = resource['Environment']
+      end
+    end
+    
     class DomainExpiryCheck < Check
       def initialize(resource)
         super(resource)
