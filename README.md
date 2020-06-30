@@ -315,6 +315,14 @@ Resources:
     StatusCode: 200
     # md5 hash of the image
     BodyRegex: ae49b4246a89efcb5c639f00a013e812
+  - Id: https://api.example.com/user
+    StatusCode: 201
+    # default method is get but can be overridden to support post/put/head etc
+    Method: post
+    # specify headers using "key=value key=value"
+    Headers: content-type=application/json
+    # pass in custom payload for the request
+    Payload: '{"name": "john"}'
 ```
 
 #### InternalHttp
