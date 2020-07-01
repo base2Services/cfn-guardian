@@ -71,6 +71,20 @@ module CfnGuardian
         @dimensions = { ApiName: resource['Id'] }
       end
     end
+
+    class ApiGatewayPathAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @group = 'ApiGateway' # create a new group?
+        @namespace = 'AWS/ApiGateway'
+        @dimensions = { 
+          ApiName: resource['ApiName'],
+          Method: resource['Method'],
+          Resource: resource['Id'],
+          Stage: resource['Stage']
+        }
+      end
+    end
     
     class ApplicationTargetGroupAlarm < Alarm
       def initialize(resource)

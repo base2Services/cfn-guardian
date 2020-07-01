@@ -3,6 +3,11 @@ Resources:
   - Id: Default
   ApiGateway:
   - Id: Default
+  ApiGatewayPath:
+  - ApiName: Default
+    Stage: Default
+    Resource: /default
+    Method: Default # GET? does it have to be a valid value?
   ApplicationTargetGroup:
   - Id: Default
     LoadBalancer: Default
