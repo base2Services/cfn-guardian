@@ -75,13 +75,13 @@ module CfnGuardian
     class ApiGatewayPathAlarm < Alarm
       def initialize(resource)
         super(resource)
-        @group = 'ApiGateway' # create a new group?
+        @group = 'ApiGateway'
         @namespace = 'AWS/ApiGateway'
         @dimensions = { 
-          ApiName: resource['ApiName'],
-          Method: resource['Method'],
-          Resource: resource['Id'],
-          Stage: resource['Stage']
+          ApiName: resource['Id'],
+          Stage: resource['Stage'],
+          Resource: resource['Resource'],
+          Method: resource['Method']
         }
       end
     end

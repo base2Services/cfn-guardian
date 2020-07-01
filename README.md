@@ -194,27 +194,27 @@ Resources:
     Loadbalancer: app/application-loadbalancer-id
 ```
 
-| Resource Group              | Require Keys                     |
-| --------------------------- | -------------------------------- |
-| ApiGateway                  | Id                               |
-| ApiGatewayPath              | ApiName, Stage, Resource, Method |
-| AmazonMQBroker              | Id                               |
-| AutoScalingGroup            | Id                               |
-| DynamoDBTable               | Id                               |
-| ElastiCacheReplicationGroup | Id                               |
-| ElasticFileSystem           | Id                               |
-| Ec2Instance                 | Id                               |
-| EcsCluster                  | Id                               |
-| EcsService                  | Id, Cluster                      |
-| NetworkTargetGroup          | Id, LoadBalancer                 |
-| ApplicationTargetGroup      | Id, LoadBalancer                 |
-| ElasticLoadBalancer         | Id                               |
-| RDSInstance                 | Id                               |
-| RDSClusterInstance          | Id                               |
-| RedshiftCluster             | Id                               |
-| Lambda                      | Id                               |
-| CloudFrontDistribution      | Id                               |
-| SQSQueue                    | Id                               |
+| Resource Group              | Require Keys                |
+| --------------------------- | --------------------------- |
+| ApiGateway                  | Id                          |
+| ApiGatewayPath              | Id, Stage, Resource, Method |
+| AmazonMQBroker              | Id                          |
+| AutoScalingGroup            | Id                          |
+| DynamoDBTable               | Id                          |
+| ElastiCacheReplicationGroup | Id                          |
+| ElasticFileSystem           | Id                          |
+| Ec2Instance                 | Id                          |
+| EcsCluster                  | Id                          |
+| EcsService                  | Id, Cluster                 |
+| NetworkTargetGroup          | Id, LoadBalancer            |
+| ApplicationTargetGroup      | Id, LoadBalancer            |
+| ElasticLoadBalancer         | Id                          |
+| RDSInstance                 | Id                          |
+| RDSClusterInstance          | Id                          |
+| RedshiftCluster             | Id                          |
+| Lambda                      | Id                          |
+| CloudFrontDistribution      | Id                          |
+| SQSQueue                    | Id                          |
 
 ### Alarm Defaults
 
