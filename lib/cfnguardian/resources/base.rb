@@ -23,7 +23,7 @@ module CfnGuardian::Resource
       return @alarms
     end
     
-    def get_alarms(overides={})
+    def get_alarms(overides={},resource={})
       # generate default alarms
       default_alarms()
       
@@ -67,8 +67,9 @@ module CfnGuardian::Resource
         
         if alarm.nil?
           # if alarm doesn't exist create a new one
-          alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(properties)
-          alarm.name = name if alarm.name.nil?
+          alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(resource)
+          properties.each {|attr,value| update_alarm(alarm,attr,value)}
+          alarm.name = name
           @alarms.push(alarm)
         else
           # if there is an existing alarm update the properties
