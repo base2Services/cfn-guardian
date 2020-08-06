@@ -36,7 +36,7 @@ module CfnGuardian::Resource
           alarm.threshold = 1000
           @alarms.push(alarm)
           
-          if host.has_key?('FileRegexMatch')
+          if host.has_key?('FileBodyMatch')
             alarm = CfnGuardian::Models::InternalSFTPAlarm.new(host)
             alarm.name = 'FileBodyMatch'
             alarm.metric_name = 'FileBodyMatch'
