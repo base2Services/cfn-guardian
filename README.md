@@ -167,6 +167,59 @@ Options:
       [--debug], [--no-debug]   # enable debug logging
 ```
 
+## Alarm Notifications
+
+There are 4 default notification levels used by Guardian Critical, Warning, Task, Informational. If you wish to recieve notifications for each of these you need to supply an sns topic arn in the alarms.yaml
+
+```yaml
+Topics:
+  Critical: arn:aws:sns:ap-southeast-2:123456789012:Critical
+  Warning: arn:aws:sns:ap-southeast-2:123456789012:Warning
+  Task: arn:aws:sns:ap-southeast-2:123456789012:Task
+  Informational: arn:aws:sns:ap-southeast-2:123456789012:Informational
+```
+
+Each alarm has a default notification level but can be overriden in the config using the `AlarmAction` property at either the alarm group or alarm level. See the [Overriding Defaults](#overriding-defaults) section on how to do that.
+
+You can add your own notification topics to the topics section and combine them with the existing topics. `AlarmAction` property will accept both a string and array of notication topics.
+
+```yaml
+Topics:
+  Critical: arn:aws:sns:ap-southeast-2:123456789012:Critical
+  Warning: arn:aws:sns:ap-southeast-2:123456789012:Warning
+  Task: arn:aws:sns:ap-southeast-2:123456789012:Task
+  Informational: arn:aws:sns:ap-southeast-2:123456789012:Informational
+  CustomTopic: arn:aws:sns:ap-southeast-2:123456789012:Custom
+
+Template:
+  Ec2Instance:
+    GroupOverrides:
+      AlarmActions:
+      - Critical
+      - Custom
+```
+
+### SNS Topics
+
+Create the topics before launching the guardian stack
+
+```bash
+aws sns create-topic --name Guardian-Critical
+aws sns create-topic --name Guardian-Warning
+aws sns create-topic --name Guardian-Task
+aws sns create-topic --name Guardian-Informational
+```
+
+SNS topics can be defined in the YAML config or during the `deploy` command using the sns switches. The full ARN must be used.
+
+```yaml
+Topics:
+  Critical: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Critical
+  Warning: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Warning
+  Task: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Task
+  Informational: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Informational
+``` 
+
 ## Configuration
 
 Config is stored in a standard YAML file which will default to `alarms.yaml`. This can be overridden by supplying the `--config` switch.
@@ -562,6 +615,26 @@ Custom alarm templates are defined within the same YAML config file un the `Temp
 
 ### Overriding Defaults
 
+Alarm properties such as `Threshold`, `AlarmAction`, etc can be overriden at the alarm level or at the alarm group level. 
+
+**Alarm Group Overrides**
+
+Alarm group level overrides apply to all alarms within the alarm group. 
+
+```yaml
+Templates:
+  # define the resource group
+  Ec2Instance:
+    # GroupOverrides key denotes the group level overrides
+    GroupOverrides:
+      # supply the key value of the alarm property you want to override
+      AlarmAction: Informational
+```
+
+**Alarm Overrides**
+
+Alarm overrides apply only to the alarm the property is applied to. This will override any alarm group level overrides.
+
 ```yaml
 Templates:
   # define the resource group
@@ -649,27 +722,6 @@ Templates:
     # disable the selected alarm
     TargetResponseTime: false
 ```
-
-## SNS Topics
-
-Create the topics before launching the guardian stack
-
-```bash
-aws sns create-topic --name Guardian-Critical
-aws sns create-topic --name Guardian-Warning
-aws sns create-topic --name Guardian-Task
-aws sns create-topic --name Guardian-Informational
-```
-
-SNS topics can be defined in the YAML config or during the `deploy` command using the sns switches. The full ARN must be used.
-
-```yaml
-Topics:
-  Critical: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Critical
-  Warning: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Warning
-  Task: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Task
-  Informational: arn:aws:sns:ap-southeast-2:111111111111:Guardian-Informational
-``` 
 
 ## M Out Of N Metric Data Points
 
@@ -797,10 +849,6 @@ MaintenaceGroups:
 cfn-guardian disable-alarms --group AppUpdate
 cfn-guardian enable-alarms --group AppUpdate
 ```
-
-## Severities
-
-Severties are defined in each alarm sing the `AlarmAction` key. There are 4 options `[ Critical, Warning, Task, Informational ]`
 
 ## Contributing
 
