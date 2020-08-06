@@ -35,7 +35,7 @@ module CfnGuardian
       end
 
       def add_alarm(alarm)
-        actions = [Ref(alarm.alarm_action)]
+        actions = alarm.alarm_action.kind_of?(Array) ? alarm.alarm_action.map{|action| Ref(action)} : [Ref(alarm.alarm_action)]
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
 
         @template.declare do

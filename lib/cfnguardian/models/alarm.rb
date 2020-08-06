@@ -28,7 +28,8 @@ module CfnGuardian
         :extended_statistic,
         :evaluate_low_sample_count_percentile,
         :unit,
-        :maintenance_groups
+        :maintenance_groups,
+        :additional_notifiers
       
       def initialize(resource)
         @type = 'Alarm'
@@ -54,6 +55,7 @@ module CfnGuardian
         @alarm_action = 'Critical'
         @treat_missing_data = nil
         @maintenance_groups = []
+        @additional_notifiers = []
       end
       
       def metric_name=(metric_name)

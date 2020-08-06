@@ -51,6 +51,11 @@ module CfnGuardian
       @topics = config.fetch('Topics',{})
       @maintenance_groups = config.fetch('MaintenaceGroups', {})
       
+      # Make sure the default topics exist if they aren't supplied in the alarms.yaml
+      %w(Critical Warning Task Informational).each do |topic|
+        @topics[topic] = '' unless @topics.has_key?(topic)
+      end
+
       @maintenance_group_list = @maintenance_groups.keys.map {|group| "#{group}MaintenanceGroup"}
       @resources = []
       @stacks = []

@@ -15,11 +15,11 @@ module CfnGuardian
       def build_template(stacks,checks,topics,maintenance_groups,ssm_parameters)     
         parameters = {}
            
-        %w(Critical Warning Task Informational).each do |name|
+        topics.each do |name, sns|
           parameter = @template.Parameter(name)
           parameter.Type 'String'
           parameter.Description "SNS topic ARN for #{name} notifications"
-          parameter.Default topics[name] if topics.has_key?(name)
+          parameter.Default sns
           parameters[name] = Ref(name)
         end
         
