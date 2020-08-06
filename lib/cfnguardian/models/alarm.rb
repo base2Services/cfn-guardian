@@ -207,6 +207,12 @@ module CfnGuardian
       end
     end
 
+    class InternalHttpAlarm < HttpAlarm
+      def initialize(resource)
+        super(resource)
+      end
+    end
+
     class PortAlarm < Alarm
       def initialize(resource)
         super(resource)
@@ -218,6 +224,12 @@ module CfnGuardian
         @evaluation_periods = 2
       end
     end
+
+    class InternalPortAlarm < PortAlarm
+      def initialize(resource)
+        super(resource)
+      end
+    end
     
     class SslAlarm < Alarm
       def initialize(resource)
@@ -226,6 +238,12 @@ module CfnGuardian
         @namespace = 'SSL'
         @dimensions = { URL: resource['Id'] }
         @comparison_operator = 'LessThanThreshold'
+      end
+    end
+
+    class InternalSslAlarm < SslAlarm
+      def initialize(resource)
+        super(resource)
       end
     end
     
@@ -333,6 +351,12 @@ module CfnGuardian
         @comparison_operator = 'LessThanThreshold'
         @threshold = 1
         @dimensions = { Host: resource['Id'], User: resource['User'] }
+      end
+    end
+
+    class InternalSFTPAlarm < SFTPAlarm
+      def initialize(resource)
+        super(resource)
       end
     end
     

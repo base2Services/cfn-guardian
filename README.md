@@ -496,7 +496,7 @@ Resources:
     # optionally set a file to check its existence and test the time it takes to get the file
     File: file.txt
     # optionally check for a regex match pattern in the body of the file
-    FileRegexMatch: ok
+    FileBodyMatch: ok
 ```
 
 #### InternalSFTP
@@ -525,7 +525,7 @@ Resources:
       PrivateKey: /ssm/path/privatekey
       PrivateKeyPass: /ssm/path/privatekey/password
       File: file.txt
-      FileRegexMatch: ok
+      FileBodyMatch: ok
 ```
 
 #### TLS

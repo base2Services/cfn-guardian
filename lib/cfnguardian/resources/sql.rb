@@ -4,8 +4,8 @@ require 'cfnguardian/string'
 module CfnGuardian::Resource
   class Sql < Base
     
-    def initialize(resource)
-      super(resource)
+    def initialize(resource, override_group = nil)
+      super(resource, override_group)
       @resource_list = resource['Hosts']
       @environment = resource['Environment']
     end

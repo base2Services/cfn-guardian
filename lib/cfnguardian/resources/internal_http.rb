@@ -3,25 +3,25 @@ require 'digest/md5'
 module CfnGuardian::Resource
   class InternalHttp < Base
     
-    def initialize(resource)
-      super(resource)
+    def initialize(resource, override_group = nil)
+      super(resource, override_group)
       @resource_list = resource['Hosts']
       @environment = resource['Environment']
     end
     
     def default_alarms    
       @resource_list.each do |host|
-        alarm = CfnGuardian::Models::HttpAlarm.new(host)
+        alarm = CfnGuardian::Models::InternalHttpAlarm.new(host)
         alarm.name = 'EndpointAvailable'
         alarm.metric_name = 'Available'
         @alarms.push(alarm)
         
-        alarm = CfnGuardian::Models::HttpAlarm.new(host)
+        alarm = CfnGuardian::Models::InternalHttpAlarm.new(host)
         alarm.name = 'EndpointStatusCodeMatch'
         alarm.metric_name = 'StatusCodeMatch'
         @alarms.push(alarm)
               
-        alarm = CfnGuardian::Models::HttpAlarm.new(host)
+        alarm = CfnGuardian::Models::InternalHttpAlarm.new(host)
         alarm.name = 'EndpointTimeTaken'
         alarm.comparison_operator = 'GreaterThanThreshold'
         alarm.metric_name = 'TimeTaken'
@@ -32,20 +32,20 @@ module CfnGuardian::Resource
         @alarms.push(alarm)
         
         if host.has_key?('BodyRegex')
-          alarm = CfnGuardian::Models::HttpAlarm.new(host)
+          alarm = CfnGuardian::Models::InternalHttpAlarm.new(host)
           alarm.name = 'EndpointBodyRegexMatch'
           alarm.metric_name = 'ResponseBodyRegexMatch'
           @alarms.push(alarm)
         end
         
         if host.has_key?('Ssl') && host['Ssl']
-          alarm = CfnGuardian::Models::SslAlarm.new(host)
+          alarm = CfnGuardian::Models::InternalSslAlarm.new(host)
           alarm.name = 'ExpiresInDaysCritical'
           alarm.metric_name = 'ExpiresInDays'
           alarm.threshold = 5
           @alarms.push(alarm)
           
-          alarm = CfnGuardian::Models::SslAlarm.new(host)
+          alarm = CfnGuardian::Models::InternalSslAlarm.new(host)
           alarm.name = 'ExpiresInDaysTask'
           alarm.metric_name = 'ExpiresInDays'
           alarm.threshold = 30
