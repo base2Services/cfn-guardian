@@ -82,7 +82,7 @@ module CfnGuardian
           end
           
           overides = @templates.has_key?(group) ? @templates[group] : {}
-          @resources.concat resource_class.get_alarms(overides,resource)
+          @resources.concat resource_class.get_alarms(resource,group,overides)
           @resources.concat resource_class.get_metric_filters()
           @resources.concat resource_class.get_events()
           @checks.concat resource_class.get_checks()

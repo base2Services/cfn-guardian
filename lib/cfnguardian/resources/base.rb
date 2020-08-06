@@ -23,10 +23,19 @@ module CfnGuardian::Resource
       return @alarms
     end
     
-    def get_alarms(overides={},resource={})
+    def get_alarms(resource,group,overides={})
       # generate default alarms
       default_alarms()
-      
+
+      # override any group properties
+      group_overrides = overides.has_key?('GroupOverrides') ? overides['GroupOverrides'] : {}
+      overides.delete('GroupOverrides')
+      if group_overrides.any?
+        @alarms.each do |alarm|
+          group_overrides.each {|attr,value| update_alarm(alarm,attr,value)}
+        end
+      end
+
       # loop over each override template for the service
       overides.each do |name,properties|
         
@@ -40,7 +49,7 @@ module CfnGuardian::Resource
             next
           end
         end
-        
+
         # continue if the override is in the incorrect format
         unless properties.is_a?(Hash)
           if name != 'Inherit'
@@ -48,7 +57,9 @@ module CfnGuardian::Resource
           end
           next
         end
-        
+
+        properties.merge!(group_overrides)
+
         # Create a new alarm inheriting the defaults of an existing alarm
         if properties.has_key?('Inherit')
           alarm = find_alarm(properties['Inherit'])
@@ -64,10 +75,14 @@ module CfnGuardian::Resource
         end
         
         alarm = find_alarm(name)
-        
+
         if alarm.nil?
+          if @resource.has_key?('Hosts')
+            logger.warn("this resource doesn't support adding new alarms")
+            next
+          end
           # if alarm doesn't exist create a new one
-          alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(resource)
+          alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
           properties.each {|attr,value| update_alarm(alarm,attr,value)}
           alarm.name = name
           @alarms.push(alarm)
