@@ -37,6 +37,7 @@ module CfnGuardian
             def initialize(resource)
                 super(resource)
                 @source = 'aws.rds'
+                @detail_type = 'RDS DB Instance Event'
                 @source_id = ''
                 @rds_event_category = ''
                 @message = ''
@@ -45,9 +46,9 @@ module CfnGuardian
             def detail
                 return {
                     EventCategories: [@rds_event_category],
-                    SourceType: @source_type,
-                    SourceIdentifier: "rds:#{@resource_id}",
-                    Message: @message
+                    SourceType: [@source_type],
+                    SourceIdentifier: ["rds:#{@resource_id}"],
+                    Message: [@message]
                 }
             end
         end
@@ -78,12 +79,13 @@ module CfnGuardian
 
             def initialize(resource)
                 super(resource)
+                @detail_type = 'EC2 Instance State-change Notification'
             end
 
             def detail
                 return {
-                    'instance-id' => @resource_id,
-                    'state' => @state
+                    'instance-id' => [@resource_id],
+                    'state' => [@state]
                 }
             end
         end

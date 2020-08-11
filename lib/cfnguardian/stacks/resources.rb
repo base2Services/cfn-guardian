@@ -117,17 +117,17 @@ module CfnGuardian
       end
 
       def add_event_subscription(subscription)
-        pattern = {}
-        pattern['detail-type'] = subscription.detail_type
-        pattern['source'] = subscription.source
-        pattern['resources'] = [subscription.resource_arn] unless subscription.resource_arn.empty?
-        pattern['detail'] = subscription.detail
+        event_pattern = {}
+        event_pattern['detail-type'] = [subscription.detail_type]
+        event_pattern['source'] = [subscription.source]
+        event_pattern['resources'] = [subscription.resource_arn] unless subscription.resource_arn.empty?
+        event_pattern['detail'] = subscription.detail
 
         @template.declare do
           Events_Rule("#{subscription.group}#{subscription.name}#{subscription.hash}"[0..255]) do
             State subscription.enabled ? 'ENABLED' : 'DISABLED'
             Description "Guardian event subscription #{subscription.group} #{subscription.name} for resource #{subscription.resource_id}"
-            EventPattern FnSub(pattern.to_json)
+            EventPattern event_pattern
             Targets [
               {
                 Arn: Ref(subscription.topic),
