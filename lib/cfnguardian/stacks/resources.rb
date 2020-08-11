@@ -28,6 +28,8 @@ module CfnGuardian
             add_composite_alarm(resource)
           when 'MetricFilter'
             add_metric_filter(resource)
+          when 'EventSubscription'
+            add_event_subscription(resource)
           else
             puts "Warn: #{resource.type} is a unsuported resource type"
           end
@@ -110,6 +112,28 @@ module CfnGuardian
                 MetricNamespace: filter.metric_namespace
               }
             ])
+          end
+        end
+      end
+
+      def add_event_subscription(subscription)
+        pattern = {}
+        pattern['detail-type'] = subscription.detail_type
+        pattern['source'] = subscription.source
+        pattern['resources'] = [subscription.resource_arn] unless subscription.resource_arn.empty?
+        pattern['detail'] = subscription.detail
+
+        @template.declare do
+          Events_Rule("#{subscription.group}#{subscription.name}#{subscription.hash}"[0..255]) do
+            State subscription.enabled ? 'ENABLED' : 'DISABLED'
+            Description "Guardian event subscription #{subscription.group} #{subscription.name} for resource #{subscription.resource_id}"
+            EventPattern FnSub(pattern.to_json)
+            Targets [
+              {
+                Arn: Ref(subscription.topic),
+                Id: "#{subscription.hash}#{subscription.topic}"
+              }
+            ]
           end
         end
       end

@@ -4,6 +4,7 @@ require 'cfnguardian/models/alarm'
 require 'cfnguardian/models/event'
 require 'cfnguardian/models/check'
 require 'cfnguardian/models/metric_filter'
+require 'cfnguardian/models/event_subscription'
 
 module CfnGuardian::Resource
   class Base
@@ -16,6 +17,7 @@ module CfnGuardian::Resource
       @events = []
       @checks = []
       @metric_filters = []
+      @event_subscriptions = []
     end
     
     # Overidden by inheritted classes to define default alarms
@@ -23,7 +25,7 @@ module CfnGuardian::Resource
       return @alarms
     end
     
-    def get_alarms(resource,group,overides={})
+    def get_alarms(group,overides={})
       # generate default alarms
       default_alarms()
 
@@ -32,7 +34,7 @@ module CfnGuardian::Resource
       overides.delete('GroupOverrides')
       if group_overrides.any?
         @alarms.each do |alarm|
-          group_overrides.each {|attr,value| update_alarm(alarm,attr,value)}
+          group_overrides.each {|attr,value| update_object(alarm,attr,value)}
         end
       end
 
@@ -45,7 +47,7 @@ module CfnGuardian::Resource
           
           if !alarm.nil?
             alarm.enabled = false 
-            logger.debug "Disabling alarm '#{name}' for resource #{alarm.resource_id}"
+            logger.info "Disabling alarm '#{name}' for resource #{alarm.resource_id}"
             next
           end
         end
@@ -66,7 +68,7 @@ module CfnGuardian::Resource
           if !alarm.nil?
             inheritited_alarm = alarm.clone
             alarm.name = name
-            properties.each {|attr,value| update_alarm(inheritited_alarm,attr,value)}
+            properties.each {|attr,value| update_object(inheritited_alarm,attr,value)}
             @alarms.push(inheritited_alarm)
           else
             logger.warn "Alarm '#{properties['Inherit']}' doesn't exists and cannot be inherited"
@@ -83,12 +85,12 @@ module CfnGuardian::Resource
           end
           # if alarm doesn't exist create a new one
           alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
-          properties.each {|attr,value| update_alarm(alarm,attr,value)}
+          properties.each {|attr,value| update_object(alarm,attr,value)}
           alarm.name = name
           @alarms.push(alarm)
         else
           # if there is an existing alarm update the properties
-          properties.each {|attr,value| update_alarm(alarm,attr,value)}
+          properties.each {|attr,value| update_object(alarm,attr,value)}
         end
       end
       
@@ -128,6 +130,59 @@ module CfnGuardian::Resource
       default_metric_filters()
       return @metric_filters
     end
+
+    # Overidden by inheritted classes to define default checks
+    def default_event_subscriptions()
+      return @event_subscriptions
+    end
+    
+    def get_event_subscriptions(group, overides)
+      # generate defailt event subscriptions
+      default_event_subscriptions()
+
+      # overide the defaults
+      overides.each do |name, properties|
+        event_subscription = find_event_subscriptions(name)
+
+        # disbable the event subscription if the value is false
+        if [false].include?(properties)
+          unless event_subscription.nil?
+            event_subscription.enabled = false
+            logger.info "Disabling event subscription #{name} for #{group} #{event_subscription.resource_id}"
+          end
+
+          next
+        end
+
+        # ignore all properties not in a proper format
+        next unless properties.is_a?(Hash) 
+
+        # Create a new event subscription by inheriting an existing one
+        if properties.has_key?('Inherit')
+          inherit_event_subscription = find_event_subscriptions(properties['Inherit'])
+          
+          if inherit_event_subscription.nil?
+            logger.warn "Unable to create #{topic} RDSEventSubscription by inheriting #{properties['Inherit']} as it cannot be found"
+            next
+          end
+
+          event_subscription = inherit_event_subscription.clone
+          event_subscription.enabled = true
+          event_subscription.name = name
+          @event_subscriptions.push(event_subscription) 
+          logger.debug "Inheriting RDSEventSubscription #{properties['Inherit']}"
+        end
+
+        if event_subscription.nil?
+          event_subscription = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}EventSubscription").new(@resource)
+          event_subscription.name = name
+        end
+
+        properties.each {|attr,value| update_object(event_subscription,attr,value)}
+      end
+
+      return @event_subscriptions.select {|es| es.enabled }
+    end
     
     def get_cost()
       return @alarms.length * 0.10
@@ -138,13 +193,17 @@ module CfnGuardian::Resource
     def find_alarm(name)
       @alarms.detect {|alarm| alarm.name == name}
     end
+
+    def find_event_subscriptions(name)
+      @event_subscriptions.detect {|es| es.name == name}
+    end
     
-    def update_alarm(alarm,attr,value)
+    def update_object(obj,attr,value)
       begin
-        alarm.send("#{attr.to_underscore}=",value)
+        obj.send("#{attr.to_underscore}=",value)
       rescue NoMethodError => e
         if !e.message.match?(/inherit/)
-          logger.warn "Unknown key '#{attr}' for #{alarm.resource_id} alarm #{alarm.name}"
+          logger.warn "Unknown property '#{attr}' for type: #{obj.type} and resource id: #{obj.resource_id}"
         end
       end
     end

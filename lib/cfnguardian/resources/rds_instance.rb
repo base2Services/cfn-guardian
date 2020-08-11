@@ -43,5 +43,76 @@ module CfnGuardian::Resource
       @alarms.push(alarm)
     end
     
+    def default_event_subscriptions()
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'MasterPasswordReset'
+      event_subscription.rds_event_category = 'configuration change'
+      event_subscription.message = 'The master password for the DB instance has been reset.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'MasterPasswordResetFailure'
+      event_subscription.rds_event_category = 'configuration change'
+      event_subscription.message = 'An attempt to reset the master password for the DB instance has failed.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'Deletion'
+      event_subscription.rds_event_category = 'deletion'
+      event_subscription.message = 'The DB instance has been deleted.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'MultiAZFailoverStarted'
+      event_subscription.rds_event_category = 'failover'
+      event_subscription.message = 'A Multi-AZ failover that resulted in the promotion of a standby instance has started.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'MultiAZFailoverComplete'
+      event_subscription.rds_event_category = 'failover'
+      event_subscription.message = 'A Multi-AZ failover has completed.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'DBFailure'
+      event_subscription.rds_event_category = 'failure'
+      event_subscription.message = 'The DB instance has failed due to an incompatible configuration or an underlying storage issue. Begin a point-in-time-restore for the DB instance.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'TableCountExceedsRecommended'
+      event_subscription.rds_event_category = 'notification'
+      event_subscription.message = 'The number of tables you have for your DB instance exceeds the recommended best practices for Amazon RDS.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'DatabasesCountExceedsRecommended'
+      event_subscription.rds_event_category = 'notification'
+      event_subscription.message = 'The number of databases you have for your DB instance exceeds the recommended best practices for Amazon RDS.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'ReplicationFailure'
+      event_subscription.enabled = false
+      event_subscription.rds_event_category = 'read replica'
+      event_subscription.message = 'An error has occurred in the read replication process.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'ReplicationTerminated'
+      event_subscription.enabled = false
+      event_subscription.rds_event_category = 'read replica'
+      event_subscription.message = 'Replication on the read replica was terminated.'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'ReplicationStopped'
+      event_subscription.enabled = false
+      event_subscription.rds_event_category = 'read replica'
+      event_subscription.message = 'Replication on the read replica was manually stopped.'
+      @event_subscriptions.push(event_subscription)
+    end
+
   end
 end

@@ -50,9 +50,10 @@ module CfnGuardian
       @templates = config.fetch('Templates',{})
       @topics = config.fetch('Topics',{})
       @maintenance_groups = config.fetch('MaintenaceGroups', {})
+      @event_subscriptions = config.fetch('EventSubscriptions', {})
       
       # Make sure the default topics exist if they aren't supplied in the alarms.yaml
-      %w(Critical Warning Task Informational).each do |topic|
+      %w(Critical Warning Task Informational Events).each do |topic|
         @topics[topic] = '' unless @topics.has_key?(topic)
       end
 
@@ -86,10 +87,15 @@ module CfnGuardian
             end
           end
           
-          overides = @templates.has_key?(group) ? @templates[group] : {}
-          @resources.concat resource_class.get_alarms(resource,group,overides)
+          template_overides = @templates.has_key?(group) ? @templates[group] : {}
+          @resources.concat resource_class.get_alarms(group,template_overides)
+
           @resources.concat resource_class.get_metric_filters()
           @resources.concat resource_class.get_events()
+
+          event_subscriptions = @event_subscriptions.has_key?(group) ? @event_subscriptions[group] : {}
+          @resources.concat resource_class.get_event_subscriptions(group,event_subscriptions)
+          
           @checks.concat resource_class.get_checks()
 
           @cost += resource_class.get_cost
