@@ -3,6 +3,7 @@ module CfnGuardian
         class EventSubscription
             
             attr_reader :type, :group
+            attr_writer :detail
             attr_accessor :name,
                 :enabled,
                 :hash,
@@ -10,7 +11,8 @@ module CfnGuardian
                 :resource_id,
                 :resource_arn,
                 :source,
-                :detail_type
+                :detail_type,
+                :detail
 
             def initialize(resource)
                 @type = 'EventSubscription'
@@ -24,10 +26,11 @@ module CfnGuardian
                 @resource_arn = ''
                 @source = ''
                 @detail_type = ''
+                @detail = {}
             end
 
             def detail
-                return {}
+                return @detail
             end
         end
 
@@ -67,27 +70,27 @@ module CfnGuardian
             end
         end
 
-        class Ec2EventSubscription < EventSubscription
+        class Ec2InstanceEventSubscription < EventSubscription
             def initialize(resource)
                 super(resource)
                 @source = 'aws.ec2'
             end
         end
 
-        class Ec2InstanceEventSubscription < Ec2EventSubscription
-            attr_accessor :state
-
-            def initialize(resource)
-                super(resource)
-                @detail_type = 'EC2 Instance State-change Notification'
-            end
-
-            def detail
-                return {
-                    'instance-id' => [@resource_id],
-                    'state' => [@state]
-                }
-            end
-        end
+        class ApiGatewayEventSubscription < EventSubscription; end
+        class ApplicationTargetGroupEventSubscription < EventSubscription; end
+        class AmazonMQBrokerEventSubscription < EventSubscription; end
+        class CloudFrontDistributionEventSubscription < EventSubscription; end
+        class AutoScalingGroupEventSubscription < EventSubscription; end
+        class DynamoDBTableEventSubscription < EventSubscription; end
+        class Ec2InstanceEventSubscription < EventSubscription; end
+        class ECSClusterEventSubscription < EventSubscription; end
+        class ECSServiceEventSubscription < EventSubscription; end
+        class ElastiCacheReplicationGroupEventSubscription < EventSubscription; end
+        class ElasticLoadBalancerEventSubscription < EventSubscription; end
+        class ElasticFileSystemEventSubscription < EventSubscription; end
+        class LambdaEventSubscription < EventSubscription; end
+        class NetworkTargetGroupEventSubscription < EventSubscription; end
+        class RedshiftClusterEventSubscription < EventSubscription; end
     end
 end

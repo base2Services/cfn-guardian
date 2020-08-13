@@ -121,7 +121,7 @@ module CfnGuardian
         event_pattern['detail-type'] = [subscription.detail_type]
         event_pattern['source'] = [subscription.source]
         event_pattern['resources'] = [subscription.resource_arn] unless subscription.resource_arn.empty?
-        event_pattern['detail'] = subscription.detail
+        event_pattern['detail'] = subscription.detail unless subscription.detail.empty?
 
         @template.declare do
           Events_Rule("#{subscription.group}#{subscription.name}#{subscription.hash}"[0..255]) do
@@ -131,7 +131,7 @@ module CfnGuardian
             Targets [
               {
                 Arn: Ref(subscription.topic),
-                Id: "#{subscription.hash}#{subscription.topic}"
+                Id: "#{subscription.topic}Notifier"
               }
             ]
           end

@@ -176,6 +176,7 @@ module CfnGuardian::Resource
         if event_subscription.nil?
           event_subscription = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}EventSubscription").new(@resource)
           event_subscription.name = name
+          @event_subscriptions.push(event_subscription) 
         end
 
         properties.each {|attr,value| update_object(event_subscription,attr,value)}

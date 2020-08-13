@@ -22,7 +22,11 @@ module CfnGuardian
       def default_event_subscriptions()
         event_subscription = CfnGuardian::Models::Ec2InstanceEventSubscription.new(@resource)
         event_subscription.name = 'InstanceTerminated'
-        event_subscription.state = 'terminated'
+        event_subscription.detail_type = 'EC2 Instance State-change Notification'
+        event_subscription.detail = {
+          'instance-id' => [@resource['Id']],
+          'state' => ['terminated']
+        }
         @event_subscriptions.push(event_subscription)
       end
 
