@@ -33,6 +33,13 @@ module CfnGuardian
     method_option :bucket, type: :string, desc: "provide custom bucket name, will create a default bucket if not provided"
     method_option :path, type: :string, default: "guardian", desc: "S3 path location for nested stacks"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :template_config, type: :boolean, default: false, desc: "Genrates an AWS CodePipeline cloudformation template configuration file to override parameters"
+    method_option :sns_critical, type: :string, desc: "sns topic arn for the critical alarms"
+    method_option :sns_warning, type: :string, desc: "sns topic arn for the warning alarms"
+    method_option :sns_task, type: :string, desc: "sns topic arn for the task alarms"
+    method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
+    method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
+
 
     def compile
       set_log_level(options[:debug])
@@ -55,6 +62,12 @@ module CfnGuardian
         end
       end
       logger.warn "AWS cloudwatch alarms defined in the templates will cost roughly $#{'%.2f' % compiler.cost} per month"
+
+      if options[:template_config]
+        logger.info "Generating a AWS CodePipeline template configuration file template-config.guardian.json"
+        parameters = compiler.load_parameters(options)
+        compiler.genrate_template_config(parameters)
+      end
     end
 
     desc "deploy", "Generates and deploys monitoring CloudFormation templates"
@@ -67,10 +80,11 @@ module CfnGuardian
     method_option :path, type: :string, default: "guardian", desc: "S3 path location for nested stacks"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :stack_name, aliases: :s, type: :string, desc: "set the Cloudformation stack name. Defaults to `guardian`"
-    method_option :sns_critical, type: :string, desc: "sns topic arn for the critical alamrs"
-    method_option :sns_warning, type: :string, desc: "sns topic arn for the warning alamrs"
-    method_option :sns_task, type: :string, desc: "sns topic arn for the task alamrs"
-    method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alamrs"
+    method_option :sns_critical, type: :string, desc: "sns topic arn for the critical alarms"
+    method_option :sns_warning, type: :string, desc: "sns topic arn for the warning alarms"
+    method_option :sns_task, type: :string, desc: "sns topic arn for the task alarms"
+    method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
+    method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
 
     def deploy
       set_log_level(options[:debug])
@@ -81,6 +95,7 @@ module CfnGuardian
       compiler = CfnGuardian::Compile.new(options[:config])
       compiler.get_resources
       compiler.compile_templates(s3.bucket,s3.path)
+      parameters = compiler.load_parameters(options)
       logger.info "Clouformation templates compiled successfully in out/ directory"
 
       s3.create_bucket_if_not_exists
@@ -92,7 +107,7 @@ module CfnGuardian
         logger.info "Clouformation templates were validated successfully"
       end
       
-      deployer = CfnGuardian::Deploy.new(options,s3.bucket)
+      deployer = CfnGuardian::Deploy.new(options,s3.bucket,parameters)
       deployer.upload_templates
       change_set, change_set_type = deployer.create_change_set()
       deployer.wait_for_changeset(change_set.id)

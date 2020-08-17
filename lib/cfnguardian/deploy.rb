@@ -7,27 +7,13 @@ module CfnGuardian
   class Deploy
     include Logging
 
-    def initialize(opts,bucket)
+    def initialize(opts,bucket,parameters)
       @stack_name = opts.fetch(:stack_name,'guardian')
       @bucket = bucket
       @prefix = @stack_name
       @template_path = "out/guardian.compiled.yaml"
       @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/guardian.compiled.yaml"
-      @parameters = {}
-      
-      config = YAML.load_file(opts[:config])
-      if config.has_key?('Topics')
-        @parameters['Critical'] = config['Topics'].fetch('Critical','')
-        @parameters['Warning'] = config['Topics'].fetch('Warning','')
-        @parameters['Task'] = config['Topics'].fetch('Task','')
-        @parameters['Informational'] = config['Topics'].fetch('Informational','')
-      end
-
-      @parameters['Critical'] = opts.fetch(:sns_critical,@parameters['Critical'])
-      @parameters['Warning'] = opts.fetch(:sns_warning,@parameters['Warning'])
-      @parameters['Task'] = opts.fetch(:sns_task,@parameters['Task'])
-      @parameters['Informational'] = opts.fetch(:sns_informational,@parameters['Informational'])
-      
+      @parameters = parameters
       @client = Aws::CloudFormation::Client.new()
     end
 

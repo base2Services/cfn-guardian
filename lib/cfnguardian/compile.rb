@@ -35,6 +35,7 @@ require 'cfnguardian/resources/log_group'
 require 'cfnguardian/resources/sftp'
 require 'cfnguardian/resources/internal_sftp'
 require 'cfnguardian/resources/tls'
+require 'cfnguardian/version'
 
 module CfnGuardian
   class Compile
@@ -162,6 +163,43 @@ module CfnGuardian
     
     def clean_out_directory
       Dir["out/*.yaml"].each {|file| File.delete(file)}
+    end
+
+    def load_parameters(options)
+      parameters = {}
+      # Load sns topic parameters in order of preference
+      @topics.each do |key, value|
+        # if parameter is passed in as a command line option
+        if options.has_key?("sns_#{key.downcase}")
+          parameters[key.to_sym] = options["sns_#{key.downcase}"]
+        # if parameter is in config
+        elsif !value.empty?
+          parameters[key.to_sym] = value
+        # if parameter is set as environment variable
+        elsif ENV.has_key?("GUARDIAN_TOPIC_#{key.upcase}")
+          parameters[key.to_sym] = ENV["GUARDIAN_TOPIC_#{key.upcase}"]
+        end
+      end
+
+      return parameters
+    end
+
+    def genrate_template_config(parameters)
+      template = {
+        Tags: {
+          'guardian:version': CfnGuardian::VERSION
+        }
+      }
+
+      if ENV.has_key?('CODEBUILD_RESOLVED_SOURCE_VERSION')
+        template[:Tags][:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
+      end
+
+      unless parameters.empty?
+        template[:Parameters] = parameters
+      end
+
+      File.write("out/template-config.guardian.json", template.to_json)
     end
         
   end
