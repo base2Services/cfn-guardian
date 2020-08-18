@@ -31,8 +31,7 @@ module CfnGuardian
         end
         
         add_iam_role(ssm_parameters)
-        add_topic_policy(topics)
-        
+                
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
         stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters)}
         
@@ -104,26 +103,6 @@ module CfnGuardian
               { Key: 'Environment', Value: 'guardian' }
             ])
           end
-        end
-      end
-
-      def add_topic_policy(topics)
-        @template.declare do
-          SNS_TopicPolicy(:EventsTopicPolicy) {
-            PolicyDocument({
-              Statement: [
-                {
-                  Effect: "Allow",
-                  Principal: {
-                    Service: "events.amazonaws.com"
-                  },
-                  Action: "sns:Publish",
-                  Resource: "*"
-                }
-              ]
-            })
-            Topics topics.map {|name, topic| Ref(name)}
-          }
         end
       end
       
