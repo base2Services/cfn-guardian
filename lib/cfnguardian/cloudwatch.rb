@@ -9,50 +9,61 @@ module CfnGuardian
       alarm_id = alarm.resource_name.nil? ? alarm.resource_id : alarm.resource_name
       return "guardian-#{alarm.group}-#{alarm_id}-#{alarm.name}"
     end
-    
-    def self.get_alarms(alarms)
-      alarm_names = alarms.map {|alarm| self.get_alarm_name(alarm)}
-      
+        
+    def self.get_alarms_by_prefix(prefix:, state: nil, action_prefix: nil)
       client = Aws::CloudWatch::Client.new()
+      options = {max_records: 100}
+      options[:alarm_name_prefix] = prefix
+
+      unless state.nil?
+        options[:state_value] = state
+      end
+
+      unless action_prefix.nil?
+        options[:action_prefix] = action_prefix
+      end
+
+      resp = client.describe_alarms(options)
+      return resp.metric_alarms
+    end
+
+    def self.get_alarms_by_name(alarm_names:, state: nil, action_prefix: nil)
+      client = Aws::CloudWatch::Client.new()
+      options = {max_records: 100}
+
+      unless state.nil?
+        options[:state_value] = state
+      end
+
+      unless action_prefix.nil?
+        options[:action_prefix] = "arn:aws:sns:#{Aws.config[:region]}:#{aws_account_id()}:#{action_prefix}"
+      end
+
       metric_alarms = []
       alarm_names.each_slice(100) do |batch|
-        resp = client.describe_alarms({alarm_names: batch, max_records: 100})
+        options[:alarm_names] = batch
+        resp = client.describe_alarms(options)
         metric_alarms.push(*resp.metric_alarms)
       end
-      
+
       return metric_alarms
     end
-    
-    def self.get_alarm_state(config_alarms: [], alarm_names: [], alarm_prefix: nil, state: nil)
-      rows = []
-      
-      if config_alarms.any?
-        alarm_names = config_alarms.map {|alarm| self.get_alarm_name(alarm)}
-      end
-      
-      client = Aws::CloudWatch::Client.new()
-      
-      options = {max_records: 100}
-      options[:state_value] = state if !state.nil?
-      
-      cw_alarms = []
-      if !alarm_prefix.nil?
-        options[:alarm_name_prefix] = alarm_prefix
-        resp = client.describe_alarms(options)
-        cw_alarms = resp.metric_alarms
-      else
-        alarm_names.each_slice(100) do |batch|
-          options[:alarm_names] = batch
-          resp = client.describe_alarms(options)
-          cw_alarms.push(*resp.metric_alarms)
+
+    def self.filter_alarms(filters:, alarms:)
+      return alarms unless filters.is_a?(Hash)
+      filters = filters.slice('group', 'resource', 'alarm', 'stack-id')
+
+      filtered_alarms = []
+      alarms.each do |alarm|
+        if filters.values.all? {|filter| alarm.alarm_name.include? (filter)}
+          filtered_alarms << alarm
         end
       end
-      
-      return cw_alarms
+
+      return filtered_alarms
     end
     
     def self.get_alarm_history(alarm_name,type)
-      rows = []
       client = Aws::CloudWatch::Client.new()
       
       logger.debug "Searching #{type} history for #{alarm_name}"

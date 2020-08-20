@@ -33,7 +33,7 @@ module CfnGuardian
         add_iam_role(ssm_parameters)
                 
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
-        stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters)}
+        stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters,stack['Reference'])}
         
         @parameters = parameters.keys
       end
@@ -152,14 +152,15 @@ module CfnGuardian
         return FnGetAtt("#{check.name}Function#{check.environment}", :Arn)
       end
       
-      def add_stack(name,url,stack_parameters)
+      def add_stack(name,url,stack_parameters,stack_id)
         @template.declare do
           CloudFormation_Stack(name) do
             Parameters stack_parameters
             TemplateURL url
             TimeoutInMinutes 15
             Tags([
-              { Key: 'Name', Value: "guardian-stack-#{name}" }
+              { Key: 'Name', Value: "guardian-stack-#{name}" },
+              { Key: 'guardian:stack-id', Value: "stk#{stack_id}"}
             ])
           end
         end

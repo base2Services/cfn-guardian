@@ -150,14 +150,11 @@ module CfnGuardian
     method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :defaults, type: :boolean, desc: "display default alarms and properties"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    method_option :group, aliases: :g, type: :string, desc: "resource group"
-    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
-    method_option :id, type: :string, desc: "resource id"
+    method_option :filter, type: :hash, default: {}, desc: "filter the displayed alarms by [group, resource-id, alarm, stack-id, topic, maintenance-group]"
     method_option :compare, type: :boolean, default: false, desc: "compare config to deployed alarms"
     
     def show_alarms
       set_log_level(options[:debug])
-      
       set_region(options[:region],options[:compare])
       
       if options[:config]
@@ -171,7 +168,7 @@ module CfnGuardian
       
       compiler = CfnGuardian::Compile.new(config_file)
       compiler.get_resources
-      alarms = filter_alarms(compiler.alarms,options)
+      alarms = filter_compiled_alarms(compiler.alarms,options[:filter])
 
       if alarms.empty?
         logger.error "No matches found" 
@@ -182,13 +179,15 @@ module CfnGuardian
       formatter = CfnGuardian::DisplayFormatter.new(alarms)
       
       if options[:compare] && !options[:defaults]
-        metric_alarms = CfnGuardian::CloudWatch.get_alarms(alarms)
+        metric_alarms = CfnGuardian::CloudWatch.get_alarms_by_prefix(prefix: 'guardian')
+        metric_alarms = CfnGuardian::CloudWatch.filter_alarms(filters: options[:filter], alarms: metric_alarms)
+
         formatted_alarms = formatter.compare_alarms(metric_alarms)
         headings.push('Deployed')
       else
         formatted_alarms = formatter.alarms()
       end
-      
+
       if formatted_alarms.any?
         formatted_alarms.each do |fa|
           puts Terminal::Table.new( 
@@ -207,37 +206,34 @@ module CfnGuardian
     
     desc "show-state", "Shows alarm state in cloudwatch"
     long_desc <<-LONG
-    Displays the current cloudwatch alarm state
+    Displays the current cloudwatch alarm state. By default it will return all the guardian alarms.
     LONG
-    method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    method_option :group, aliases: :g, type: :string, desc: "resource group"
-    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
-    method_option :id, type: :string, desc: "resource id"
     method_option :state, aliases: :s, type: :string, enum: %w(OK ALARM INSUFFICIENT_DATA), desc: "filter by alarm state"
-    method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
-    method_option :alarm_prefix, type: :string, desc: "CloudWatch alarm name prefix if not providing config"
-    
+    method_option :alarm_names, type: :array, desc: "list of cloudwatch alarm names"
+    method_option :alarm_prefix, type: :string, default: "guardian", desc: "cloudwatch alarm name prefix"
+    method_option :filter, type: :hash, default: {}, desc: "filter the displayed alarms by [group, resource-id, alarm, stack-id, topic, maintenance-group]"
+
     def show_state
       set_log_level(options[:debug])
       set_region(options[:region],true)
-      
-      formatter = CfnGuardian::DisplayFormatter.new()
-      
-      if !options[:config].nil?
-        compiler = CfnGuardian::Compile.new(options[:config])
-        compiler.get_resources
-        alarms = filter_alarms(compiler.alarms,options)
-        metric_alarms = CfnGuardian::CloudWatch.get_alarm_state(config_alarms: alarms, state: options[:state])
-      elsif !options[:alarm_names].nil?
-        metric_alarms = CfnGuardian::CloudWatch.get_alarm_state(alarm_names: options[:alarm_names], state: options[:state])
-      elsif !options[:alarm_prefix].nil?
-        metric_alarms = CfnGuardian::CloudWatch.get_alarm_state(alarm_prefix: options[:alarm_prefix], state: options[:state])
-      else
-        logger.error "one of `--config` `--alarm-prefix` `--alarm-names` must be supplied"
-        exit 1
+      action_prefix = nil
+
+      if options[:filter].has_key?('topic')
+        action_prefix = get_topic_arn_from_stack(options[:filter]['topic'])
+      elsif options[:filter].has_key?('maintenance-group')
+        action_prefix = "arn:aws:sns:#{Aws.config[:region]}:#{CfnGuardian::CloudWatch.aws_account_id()}:#{options[:filter]['maintenance-group']}MaintenanceGroup"
       end
-      
+
+      if options[:alarm_names]
+        metric_alarms = CfnGuardian::CloudWatch.get_alarms_by_name(alarm_names: options[:alarm_names], state: options[:state], action_prefix: action_prefix)
+      else
+        metric_alarms = CfnGuardian::CloudWatch.get_alarms_by_prefix(prefix: options[:alarm_prefix], state: options[:state], action_prefix: action_prefix)
+      end
+
+      metric_alarms = CfnGuardian::CloudWatch.filter_alarms(filters: options[:filter], alarms: metric_alarms)
+
+      formatter = CfnGuardian::DisplayFormatter.new()
       rows = formatter.alarm_state(metric_alarms)
       
       if rows.any?
@@ -254,31 +250,24 @@ module CfnGuardian
     long_desc <<-LONG
     Displays the alarm state or config history for the last 7 days
     LONG
-    method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    method_option :group, aliases: :g, type: :string, desc: "resource group"
-    method_option :alarm, aliases: :a, type: :string, desc: "alarm name"
-    method_option :alarm_names, type: :array, desc: "CloudWatch alarm name if not providing config"
-    method_option :id, type: :string, desc: "resource id"
+    method_option :alarm_names, type: :array, desc: "list of cloudwatch alarm names"
     method_option :type, aliases: :t, type: :string, 
         enum: %w(state config), default: 'state', desc: "filter by alarm state"
+    method_option :alarm_prefix, type: :string, default: "guardian", desc: "cloudwatch alarm name prefix"
+    method_option :filter, type: :hash, desc: "filter the displayed alarms by [group, resource-id, alarm, stack-id]"
     
     def show_history
       set_log_level(options[:debug])
       set_region(options[:region],true)
       
-      if !options[:config].nil?
-        compiler = CfnGuardian::Compile.new(options[:config])
-        compiler.get_resources
-        config_alarms = filter_alarms(compiler.alarms,options)
-        alarms = config_alarms.map {|alarm| CfnGuardian::CloudWatch.get_alarm_name(alarm)}
-      elsif !options[:alarm_names].nil?
-        alarms = options[:alarm_names]
+      if options[:alarm_names]
+        metric_alarms = CfnGuardian::CloudWatch.get_alarms_by_name(alarm_names: options[:alarm_names], state: options[:state])
       else
-        logger.error "one of `--config` `--alarm-names` must be supplied"
-        exit 1
+        metric_alarms = CfnGuardian::CloudWatch.get_alarms_by_prefix(prefix: options[:alarm_prefix], state: options[:state])
       end
-        
+
+      metric_alarms = CfnGuardian::CloudWatch.filter_alarms(filters: options[:filter], alarms: metric_alarms)       
       
       case options[:type]
       when 'state'
@@ -291,12 +280,12 @@ module CfnGuardian
       
       formatter = CfnGuardian::DisplayFormatter.new()
       
-      alarms.each do |alarm|
-        history = CfnGuardian::CloudWatch.get_alarm_history(alarm,type)
+      metric_alarms.each do |alarm|
+        history = CfnGuardian::CloudWatch.get_alarm_history(alarm.alarm_name,type)
         rows = formatter.alarm_history(history,type)
         if rows.any?     
           puts Terminal::Table.new( 
-                  :title => alarm.green, 
+                  :title => alarm.alarm_name.green, 
                   :headings => headings, 
                   :rows => rows)
           puts "\n"
@@ -308,7 +297,6 @@ module CfnGuardian
     long_desc <<-LONG
     Shows the last 10 commits made to the codecommit repo
     LONG
-    method_option :config, aliases: :c, type: :string, desc: "yaml config file"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :repository, type: :string, default: 'guardian', desc: "codecommit repository name"
     
@@ -420,15 +408,26 @@ module CfnGuardian
       logger.level = debug ? Logger::DEBUG : Logger::INFO
     end
     
-    def filter_alarms(alarms,options)
-      alarms.select! {|alarm| alarm.group.downcase == options[:group].downcase} if options[:group]
-      alarms.select! {|alarm| alarm.resource_id.downcase == options[:id].downcase} if options[:id]
-      alarms.select! {|alarm| alarm.name.downcase.include? options[:alarm].downcase} if options[:alarm]
+    def filter_compiled_alarms(alarms,filters)
+      filters = filters.slice('group', 'resource', 'alarm', 'topic', 'maintenance-group')
+      alarms.select! {|alarm| alarm.group.downcase == filters['group'].downcase} if filters.has_key?('group')
+      alarms.select! {|alarm| alarm.resource_id.downcase == filters['resource'].downcase} if filters.has_key?('resource')
+      alarms.select! {|alarm| alarm.name.downcase.include? filters['alarm'].downcase} if filters.has_key?('alarm')
+      alarms.select! {|alarm| alarm.alarm_action.include? filters['topic']} if filters.has_key?('topic')
+      alarms.select! {|alarm| alarm.maintenance_groups.include? filters['maintenance-group']} if filters.has_key?('maintenance-group')
       return alarms
     end
     
     def default_config()
       return "#{File.expand_path(File.dirname(__FILE__))}/cfnguardian/config/defaults.yaml"
+    end
+
+    def get_topic_arn_from_stack(topic)
+      client = Aws::CloudFormation::Client.new()
+      resp = client.describe_stacks({ stack_name: @stack_name })
+      stack = resp.stacks.first
+      parameter = stack.parameters.find {|p| p.parameter_key == topic}
+      return !parameter.nil? ? parameter.parameter_value : nil
     end
     
   end

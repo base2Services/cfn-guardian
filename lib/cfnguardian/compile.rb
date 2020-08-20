@@ -105,6 +105,7 @@ module CfnGuardian
       
       @maintenance_groups.each do |maintenance_group,resource_groups|
         resource_groups.each do |group, alarms|
+          puts group
           alarms.each do |alarm, resources|
             resources.each do |resource|
               res = @resources.find {|r| 
@@ -154,7 +155,7 @@ module CfnGuardian
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
       
       resources.each_with_index do |resources,index|
-        stack = CfnGuardian::Stacks::Resources.new(main_stack.parameters)
+        stack = CfnGuardian::Stacks::Resources.new(main_stack.parameters,index)
         stack.build_template(resources)
         valid = stack.template.validate
         File.write("out/guardian-stack-#{index}.compiled.yaml", JSON.parse(valid.to_json).to_yaml)

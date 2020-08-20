@@ -52,7 +52,7 @@ module CfnGuardian
       
       @alarms.each do |alarm|
         alarm_name = CfnGuardian::CloudWatch.get_alarm_name(alarm)
-        metric_alarm = metric_alarms.find {|ma| ma.alarm_name == alarm_name}
+        metric_alarm = metric_alarms.find {|ma| ma.alarm_name.include? alarm_name}
         dimensions = metric_alarm.dimensions.map {|dim| {dim.name.to_sym => dim.value}}.inject(:merge)
         
         rows = [
