@@ -105,16 +105,18 @@ module CfnGuardian
       
       @maintenance_groups.each do |maintenance_group,resource_groups|
         resource_groups.each do |group, alarms|
-          puts group
           alarms.each do |alarm, resources|
             resources.each do |resource|
+
               res = @resources.find {|r| 
                 (r.type == 'Alarm') && 
-                (r.class == group && r.name == alarm) &&
+                (r.group == group && r.name == alarm) &&
                 (r.resource_id == resource['Id'] || r.resource_name == resource['Name'])}
+
               unless res.nil?
                 res.maintenance_groups.append("#{maintenance_group}MaintenanceGroup")
               end
+              
             end
           end
         end
