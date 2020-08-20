@@ -414,7 +414,7 @@ module CfnGuardian
       alarms.select! {|alarm| alarm.resource_id.downcase == filters['resource'].downcase} if filters.has_key?('resource')
       alarms.select! {|alarm| alarm.name.downcase.include? filters['alarm'].downcase} if filters.has_key?('alarm')
       alarms.select! {|alarm| alarm.alarm_action.include? filters['topic']} if filters.has_key?('topic')
-      alarms.select! {|alarm| alarm.maintenance_groups.include? filters['maintenance-group']} if filters.has_key?('maintenance-group')
+      alarms.select! {|alarm| alarm.maintenance_groups.include? "#{filters['maintenance-group']}MaintenanceGroup"} if filters.has_key?('maintenance-group')
       return alarms
     end
     

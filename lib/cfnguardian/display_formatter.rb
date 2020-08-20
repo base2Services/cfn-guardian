@@ -14,7 +14,6 @@ module CfnGuardian
       
       @alarms.each do |alarm|
         alarm_name = CfnGuardian::CloudWatch.get_alarm_name(alarm)
-        puts alarm_name
         rows = [
           ['ResourceId', alarm.resource_id],
           ['ResourceHash', alarm.resource_hash],
