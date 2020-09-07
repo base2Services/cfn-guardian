@@ -34,20 +34,22 @@ module CfnGuardian::Resource
       overides.delete('GroupOverrides')
       if group_overrides.any?
         @alarms.each do |alarm|
+          logger.debug("overriding #{alarm.name} alarm properties for resource #{alarm.resource_id} in resource group #{group} via group overrides") 
           group_overrides.each {|attr,value| update_object(alarm,attr,value)}
         end
       end
 
       # loop over each override template for the service
-      overides.each do |name,properties|
-        
+      overides.each do |name,properties|       
         # disable default alarms
         if [false].include?(properties)
-          alarm = find_alarm(name)
+          alarms = find_alarms(name)
           
-          if !alarm.nil?
-            alarm.enabled = false 
-            logger.info "Disabling alarm '#{name}' for resource #{alarm.resource_id}"
+          if !alarms.nil?
+            alarms.each do |alarm| 
+              alarm.enabled = false
+              logger.info "Disabling alarm '#{name}' for resource #{alarm.resource_id}"
+            end
             next
           end
         end
@@ -76,21 +78,23 @@ module CfnGuardian::Resource
           next
         end
         
-        alarm = find_alarm(name)
+        alarms = find_alarms(name)
 
-        if alarm.nil?
-          if @resource.has_key?('Hosts')
-            logger.warn("this resource doesn't support adding new alarms")
-            next
+        if alarms.nil?
+          alarms.each do |alarm|
+            # if alarm doesn't exist create a new one
+            alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
+            properties.each {|attr,value| update_object(alarm,attr,value)}
+            alarm.name = name
+            logger.debug("created new alarm #{alarm.name} for resource #{alarm.resource_id} in resource group #{group}")
+            @alarms.push(alarm)
           end
-          # if alarm doesn't exist create a new one
-          alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
-          properties.each {|attr,value| update_object(alarm,attr,value)}
-          alarm.name = name
-          @alarms.push(alarm)
         else
           # if there is an existing alarm update the properties
-          properties.each {|attr,value| update_object(alarm,attr,value)}
+          alarms.each do |alarm|
+            logger.debug("overriding #{alarm.name} alarm properties for resource #{alarm.resource_id} in resource group #{group} via alarm overrides") 
+            properties.each {|attr,value| update_object(alarm,attr,value)}
+          end
         end
       end
       
@@ -193,6 +197,10 @@ module CfnGuardian::Resource
     
     def find_alarm(name)
       @alarms.detect {|alarm| alarm.name == name}
+    end
+
+    def find_alarms(name)
+      @alarms.find_all {|alarm| alarm.name == name}
     end
 
     def find_event_subscriptions(name)
