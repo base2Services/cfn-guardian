@@ -375,6 +375,18 @@ module CfnGuardian
         @evaluation_periods = 1
       end
     end
+
+    class AzureFileAlarm < Alarm
+      def initialize(resource)
+        super(resource)
+        @group = 'AzureFile'
+        @namespace = 'FileAgeCheck'
+        @period = 300
+        @comparison_operator = 'GreaterThanThreshold'
+        @threshold = 0
+        @dimensions = { StorageAccount: resource['Id'], StorageContainer: resource['Container'] }
+      end
+    end
     
   end
 end

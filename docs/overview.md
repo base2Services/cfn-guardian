@@ -13,6 +13,7 @@
     6. [SFTP](custom_checks/sftp.md)
     7. [SQL](custom_checks/sql.md)
     8. [TLS](custom_checks/tls.md)
+    9. [Azure File Check](custom_checks/azure_file_check.md)
 5. [Event Subscriptions](event_subscriptions.md)
 6. [Notifiers](notifiers.md)
 7. [Maintenance Mode](maintenance_mode.md)

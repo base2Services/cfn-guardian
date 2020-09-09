@@ -187,5 +187,17 @@ module CfnGuardian
       end
     end
 
+    class AzureFileCheck < Check
+      def initialize(resource)
+        super(resource)
+        @group = 'AzureFile'
+        @name = 'AzureFileCheck'
+        @package = 'azure-file-check'
+        @handler = 'handler.file_check'
+        @version = '01d77e0ffcc3878f2df0125eee31c7736bc4e48c'
+        @runtime = 'python3.7'
+      end
+    end
+
   end
 end

@@ -312,5 +312,32 @@ module CfnGuardian
       end
     end
 
+    class AzureFileEvent < Event
+      def initialize(resource)
+        super(resource)
+        @group = 'AzureFile'
+        @name = 'AzureFileEvent'
+        @target = 'AzureFileCheckFunction'
+        @cron = "0/5 * * * ? *"
+        @storage_account = resource['Id']
+        @container = resource['Container']
+        @connection_string = resource['ConnectionString']
+        @search = resource['Search']
+      end
+
+      def payload
+        return {
+          'STORAGE_ACCOUNT' => @storage_account,
+          'CONTAINER' => @container,
+          'CONNECTION_STRING' => @connection_string,
+          'SEARCH' => @search
+        }.to_json
+      end
+
+      def ssm_parameters
+        return [@connection_string]
+      end
+    end
+
   end
 end
