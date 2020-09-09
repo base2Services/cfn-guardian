@@ -2,6 +2,7 @@
 
 CloudWatch Namespace: `FileAgeCheck`
 
+Alerts based on file age being older than expected
 ```yaml
 Resources:
   AzureFile:
