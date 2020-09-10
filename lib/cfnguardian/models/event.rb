@@ -140,7 +140,7 @@ module CfnGuardian
         @group = 'Ssl'
         @name = 'SslEvent'
         @target = 'SslCheckFunction'
-        @cron = "0 12 * * ? *" 
+        @cron = resource.fetch('Schedule', "0 12 * * ? *")
         @url = resource['Id']
         @region = resource.fetch('Region',"${AWS::Region}")
       end
@@ -173,7 +173,7 @@ module CfnGuardian
         @group = 'DomainExpiry'
         @name = 'DomainExpiryEvent'
         @target = 'DomainExpiryCheckFunction'
-        @cron = "0 12 * * ? *" 
+        @cron = resource.fetch('Schedule', "0 12 * * ? *")
         @domain = resource['Id']
         @region = resource.fetch('Region',"${AWS::Region}")
       end
@@ -227,7 +227,7 @@ module CfnGuardian
         @group = 'ContainerInstance'
         @name = 'ContainerInstanceEvent'
         @target = 'ContainerInstanceCheckFunction'
-        @cron = "0/5 * * * ? *"
+        @cron = resource.fetch('Schedule', "0/5 * * * ? *")
         @cluster = resource['Id']
       end
       
@@ -242,7 +242,7 @@ module CfnGuardian
         @group = 'SFTP'
         @name = 'SFTPEvent'
         @target = 'SFTPCheckFunction'
-        @cron = "0/5 * * * ? *"
+        @cron = resource.fetch('Schedule', "0/5 * * * ? *")
         @host = resource['Id']
         @user = resource['User']
         @port = resource.fetch('Port', nil)
@@ -294,7 +294,7 @@ module CfnGuardian
         @group = 'TLS'
         @name = 'TLSEvent'
         @target = 'TLSCheckFunction'
-        @cron = "0/5 * * * ? *"
+        @cron = resource.fetch('Schedule', "0/5 * * * ? *")
         @host = resource['Id']
         @port = resource.fetch('Port', 443)
         @check_max = resource.fetch('MaxSupported', nil)
@@ -318,7 +318,7 @@ module CfnGuardian
         @group = 'AzureFile'
         @name = 'AzureFileEvent'
         @target = 'AzureFileCheckFunction'
-        @cron = "0/5 * * * ? *"
+        @cron = resource.fetch('Schedule', "0/5 * * * ? *")
         @storage_account = resource['Id']
         @container = resource['Container']
         @connection_string = resource['ConnectionString']
