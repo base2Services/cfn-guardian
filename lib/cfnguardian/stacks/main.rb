@@ -131,9 +131,9 @@ module CfnGuardian
               S3Key: "#{check.package}/master/#{check.version}.zip"
             })
             Handler check.handler
-            MemorySize 128
+            MemorySize check.memory
             Runtime check.runtime
-            Timeout 120
+            Timeout check.timeout
             Role FnGetAtt(:LambdaExecutionRole, :Arn)
             VpcConfig vpc_config unless vpc_config.empty?
             Tags([

@@ -13,7 +13,9 @@ module CfnGuardian
         :runtime,
         :environment,
         :subnets, 
-        :vpc
+        :vpc,
+        :memory,
+        :timeout
         
       def initialize(resource)
         @type = 'Check'
@@ -26,6 +28,8 @@ module CfnGuardian
         @environment = ''
         @subnets = nil
         @vpc = nil
+        @memory = 128
+        @timeout = 120
       end
     end
     
@@ -194,8 +198,10 @@ module CfnGuardian
         @name = 'AzureFileCheck'
         @package = 'azure-file-check'
         @handler = 'handler.file_check'
-        @version = '01d77e0ffcc3878f2df0125eee31c7736bc4e48c'
+        @version = 'cc37aa8fe4855570132431611b507274b390f4c1'
         @runtime = 'python3.7'
+        @memory = 256
+        @timeout = 600
       end
     end
 
