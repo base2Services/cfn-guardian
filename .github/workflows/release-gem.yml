@@ -17,26 +17,20 @@ jobs:
       with:
         ruby-version: 2.6.x
 
-    - name: Publish to GPR
+    - name: Publish Gem to Github Packages Respository
       run: |
         mkdir -p $HOME/.gem
         touch $HOME/.gem/credentials
         chmod 0600 $HOME/.gem/credentials
         printf -- "---\n:github: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
-        gem build *.gemspec
+        gem build cfn-guardian.gemspec
         gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} *.gem
       env:
         GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
         OWNER: ${{ github.repository_owner }}
-  publish_image:
-    name: Build + Publish Container Image
-    runs-on: ubuntu-latest
 
-    steps:
-    - name: Check out the repo 
-      uses: actions/checkout@v2
-    - name: Push to GitHub Packages
-      uses: docker/build-push-action@v1
+    - name: Push Container Image to GitHub Container Repository
+      uses: docker/build-push-action@v2
       with:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PUSH_TOKEN }}
