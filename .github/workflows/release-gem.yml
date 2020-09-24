@@ -1,0 +1,45 @@
+name: release gem and docker image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish_gem:
+    name: Build + Publish Gem
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v2
+    - name: Set up Ruby 2.6
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.6.x
+
+    - name: Publish to GPR
+      run: |
+        mkdir -p $HOME/.gem
+        touch $HOME/.gem/credentials
+        chmod 0600 $HOME/.gem/credentials
+        printf -- "---\n:github: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+        gem build *.gemspec
+        gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} *.gem
+      env:
+        GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
+        OWNER: ${{ github.repository_owner }}
+  publish_image:
+    name: Build + Publish Container Image
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out the repo 
+      uses: actions/checkout@v2
+    - name: Push to GitHub Packages
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GHCR_PUSH_TOKEN }}
+        registry: ghcr.io
+        repository: base2services/guardian
+        tag_with_ref: true
