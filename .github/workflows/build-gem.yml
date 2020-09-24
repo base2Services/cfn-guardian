@@ -22,4 +22,4 @@ jobs:
         rspec
     - name: build gem
       run: |
-        gem build cfn-guardian-*.gemspec
+        gem build cfn-guardian.gemspec
