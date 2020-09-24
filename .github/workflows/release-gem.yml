@@ -34,6 +34,5 @@ jobs:
       with:
         username: ${{ github.actor }}
         password: ${{ secrets.GHCR_PUSH_TOKEN }}
-        registry: ghcr.io
-        repository: base2services/guardian
-        tag_with_ref: true
+        tags: ghcr.io/base2services/guardian:${{ github.ref }}
+        build-args: GUARDIAN_VERSION=${{ github.ref }}
