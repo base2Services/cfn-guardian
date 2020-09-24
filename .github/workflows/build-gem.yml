@@ -1,4 +1,4 @@
-name: Test and build gem
+name: test and build gem
 on:
   push:
     branches: [ master ]
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Test + Build
+    name: test + build
     runs-on: ubuntu-latest
 
     steps:
