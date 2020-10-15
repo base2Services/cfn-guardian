@@ -1,6 +1,6 @@
 module CfnGuardian
     module Models
-        class EventSubscription
+        class BaseEventSubscription
             
             attr_reader :type, :group
             attr_writer :detail
@@ -34,7 +34,7 @@ module CfnGuardian
             end
         end
 
-        class RDSEventSubscription < EventSubscription
+        class RDSEventSubscription < BaseEventSubscription
             attr_accessor :source_id, :rds_event_category, :message
 
             def initialize(resource)
@@ -70,27 +70,27 @@ module CfnGuardian
             end
         end
 
-        class Ec2InstanceEventSubscription < EventSubscription
+        class Ec2InstanceEventSubscription < BaseEventSubscription
             def initialize(resource)
                 super(resource)
                 @source = 'aws.ec2'
             end
         end
 
-        class ApiGatewayEventSubscription < EventSubscription; end
-        class ApplicationTargetGroupEventSubscription < EventSubscription; end
-        class AmazonMQBrokerEventSubscription < EventSubscription; end
-        class CloudFrontDistributionEventSubscription < EventSubscription; end
-        class AutoScalingGroupEventSubscription < EventSubscription; end
-        class DynamoDBTableEventSubscription < EventSubscription; end
-        class Ec2InstanceEventSubscription < EventSubscription; end
-        class ECSClusterEventSubscription < EventSubscription; end
-        class ECSServiceEventSubscription < EventSubscription; end
-        class ElastiCacheReplicationGroupEventSubscription < EventSubscription; end
-        class ElasticLoadBalancerEventSubscription < EventSubscription; end
-        class ElasticFileSystemEventSubscription < EventSubscription; end
-        class LambdaEventSubscription < EventSubscription; end
-        class NetworkTargetGroupEventSubscription < EventSubscription; end
-        class RedshiftClusterEventSubscription < EventSubscription; end
+        class ApiGatewayEventSubscription < BaseEventSubscription; end
+        class ApplicationTargetGroupEventSubscription < BaseEventSubscription; end
+        class AmazonMQBrokerEventSubscription < BaseEventSubscription; end
+        class CloudFrontDistributionEventSubscription < BaseEventSubscription; end
+        class AutoScalingGroupEventSubscription < BaseEventSubscription; end
+        class DynamoDBTableEventSubscription < BaseEventSubscription; end
+        class Ec2InstanceEventSubscription < BaseEventSubscription; end
+        class ECSClusterEventSubscription < BaseEventSubscription; end
+        class ECSServiceEventSubscription < BaseEventSubscription; end
+        class ElastiCacheReplicationGroupEventSubscription < BaseEventSubscription; end
+        class ElasticLoadBalancerEventSubscription < BaseEventSubscription; end
+        class ElasticFileSystemEventSubscription < BaseEventSubscription; end
+        class LambdaEventSubscription < BaseEventSubscription; end
+        class NetworkTargetGroupEventSubscription < BaseEventSubscription; end
+        class RedshiftClusterEventSubscription < BaseEventSubscription; end
     end
 end

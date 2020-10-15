@@ -2,7 +2,7 @@ require 'cfnguardian/string'
 
 module CfnGuardian
   module Models
-    class Check
+    class BaseCheck
       
       attr_reader :type
       attr_accessor :group,
@@ -33,7 +33,7 @@ module CfnGuardian
       end
     end
     
-    class HttpCheck < Check      
+    class HttpCheck < BaseCheck      
       def initialize(resource)
         super(resource)
         @group = 'Http'
@@ -56,7 +56,7 @@ module CfnGuardian
       end
     end
     
-    class PortCheck < Check      
+    class PortCheck < BaseCheck      
       def initialize(resource)
         super(resource)
         @group = 'Port'
@@ -79,7 +79,7 @@ module CfnGuardian
       end
     end
     
-    class NrpeCheck < Check
+    class NrpeCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'Nrpe'
@@ -94,7 +94,7 @@ module CfnGuardian
       end
     end
     
-    class SslCheck < Check
+    class SslCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'Ssl'
@@ -117,7 +117,7 @@ module CfnGuardian
       end
     end
     
-    class DomainExpiryCheck < Check
+    class DomainExpiryCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'DomainExpiry'
@@ -129,7 +129,7 @@ module CfnGuardian
       end
     end
     
-    class SqlCheck < Check
+    class SqlCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'Sql'
@@ -144,7 +144,7 @@ module CfnGuardian
       end
     end
     
-    class ContainerInstanceCheck < Check
+    class ContainerInstanceCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'ContainerInstance'
@@ -156,7 +156,7 @@ module CfnGuardian
       end
     end
     
-    class TLSCheck < Check
+    class TLSCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'TLS'
@@ -168,7 +168,7 @@ module CfnGuardian
       end
     end
     
-    class SFTPCheck < Check
+    class SFTPCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'SFTP'
@@ -191,7 +191,7 @@ module CfnGuardian
       end
     end
 
-    class AzureFileCheck < Check
+    class AzureFileCheck < BaseCheck
       def initialize(resource)
         super(resource)
         @group = 'AzureFile'

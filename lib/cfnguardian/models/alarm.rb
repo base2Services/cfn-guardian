@@ -3,7 +3,7 @@ require 'digest/md5'
 
 module CfnGuardian
   module Models
-    class Alarm
+    class BaseAlarm
       
       attr_reader :type,
         :resource_hash
@@ -65,7 +65,7 @@ module CfnGuardian
     end
     
     
-    class ApiGatewayAlarm < Alarm
+    class ApiGatewayAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ApiGateway'
@@ -74,7 +74,7 @@ module CfnGuardian
       end
     end
     
-    class ApplicationTargetGroupAlarm < Alarm
+    class ApplicationTargetGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ApplicationTargetGroup'
@@ -86,7 +86,7 @@ module CfnGuardian
       end
     end
     
-    class AmazonMQBrokerAlarm < Alarm
+    class AmazonMQBrokerAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'AmazonMQBroker'
@@ -95,7 +95,7 @@ module CfnGuardian
       end
     end
     
-    class CloudFrontDistributionAlarm < Alarm
+    class CloudFrontDistributionAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'CloudFrontDistribution'
@@ -109,7 +109,7 @@ module CfnGuardian
       end
     end
     
-    class AutoScalingGroupAlarm < Alarm
+    class AutoScalingGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'AutoScalingGroup'
@@ -118,7 +118,7 @@ module CfnGuardian
       end
     end
     
-    class DomainExpiryAlarm < Alarm
+    class DomainExpiryAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'DomainExpiry'
@@ -128,7 +128,7 @@ module CfnGuardian
       end
     end
     
-    class DynamoDBTableAlarm < Alarm
+    class DynamoDBTableAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'DynamoDBTable'
@@ -137,7 +137,7 @@ module CfnGuardian
       end
     end
     
-    class Ec2InstanceAlarm < Alarm
+    class Ec2InstanceAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'Ec2Instance'
@@ -146,7 +146,7 @@ module CfnGuardian
       end
     end
     
-    class ECSClusterAlarm < Alarm
+    class ECSClusterAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ECSCluster'
@@ -158,7 +158,7 @@ module CfnGuardian
       end
     end
     
-    class ECSServiceAlarm < Alarm
+    class ECSServiceAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ECSService'
@@ -170,7 +170,7 @@ module CfnGuardian
       end
     end
     
-    class ElastiCacheReplicationGroupAlarm < Alarm
+    class ElastiCacheReplicationGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ElastiCacheReplicationGroup'
@@ -179,7 +179,7 @@ module CfnGuardian
       end
     end
     
-    class ElasticLoadBalancerAlarm < Alarm
+    class ElasticLoadBalancerAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ElasticLoadBalancer'
@@ -188,7 +188,7 @@ module CfnGuardian
       end
     end
     
-    class ElasticFileSystemAlarm < Alarm
+    class ElasticFileSystemAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ElasticFileSystem'
@@ -197,7 +197,7 @@ module CfnGuardian
       end
     end
     
-    class HttpAlarm < Alarm
+    class HttpAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'Http'
@@ -215,7 +215,7 @@ module CfnGuardian
       end
     end
 
-    class PortAlarm < Alarm
+    class PortAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'Port'
@@ -233,7 +233,7 @@ module CfnGuardian
       end
     end
     
-    class SslAlarm < Alarm
+    class SslAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'Ssl'
@@ -249,7 +249,7 @@ module CfnGuardian
       end
     end
     
-    class NrpeAlarm < Alarm
+    class NrpeAlarm < BaseAlarm
       def initialize(resource,environment)
         super(resource)
         @group = 'Nrpe'
@@ -260,7 +260,7 @@ module CfnGuardian
       end
     end
 
-    class LambdaAlarm < Alarm
+    class LambdaAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'Lambda'
@@ -271,7 +271,7 @@ module CfnGuardian
       end
     end
     
-    class NetworkTargetGroupAlarm < Alarm
+    class NetworkTargetGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'NetworkTargetGroup'
@@ -283,7 +283,7 @@ module CfnGuardian
       end
     end
     
-    class RedshiftClusterAlarm < Alarm
+    class RedshiftClusterAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'RedshiftCluster'
@@ -292,7 +292,7 @@ module CfnGuardian
       end
     end
     
-    class RDSClusterInstanceAlarm < Alarm
+    class RDSClusterInstanceAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'RDSClusterInstance'
@@ -301,7 +301,7 @@ module CfnGuardian
       end
     end
     
-    class RDSInstanceAlarm < Alarm
+    class RDSInstanceAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'RDSInstance'
@@ -310,7 +310,7 @@ module CfnGuardian
       end
     end
     
-    class SqlAlarm < Alarm
+    class SqlAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'Sql'
@@ -321,7 +321,7 @@ module CfnGuardian
       end
     end
     
-    class SQSQueueAlarm < Alarm
+    class SQSQueueAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'SQSQueue'
@@ -332,7 +332,7 @@ module CfnGuardian
       end
     end
     
-    class LogGroupAlarm < Alarm
+    class LogGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'LogGroup'
@@ -344,7 +344,7 @@ module CfnGuardian
       end
     end
     
-    class SFTPAlarm < Alarm
+    class SFTPAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'SFTP'
@@ -362,7 +362,7 @@ module CfnGuardian
       end
     end
     
-    class TLSAlarm < Alarm
+    class TLSAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'TLS'
@@ -376,7 +376,7 @@ module CfnGuardian
       end
     end
 
-    class AzureFileAlarm < Alarm
+    class AzureFileAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'AzureFile'

@@ -18,3 +18,4 @@
 6. [Notifiers](notifiers.md)
 7. [Maintenance Mode](maintenance_mode.md)
 8. [Composite Alarms](composite_alarms.md)
+9. [Alarms for Custom Metrics](custom_metrics.md)

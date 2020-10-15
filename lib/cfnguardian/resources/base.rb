@@ -80,15 +80,13 @@ module CfnGuardian::Resource
         
         alarms = find_alarms(name)
 
-        if alarms.nil?
-          alarms.each do |alarm|
-            # if alarm doesn't exist create a new one
-            alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
-            properties.each {|attr,value| update_object(alarm,attr,value)}
-            alarm.name = name
-            logger.debug("created new alarm #{alarm.name} for resource #{alarm.resource_id} in resource group #{group}")
-            @alarms.push(alarm)
-          end
+        if alarms.empty?
+          # if alarm doesn't exist create a new one
+          alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
+          properties.each {|attr,value| update_object(alarm,attr,value)}
+          alarm.name = name
+          logger.debug("created new alarm #{alarm.name} for resource #{alarm.resource_id} in resource group #{group}")
+          @alarms.push(alarm)
         else
           # if there is an existing alarm update the properties
           alarms.each do |alarm|

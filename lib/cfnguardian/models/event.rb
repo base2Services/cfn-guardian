@@ -2,7 +2,7 @@ require 'cfnguardian/string'
 
 module CfnGuardian
   module Models
-    class Event
+    class BaseEvent
       
       attr_reader :type
       attr_accessor :group,
@@ -31,7 +31,7 @@ module CfnGuardian
       end      
     end
     
-    class HttpEvent < Event
+    class HttpEvent < BaseEvent
       
       attr_accessor :endpoint,
         :method,
@@ -81,7 +81,7 @@ module CfnGuardian
       end
     end
     
-    class PortEvent < Event      
+    class PortEvent < BaseEvent      
       def initialize(resource)
         super(resource)
         @group = 'Port'
@@ -112,7 +112,7 @@ module CfnGuardian
       end
     end
     
-    class NrpeEvent < Event      
+    class NrpeEvent < BaseEvent      
       def initialize(resource,environment,command)
         super(resource)
         @group = 'Nrpe'
@@ -134,7 +134,7 @@ module CfnGuardian
       end
     end
     
-    class SslEvent < Event
+    class SslEvent < BaseEvent
       def initialize(resource)
         super(resource)
         @group = 'Ssl'
@@ -163,7 +163,7 @@ module CfnGuardian
       end
     end
     
-    class DomainExpiryEvent < Event
+    class DomainExpiryEvent < BaseEvent
       
       attr_accessor :domain,
         :region
@@ -183,7 +183,7 @@ module CfnGuardian
       end
     end
     
-    class SqlEvent < Event
+    class SqlEvent < BaseEvent
       def initialize(resource,query,environment)
         super(resource)
         @group = 'Sql'
@@ -221,7 +221,7 @@ module CfnGuardian
       end
     end
     
-    class ContainerInstanceEvent < Event
+    class ContainerInstanceEvent < BaseEvent
       def initialize(resource)
         super(resource)
         @group = 'ContainerInstance'
@@ -236,7 +236,7 @@ module CfnGuardian
       end
     end
     
-    class SFTPEvent < Event
+    class SFTPEvent < BaseEvent
       def initialize(resource)
         super(resource)
         @group = 'SFTP'
@@ -288,7 +288,7 @@ module CfnGuardian
       end
     end
     
-    class TLSEvent < Event
+    class TLSEvent < BaseEvent
       def initialize(resource)
         super(resource)
         @group = 'TLS'
@@ -312,7 +312,7 @@ module CfnGuardian
       end
     end
 
-    class AzureFileEvent < Event
+    class AzureFileEvent < BaseEvent
       def initialize(resource)
         super(resource)
         @group = 'AzureFile'
