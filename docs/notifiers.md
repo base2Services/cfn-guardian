@@ -22,7 +22,7 @@ Topics:
   Warning: arn:aws:sns:ap-southeast-2:123456789012:Warning
   Task: arn:aws:sns:ap-southeast-2:123456789012:Task
   Informational: arn:aws:sns:ap-southeast-2:123456789012:Informational
-  CustomTopic: arn:aws:sns:ap-southeast-2:123456789012:Custom
+  Custom: arn:aws:sns:ap-southeast-2:123456789012:Custom
 
 Template:
   Ec2Instance:
