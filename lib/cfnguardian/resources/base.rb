@@ -100,6 +100,20 @@ module CfnGuardian::Resource
         @alarms.each {|a| a.group = @override_group}
       end
       
+      # String interpolation for alarm dimensions
+      @alarms.each do |alarm|
+        next if alarm.dimensions.nil?
+        alarm.dimensions.each do |k,v|
+          if v.match?(/^\${Resource::.*[A-Za-z]}$/)
+            resource_key = v.tr('${}', '').split('Resource::').last
+            if @resource.has_key?(resource_key)
+              logger.debug "reassigning alarm #{alarm.name} dimension key '#{k}' with value '#{@resource[resource_key]}' from Resource::#{resource_key}" 
+              alarm.dimensions[k] = @resource[resource_key]
+            end
+          end
+        end
+      end
+
       return @alarms.select{|a| a.enabled}
     end
     
@@ -204,10 +218,10 @@ module CfnGuardian::Resource
     def find_event_subscriptions(name)
       @event_subscriptions.detect {|es| es.name == name}
     end
-    
+
     def update_object(obj,attr,value)
       begin
-        obj.send("#{attr.to_underscore}=",value)
+        obj.send("#{attr.to_underscore}=",value.clone)
       rescue NoMethodError => e
         if !e.message.match?(/inherit/)
           logger.warn "Unknown property '#{attr}' for type: #{obj.type} and resource id: #{obj.resource_id}"
