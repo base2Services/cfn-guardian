@@ -48,7 +48,7 @@ module CfnGuardian::Resource
           if !alarms.nil?
             alarms.each do |alarm| 
               alarm.enabled = false
-              logger.info "Disabling alarm '#{name}' for resource #{alarm.resource_id}"
+              logger.info "disabling alarm '#{name}' for resource #{alarm.resource_id}"
             end
             next
           end
@@ -57,7 +57,7 @@ module CfnGuardian::Resource
         # continue if the override is in the incorrect format
         unless properties.is_a?(Hash)
           if name != 'Inherit'
-            logger.warn "Incorrect format for alarm '#{name}'. Should be of type 'Hash', instead got type '#{properties.group}'"
+            logger.warn "incorrect format for alarm '#{name}'. Should be of type 'Hash', instead got type '#{properties.group}'"
           end
           next
         end
@@ -68,12 +68,13 @@ module CfnGuardian::Resource
         if properties.has_key?('Inherit')
           alarm = find_alarm(properties['Inherit'])
           if !alarm.nil?
+            logger.debug("creating new alarm #{name} for alarm group #{self.class.to_s.split('::').last} inheriting properties from alarm #{properties['Inherit']}")
             inheritited_alarm = alarm.clone
             alarm.name = name
             properties.each {|attr,value| update_object(inheritited_alarm,attr,value)}
             @alarms.push(inheritited_alarm)
           else
-            logger.warn "Alarm '#{properties['Inherit']}' doesn't exists and cannot be inherited"
+            logger.warn "alarm '#{properties['Inherit']}' doesn't exists and cannot be inherited"
           end
           next
         end
@@ -82,6 +83,7 @@ module CfnGuardian::Resource
 
         if alarms.empty?
           # if alarm doesn't exist create a new one
+          logger.debug("creating new alarm #{name} for alarm group #{self.class.to_s.split('::').last}")
           alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(@resource)
           properties.each {|attr,value| update_object(alarm,attr,value)}
           alarm.name = name
@@ -107,7 +109,7 @@ module CfnGuardian::Resource
           if v.match?(/^\${Resource::.*[A-Za-z]}$/)
             resource_key = v.tr('${}', '').split('Resource::').last
             if @resource.has_key?(resource_key)
-              logger.debug "reassigning alarm #{alarm.name} dimension key '#{k}' with value '#{@resource[resource_key]}' from Resource::#{resource_key}" 
+              logger.debug "overriding alarm #{alarm.name} dimension key '#{k}' with value '#{@resource[resource_key]}'" 
               alarm.dimensions[k] = @resource[resource_key]
             end
           end
@@ -220,6 +222,7 @@ module CfnGuardian::Resource
     end
 
     def update_object(obj,attr,value)
+      logger.debug("overriding #{obj.type} property '#{attr}' with value #{value} for resource id: #{obj.resource_id}")
       begin
         obj.send("#{attr.to_underscore}=",value.clone)
       rescue NoMethodError => e
