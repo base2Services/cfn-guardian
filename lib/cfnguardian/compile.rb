@@ -37,6 +37,7 @@ require 'cfnguardian/resources/internal_sftp'
 require 'cfnguardian/resources/tls'
 require 'cfnguardian/resources/azure_file'
 require 'cfnguardian/version'
+require 'cfnguardian/error'
 
 module CfnGuardian
   class Compile
@@ -129,10 +130,38 @@ module CfnGuardian
       end
       
       @ssm_parameters = @resources.select {|resource| resource.type == 'Event'}.map {|event| event.ssm_parameters}.flatten.uniq
+
+      validate_resources()
     end
     
     def alarms
       @resources.select {|resource| resource.type == 'Alarm'}
+    end
+
+    def validate_resources()
+      errors = []
+      @resources.each do |resource|
+        case resource.type
+        when 'Alarm'
+          %w(metric_name namespace).each do |property|
+            if resource.send(property).nil?
+              errors << "Alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}"
+            end
+          end
+        when 'Check'
+          # no validation check yet
+        when 'Event'
+          # no validation check yet
+        when 'Composite'
+          # no validation check yet
+        when 'EventSubscription'
+          # no validation check yet
+        when 'MetricFilter'
+          # no validation check yet
+        end
+      end
+
+      raise CfnGuardian::ValidationError, "#{errors.size} errors found\n[*] #{errors.join("\n[*] ")}" if errors.any?
     end
     
     def split_resources(bucket,path)
