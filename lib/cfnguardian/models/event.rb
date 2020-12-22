@@ -121,6 +121,7 @@ module CfnGuardian
         @host = resource['Id']
         @environment = environment
         @region = resource.fetch('Region',"${AWS::Region}")
+        @hash = Digest::MD5.hexdigest "#{resource['Id']}#{command}"
         @command = command
       end
       
