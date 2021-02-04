@@ -51,7 +51,7 @@ module CfnGuardian
             ComparisonOperator alarm.comparison_operator
             Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
             EvaluationPeriods alarm.evaluation_periods
-            Statistic alarm.statistic
+            Statistic alarm.statistic if alarm.extended_statistic.nil?
             Period alarm.period
             Threshold alarm.threshold
             MetricName alarm.metric_name
