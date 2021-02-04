@@ -17,17 +17,9 @@ jobs:
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.7.x
-
-    - name: Publish gem to RubyGems and Github packages
-      run: |
-        mkdir -p $HOME/.gem
-        touch $HOME/.gem/credentials
-        chmod 0600 $HOME/.gem/credentials
-        printf -- "---\n:github: Bearer ${GITHUB_TOKEN}\n:rubygems_api_key: #{RUBYGEMS_API_KEY}\n" > $HOME/.gem/credentials
-        gem build cfn-guardian.gemspec
-        gem push cfn-guardian-*.gem
-        gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} cfn-guardian-*.gem
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        RUBYGEMS_API_KEY: ${{secrets.RUBYGEMS_API_KEY}}
-        OWNER: ${{ github.repository_owner }}
+    
+    - name: Publish gem
+      uses: dawidd6/action-publish-gem@v1
+      with:
+        api_key: ${{secrets.RUBYGEMS_API_KEY}}
+        github_token: ${{secrets.GITHUB_TOKEN}}
