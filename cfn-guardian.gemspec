@@ -13,8 +13,6 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/base2Services/cfn-guardian"
   spec.license       = "MIT"
 
-  spec.metadata["allowed_push_host"] = "https://rubygems.pkg.github.com/base2Services"
-
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/base2Services/cfn-guardian"
   spec.metadata["changelog_uri"] = "https://github.com/base2Services/cfn-guardian"
