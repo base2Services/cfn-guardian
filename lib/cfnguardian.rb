@@ -50,7 +50,7 @@ module CfnGuardian
       compiler = CfnGuardian::Compile.new(options[:config])
       compiler.get_resources
       compiler.compile_templates(s3.bucket,s3.path)
-      logger.info "Clouformation templates compiled successfully in out/ directory"
+      logger.info "Cloudformation templates compiled successfully in out/ directory"
       if options[:validate]
         s3.create_bucket_if_not_exists()
         validator = CfnGuardian::Validate.new(s3.bucket)
@@ -58,7 +58,7 @@ module CfnGuardian
           logger.error("One or more templates failed to validate")
           exit(1)
         else
-          logger.info "Clouformation templates were validated successfully"
+          logger.info "Cloudformation templates were validated successfully"
         end
       end
       logger.warn "AWS cloudwatch alarms defined in the templates will cost roughly $#{'%.2f' % compiler.cost} per month"
@@ -96,7 +96,7 @@ module CfnGuardian
       compiler.get_resources
       compiler.compile_templates(s3.bucket,s3.path)
       parameters = compiler.load_parameters(options)
-      logger.info "Clouformation templates compiled successfully in out/ directory"
+      logger.info "Cloudformation templates compiled successfully in out/ directory"
 
       s3.create_bucket_if_not_exists
       validator = CfnGuardian::Validate.new(s3.bucket)
@@ -104,7 +104,7 @@ module CfnGuardian
         logger.error("One or more templates failed to validate")
         exit(1)
       else
-        logger.info "Clouformation templates were validated successfully"
+        logger.info "Cloudformation templates were validated successfully"
       end
       
       deployer = CfnGuardian::Deploy.new(options,s3.bucket,parameters)
