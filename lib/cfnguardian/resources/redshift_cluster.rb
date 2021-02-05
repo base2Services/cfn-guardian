@@ -20,9 +20,9 @@ module CfnGuardian::Resource
       alarm = CfnGuardian::Models::RedshiftClusterAlarm.new(@resource)
       alarm.name = 'UnHealthyCluster'
       alarm.metric_name = 'HealthStatus'
-      alarm.threshold = 0
+      alarm.comparison_operator = 'LessThanThreshold'
+      alarm.threshold = 1
       alarm.evaluation_periods = 10
-      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
     end
     
