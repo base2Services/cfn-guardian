@@ -23,7 +23,7 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
 
 **Supported AWS Resources**
 
-- AmazonMq
+- AmazonMq(RabbitMQ and ActiveMQ)
 - ApiGateway
 - Application Targetgroups
 - Network TargetGroups
