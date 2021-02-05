@@ -36,6 +36,7 @@ require 'cfnguardian/resources/sftp'
 require 'cfnguardian/resources/internal_sftp'
 require 'cfnguardian/resources/tls'
 require 'cfnguardian/resources/azure_file'
+require 'cfnguardian/resources/amazonmq_rabbitmq'
 require 'cfnguardian/version'
 require 'cfnguardian/error'
 

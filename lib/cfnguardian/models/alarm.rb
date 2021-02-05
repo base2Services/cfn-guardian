@@ -94,6 +94,40 @@ module CfnGuardian
         @dimensions = { Broker: resource['Id'] }
       end
     end
+
+    class AmazonMQRabbitMQBrokerAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'AmazonMQRabbitMQBroker'
+        @namespace = 'AWS/AmazonMQ'
+        @dimensions = { Broker: resource['Id'] }
+      end
+    end
+
+    class AmazonMQRabbitMQNodeAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'AmazonMQRabbitMQNode'
+        @namespace = 'AWS/AmazonMQ'
+        @dimensions = { 
+          Broker: resource['Id'],
+          Node: resource['Node']
+        }
+      end
+    end
+
+    class AmazonMQRabbitMQQueueAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'AmazonMQRabbitMQQueue'
+        @namespace = 'AWS/AmazonMQ'
+        @dimensions = { 
+          Broker: resource['Id'],
+          Queue: resource['Queue'],
+          VirtualHost: resource['Vhost']
+        }
+      end
+    end
     
     class CloudFrontDistributionAlarm < BaseAlarm
       def initialize(resource)

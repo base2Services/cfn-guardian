@@ -1,6 +1,15 @@
 Resources:
   AmazonMQBroker:
   - Id: Default
+  AmazonMQRabbitMQBroker:
+  - Id: Default
+  AmazonMQRabbitMQNode:
+  - Id: Default
+    Node: Default
+  AmazonMQRabbitMQQueue:
+  - Id: Default
+    Queue: Default
+    Vhost: Default
   ApiGateway:
   - Id: Default
   ApplicationTargetGroup:
