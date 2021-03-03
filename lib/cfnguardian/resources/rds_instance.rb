@@ -41,6 +41,15 @@ module CfnGuardian::Resource
       alarm.threshold = 45
       alarm.evaluation_periods = 10
       @alarms.push(alarm)
+
+      alarm = CfnGuardian::Models::RDSInstanceAlarm.new(@resource)
+      alarm.name = 'ReplicaLag'
+      alarm.metric_name = 'ReplicaLag'
+      alarm.threshold = 30 # seconds
+      alarm.evaluation_periods = 5
+      alarm.alarm_action = 'Warning'
+      alarm.enabled = false
+      @alarms.push(alarm)
     end
     
     def default_event_subscriptions()
