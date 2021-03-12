@@ -343,7 +343,31 @@ module CfnGuardian
         @dimensions = { DBInstanceIdentifier: resource['Id'] }
       end
     end
-    
+
+    class StepFunctionsAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'StepFunctions'
+        @namespace = 'AWS/States'
+        @dimensions = { StateMachineArn: { "Fn::Sub" => "arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:#{resource['Id']}"} }
+      end
+    end
+
+    class BatchAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'Batch'
+      end
+    end
+
+    class GlueAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'Batch'
+        @namespace = 'Glue'
+      end
+    end
+
     class SqlAlarm < BaseAlarm
       def initialize(resource)
         super(resource)

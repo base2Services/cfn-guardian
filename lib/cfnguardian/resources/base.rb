@@ -108,7 +108,7 @@ module CfnGuardian::Resource
       @alarms.each do |alarm|
         next if alarm.dimensions.nil?
         alarm.dimensions.each do |k,v|
-          if v.match?(/^\${Resource::.*[A-Za-z]}$/)
+          if v.is_a?(String) && v.match?(/^\${Resource::.*[A-Za-z]}$/)
             resource_key = v.tr('${}', '').split('Resource::').last
             if @resource.has_key?(resource_key)
               logger.debug "overriding alarm #{alarm.name} dimension key '#{k}' with value '#{@resource[resource_key]}'" 

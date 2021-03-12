@@ -132,7 +132,7 @@ module CfnGuardian
           Events_Rule("#{subscription.group}#{subscription.name}#{subscription.hash}"[0..255]) do
             State subscription.enabled ? 'ENABLED' : 'DISABLED'
             Description "Guardian event subscription #{subscription.group} #{subscription.name} for resource #{subscription.resource_id}"
-            EventPattern event_pattern
+            EventPattern FnSub(event_pattern.to_json)
             Targets [
               {
                 Arn: Ref(subscription.topic),
