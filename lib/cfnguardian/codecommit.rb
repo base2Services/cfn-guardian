@@ -10,16 +10,24 @@ module CfnGuardian
       @repo_name = repo_name
       @client = Aws::CodeCommit::Client.new()
     end
-    
-    def get_last_commit(branch='main')
+
+    def get_last_commit(branch='master')
       resp = @client.get_branch({
         repository_name: @repo_name,
         branch_name: branch,
       })
       return resp.branch.commit_id
     end
+
+    def create_main_branch(branch='main')
+      last_master_commit = get_last_commit('master')
+      resp = @client.create_branch({
+        repository_name: @repo_name,
+        branch_name: branch, 
+        commit_id: commit
+      })
     
-    def get_commit_history(branch='main',count=10)
+    def get_commit_history(branch='master',count=10)
       history = []
       commit = get_last_commit(branch)
       
