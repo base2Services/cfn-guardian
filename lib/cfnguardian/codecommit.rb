@@ -24,7 +24,7 @@ module CfnGuardian
       resp = @client.create_branch({
         repository_name: @repo_name,
         branch_name: branch, 
-        commit_id: commit
+        commit_id: last_master_commit
       })
     
     def get_commit_history(branch='master',count=10)
