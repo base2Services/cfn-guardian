@@ -27,7 +27,7 @@ module CfnGuardian
         commit_id: last_master_commit
       })
     
-    def get_commit_history(branch='master',count=10)
+    def get_commit_history(branch='main',count=10)
       history = []
       commit = get_last_commit(branch)
       
