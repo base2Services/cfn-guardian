@@ -19,9 +19,18 @@ module CfnGuardian
       return resp.branch.commit_id
     end
     
-    def get_commit_history(branch='master',count=10)
+    def get_commit_history(branch,count)
       history = []
-      commit = get_last_commit(branch)
+
+      begin
+        commit = get_last_commit(branch)
+      rescue Aws::CodeCommit::Errors::BranchDoesNotExistException => e
+        logger.error "Branch #{branch} does not exist in the #{@repo_name} repository"
+        return []
+      rescue Aws::CodeCommit::Errors::RepositoryDoesNotExistException => e
+        logger.error "Respository #{@repo_name} does not exist in this AWS account or region"
+        return []
+      end
       
       count.times do
         

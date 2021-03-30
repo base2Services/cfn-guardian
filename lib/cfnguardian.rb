@@ -299,14 +299,18 @@ module CfnGuardian
     LONG
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :repository, type: :string, default: 'guardian', desc: "codecommit repository name"
+    method_option :branch, type: :string, default: 'master', desc: "codecommit branch"
+    method_option :count, type: :numeric, default: 10, desc: "number of last commits to retrieve"
     
     def show_config_history
       set_region(options[:region],true)
     
-      history = CfnGuardian::CodeCommit.new(options[:repository]).get_commit_history()
-      puts Terminal::Table.new(
-        :headings => history.first.keys.map{|h| h.to_s.to_heading}, 
-        :rows => history.map(&:values))
+      history = CfnGuardian::CodeCommit.new(options[:repository]).get_commit_history(options[:branch], options[:count])
+      if history.any?
+        puts Terminal::Table.new(
+          :headings => history.first.keys.map{|h| h.to_s.to_heading}, 
+          :rows => history.map(&:values))
+      end
     end
     
     desc "show-pipeline", "Shows the current state of the AWS code pipeline"
