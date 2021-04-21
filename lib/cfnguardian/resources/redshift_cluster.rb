@@ -26,11 +26,20 @@ module CfnGuardian::Resource
       @alarms.push(alarm)
 
       alarm = CfnGuardian::Models::RedshiftClusterAlarm.new(@resource)
-      alarm.name = 'DiskSpaceUsed'
+      alarm.name = 'DiskSpaceUsedCrit'
       alarm.metric_name = 'PercentageDiskSpaceUsed'
       alarm.comparison_operator = 'GreaterThanThreshold'
       alarm.threshold = 90
       alarm.evaluation_periods = 10
+      @alarms.push(alarm)
+
+      alarm = CfnGuardian::Models::RedshiftClusterAlarm.new(@resource)
+      alarm.name = 'DiskSpaceUsedWarm'
+      alarm.metric_name = 'PercentageDiskSpaceUsed'
+      alarm.comparison_operator = 'GreaterThanThreshold'
+      alarm.threshold = 80
+      alarm.evaluation_periods = 10
+      alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
     end
 
