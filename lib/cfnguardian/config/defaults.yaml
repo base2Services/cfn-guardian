@@ -100,4 +100,6 @@ Resources:
         Query: Default
   SQSQueue:
   - Id: Default
+  VPNTunnel:
+  - Id: Default
   

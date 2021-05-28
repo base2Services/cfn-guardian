@@ -107,5 +107,6 @@ module CfnGuardian
     class NetworkTargetGroupEventSubscription < BaseEventSubscription; end
     class RedshiftClusterEventSubscription < BaseEventSubscription; end
     class StepFunctionsSubscription < BaseEventSubscription; end
+    class VPNTunnelEventSubscription < BaseEventSubscription; end
   end
 end

@@ -40,6 +40,7 @@ require 'cfnguardian/resources/amazonmq_rabbitmq'
 require 'cfnguardian/resources/batch'
 require 'cfnguardian/resources/glue'
 require 'cfnguardian/resources/step_functions'
+require 'cfnguardian/resources/vpn_tunnel'
 require 'cfnguardian/version'
 require 'cfnguardian/error'
 
