@@ -445,6 +445,17 @@ module CfnGuardian
         @dimensions = { StorageAccount: resource['Id'], StorageContainer: resource['Container'] }
       end
     end
+
+    class VPNTunnelAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'VPNTunnel'
+        @namespace = 'AWS/VPN'
+        @dimensions = {
+          TunnelIpAddress: resource['Id']
+        }
+      end
+    end
     
   end
 end
