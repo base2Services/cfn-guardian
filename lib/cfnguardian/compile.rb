@@ -41,6 +41,7 @@ require 'cfnguardian/resources/batch'
 require 'cfnguardian/resources/glue'
 require 'cfnguardian/resources/step_functions'
 require 'cfnguardian/resources/vpn_tunnel'
+require 'cfnguardian/resources/vpn_connection'
 require 'cfnguardian/version'
 require 'cfnguardian/error'
 

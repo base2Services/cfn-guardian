@@ -17,6 +17,17 @@ module CfnGuardian
         alarm.threshold = 90
         alarm.evaluation_periods = 10
         @alarms.push(alarm)
+
+        alarm = CfnGuardian::Models::Ec2InstanceAlarm.new(@resource)
+        alarm.name = 'CPUCreditBalanceLow'
+        alarm.metric_name = 'CPUCreditBalance'
+        alarm.comparison_operator = 'LessThanThreshold'
+        alarm.statistic = 'Minimum'
+        alarm.threshold = 100
+        alarm.evaluation_periods = 5
+        alarm.treat_missing_data = 'notBreaching'
+        alarm.datapoints_to_alarm = 5
+        @alarms.push(alarm)
       end
       
       def default_event_subscriptions()
