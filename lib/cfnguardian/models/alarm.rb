@@ -456,6 +456,17 @@ module CfnGuardian
         }
       end
     end
-    
+
+    class VPNConnectionAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'VPNConnection'
+        @namespace = 'AWS/VPN'
+        @dimensions = {
+          VpnId: resource['Id']
+        }
+      end
+    end
+
   end
 end
