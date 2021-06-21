@@ -19,3 +19,4 @@ module CfnGuardian::Resource
         @alarms.push(alarm)  
     end
   end
+end
