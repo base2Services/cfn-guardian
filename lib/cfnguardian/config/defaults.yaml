@@ -27,6 +27,8 @@ Resources:
   - Id: Default
   ECSCluster:
   - Id: Default
+  ElasticSearch:
+  - Id: Default
   ECSService:
   - Id: Default
     Cluster: Default
