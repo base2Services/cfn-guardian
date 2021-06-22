@@ -4,7 +4,7 @@ module CfnGuardian::Resource
       def default_alarms    
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
-        alarm.name = 'JVMMemoryPressure'
+        alarm.name = 'JVMMemoryPressureWarning'
         alarm.metric_name = 'JVMMemoryPressure'
         alarm.threshold = 72
         alarm.evaluation_periods = 5
@@ -13,7 +13,7 @@ module CfnGuardian::Resource
         @alarms.push(alarm)
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
-        alarm.name = 'JVMMemoryPressure'
+        alarm.name = 'JVMMemoryPressureCrit'
         alarm.metric_name = 'JVMMemoryPressure'
         alarm.threshold = 92
         alarm.evaluation_periods = 5
