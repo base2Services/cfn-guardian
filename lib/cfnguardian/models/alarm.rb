@@ -122,8 +122,8 @@ module CfnGuardian
         @group = 'AmazonMQRabbitMQQueue'
         @namespace = 'AWS/AmazonMQ'
         @dimensions = { 
-          Broker: resource['Id'],
-          Queue: resource['Queue'],
+          Broker: resource['Broker'],
+          Queue: resource['Id'],
           VirtualHost: resource['Vhost']
         }
       end

@@ -8,7 +8,7 @@ Resources:
     Node: Default
   AmazonMQRabbitMQQueue:
   - Id: Default
-    Queue: Default
+    Broker: Default
     Vhost: Default
   ApiGateway:
   - Id: Default
