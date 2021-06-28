@@ -8,6 +8,7 @@ module CfnGuardian::Resource
         alarm.threshold = 1
         alarm.evaluation_periods = 1440 # 24 hours
         alarm.data_points_to_alarm = 3
+        alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         alarm.alarm_action = 'Critical'
         @alarms.push(alarm)
 
