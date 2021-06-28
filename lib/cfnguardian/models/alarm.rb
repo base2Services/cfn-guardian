@@ -218,10 +218,13 @@ module CfnGuardian
         super(resource)
         @group = 'ElasticSearch'
         @namespace = 'AWS/ElasticSearch'
-        @dimensions = { ClusterName: resource['Id'] }
-        @comparison_operator = 'LessThanThreshold'
+        @dimensions = { DomainName: resource['Id'] }
+        @comparison_operator = 'GreaterThanThreshold'
         @threshold = 1
         @evaluation_periods = 5
+        @treat_missing_data = 'breaching'
+        @period = 60
+        @data_points_to_alarm = 1
       end
     end
     
