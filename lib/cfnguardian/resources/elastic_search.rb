@@ -105,7 +105,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'KMSKeyInaccessible'
         alarm.threshold = 1
         alarm.evaluation_periods = 1
-        alarm.alarm_action = 'Warning'
+        alarm.alarm_action = 'Critical'
         alarm.statistic = 'Minimum'
         alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
         @alarms.push(alarm)  
@@ -125,7 +125,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'ClusterStatus.yellow'
         alarm.threshold = 1
         alarm.evaluation_periods = 1
-        alarm.alarm_action = 'Critical'
+        alarm.alarm_action = 'Warning'
         alarm.statistic = 'Minimum'
         alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
         @alarms.push(alarm)  
