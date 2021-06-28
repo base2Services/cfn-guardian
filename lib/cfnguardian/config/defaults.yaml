@@ -30,6 +30,11 @@ Resources:
   ECSService:
   - Id: Default
     Cluster: Default
+  EKSContainerInsightsCluster:
+  - Id: Default
+  EKSContainerInsightsNamespace:
+  - Id: Default
+    Cluster: Default
   ElasticFileSystem:
   - Id: Default
   ElasticLoadBalancer:

@@ -203,7 +203,28 @@ module CfnGuardian
         }
       end
     end
+
+    class EKSContainerInsightsClusterAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'EKSContainerInsightsCluster'
+        @namespace = 'ContainerInsights'
+        @dimensions = { ClusterName: resource['Id'] }
+      end
+    end
     
+    class EKSContainerInsightsNamespaceAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'EKSContainerInsightsNamespace'
+        @namespace = 'ContainerInsights'
+        @dimensions = { 
+          ClusterName: resource['Cluster'],
+          Namespace: resource['Id']
+        }
+      end
+    end
+
     class ElastiCacheReplicationGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
