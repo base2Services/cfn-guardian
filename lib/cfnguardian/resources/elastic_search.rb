@@ -5,9 +5,9 @@ module CfnGuardian::Resource
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
         alarm.name = 'NodeCount'
         alarm.metric_name = 'Nodes'
-        alarm.threshold = 1
+        alarm.threshold = 3
         alarm.evaluation_periods = 1440 # 24 hours
-        alarm.data_points_to_alarm = 3
+        alarm.data_points_to_alarm = 1
         alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         alarm.alarm_action = 'Critical'
         @alarms.push(alarm)
