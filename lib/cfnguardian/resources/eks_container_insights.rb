@@ -24,7 +24,7 @@ module CfnGuardian::Resource
 
       alarm = CfnGuardian::Models::EKSContainerInsightsClusterAlarm.new(@resource)
       alarm.name = 'NodeFileSystemUtilisationCrit'
-      alarm.metric_name = 'node_cpu_utilization'
+      alarm.metric_name = 'node_filesystem_utilization'
       alarm.comparison_operator = 'GreaterThanThreshold'
       alarm.statistic = 'Maximum'
       alarm.threshold = 90
@@ -33,7 +33,7 @@ module CfnGuardian::Resource
 
       alarm = CfnGuardian::Models::EKSContainerInsightsClusterAlarm.new(@resource)
       alarm.name = 'NodeFileSystemUtilisationWarning'
-      alarm.metric_name = 'node_cpu_utilization'
+      alarm.metric_name = 'node_filesystem_utilization'
       alarm.comparison_operator = 'GreaterThanThreshold'
       alarm.statistic = 'Maximum'
       alarm.threshold = 75
