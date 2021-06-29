@@ -10,6 +10,7 @@ module CfnGuardian::Resource
         alarm.data_points_to_alarm = 1
         alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         alarm.alarm_action = 'Critical'
+        alarm.enabled = false
         @alarms.push(alarm)
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -108,6 +109,7 @@ module CfnGuardian::Resource
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Minimum'
         alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
+        alarm.enabled = false
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
