@@ -218,7 +218,7 @@ module CfnGuardian
         super(resource)
         @group = 'ElasticSearch'
         @namespace = 'AWS/ElasticSearch'
-        @dimensions = { DomainName: resource['domain'], ClientId: resource['Id']}
+        @dimensions = { DomainName: resource['Domain'], ClientId: resource['Id']}
         @comparison_operator = 'GreaterThanThreshold'
         @threshold = 1
         @evaluation_periods = 5

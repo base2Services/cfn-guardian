@@ -36,6 +36,7 @@ Resources:
   - Id: Default
   ElasticSearch:
   - Id: Default
+  - domain: Default
   ElastiCacheReplicationGroup:
   - Id: Default
   Http:
