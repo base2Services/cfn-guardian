@@ -43,8 +43,10 @@ require 'cfnguardian/resources/glue'
 require 'cfnguardian/resources/step_functions'
 require 'cfnguardian/resources/vpn_tunnel'
 require 'cfnguardian/resources/vpn_connection'
+require 'cfnguardian/resources/elastic_search'
 require 'cfnguardian/version'
 require 'cfnguardian/error'
+
 
 module CfnGuardian
   class Compile
