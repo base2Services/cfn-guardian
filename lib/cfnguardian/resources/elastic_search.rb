@@ -61,6 +61,7 @@ module CfnGuardian::Resource
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Warning'
         alarm.statistic = 'Minimum'
+        alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -69,6 +70,7 @@ module CfnGuardian::Resource
         alarm.threshold = 25000
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Critical'
+        alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         @alarms.push(alarm)  
        
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -89,6 +91,7 @@ module CfnGuardian::Resource
         alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Average'
+
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -98,7 +101,6 @@ module CfnGuardian::Resource
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Warning'
         alarm.statistic = 'Minimum'
-        alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -108,7 +110,6 @@ module CfnGuardian::Resource
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Minimum'
-        alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
         alarm.enabled = false
         @alarms.push(alarm)  
 
@@ -119,7 +120,6 @@ module CfnGuardian::Resource
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Minimum'
-        alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -129,7 +129,6 @@ module CfnGuardian::Resource
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Warning'
         alarm.statistic = 'Minimum'
-        alarm.comparison_operator = 'GreaterThanOrEqualToThreshold'
         @alarms.push(alarm)  
 
     end
