@@ -91,7 +91,6 @@ module CfnGuardian::Resource
         alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Average'
-
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)

@@ -49,7 +49,7 @@ module CfnGuardian
         @evaluate_low_sample_count_percentile = nil
         @unit = nil
         @enabled = true
-        @resource_hash = Digest::MD5.hexdigest resource['Id'] 
+        @resource_hash = Digest::MD5.hexdigest resource['Id']
         @resource_id = resource['Id']
         @resource_name = resource.fetch('Name', nil)
         @alarm_action = 'Critical'
@@ -222,7 +222,7 @@ module CfnGuardian
           DomainName: resource['Domain'], 
           ClientId: resource['Id'] 
         }
-        @comparison_operator = 'GreaterOrEqualToThreshold'
+        @comparison_operator = 'GreaterThanOrEqualToThreshold'
         @threshold = 1
         @evaluation_periods = 5
         @treat_missing_data = 'breaching'
