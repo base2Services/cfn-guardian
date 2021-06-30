@@ -7,7 +7,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'Nodes'
         alarm.threshold = 3
         alarm.evaluation_periods = 1440 # 24 hours
-        alarm.data_points_to_alarm = 1
+        alarm.datapoints_to_alarm = 1
         alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         alarm.alarm_action = 'Critical'
         alarm.enabled = false
@@ -18,7 +18,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'JVMMemoryPressure'
         alarm.threshold = 72
         alarm.evaluation_periods = 5
-        alarm.data_points_to_alarm = 3
+        alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Warning'
         @alarms.push(alarm)
 
@@ -76,7 +76,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'CPUUtilization'
         alarm.threshold = 75
         alarm.evaluation_periods = 15
-        alarm.data_points_to_alarm = 3
+        alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Warning'
         alarm.statistic = 'Average'
         @alarms.push(alarm)  
@@ -86,7 +86,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'CPUUtilization'
         alarm.threshold = 95
         alarm.evaluation_periods = 5
-        alarm.data_points_to_alarm = 3
+        alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Average'
         @alarms.push(alarm)  
