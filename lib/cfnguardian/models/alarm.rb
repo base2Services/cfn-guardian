@@ -233,6 +233,21 @@ module CfnGuardian
         @dimensions = { CacheClusterId: resource['Id'] }
       end
     end
+
+    class ElasticSearchAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'ElasticSearch'
+        @namespace = 'AWS/ElasticSearch'
+        @dimensions = { DomainName: resource['Domain'], ClientId: resource['Id']}
+        @comparison_operator = 'GreaterThanThreshold'
+        @threshold = 1
+        @evaluation_periods = 5
+        @treat_missing_data = 'breaching'
+        @period = 60
+        @data_points_to_alarm = 1
+      end
+    end
     
     class ElasticLoadBalancerAlarm < BaseAlarm
       def initialize(resource)

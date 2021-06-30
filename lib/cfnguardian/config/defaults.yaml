@@ -39,6 +39,9 @@ Resources:
   - Id: Default
   ElasticLoadBalancer:
   - Id: Default
+  ElasticSearch:
+  - Id: Default
+  - Domain: Default
   ElastiCacheReplicationGroup:
   - Id: Default
   Http:
