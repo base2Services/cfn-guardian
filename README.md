@@ -41,3 +41,4 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
 - Redshift Cluster
 - SQS Queues
 - LogGroup Metric Filters
+- ElasticSearch
