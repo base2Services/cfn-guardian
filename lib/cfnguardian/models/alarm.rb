@@ -238,7 +238,7 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @group = 'ElasticSearch'
-        @namespace = 'AWS/ElasticSearch'
+        @namespace = 'AWS/ES'
         @dimensions = { 
           DomainName: resource['Domain'], 
           ClientId: resource['Id'] 
