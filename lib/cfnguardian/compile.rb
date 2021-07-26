@@ -16,6 +16,7 @@ require 'cfnguardian/resources/dynamodb_table'
 require 'cfnguardian/resources/ec2_instance'
 require 'cfnguardian/resources/ecs_cluster'
 require 'cfnguardian/resources/ecs_service'
+require 'cfnguardian/resources/eks_container_insights'
 require 'cfnguardian/resources/elastic_file_system'
 require 'cfnguardian/resources/elasticache_replication_group'
 require 'cfnguardian/resources/elastic_loadbalancer'
@@ -42,8 +43,10 @@ require 'cfnguardian/resources/glue'
 require 'cfnguardian/resources/step_functions'
 require 'cfnguardian/resources/vpn_tunnel'
 require 'cfnguardian/resources/vpn_connection'
+require 'cfnguardian/resources/elastic_search'
 require 'cfnguardian/version'
 require 'cfnguardian/error'
+
 
 module CfnGuardian
   class Compile

@@ -122,8 +122,8 @@ module CfnGuardian
         @group = 'AmazonMQRabbitMQQueue'
         @namespace = 'AWS/AmazonMQ'
         @dimensions = { 
-          Broker: resource['Id'],
-          Queue: resource['Queue'],
+          Broker: resource['Broker'],
+          Queue: resource['Id'],
           VirtualHost: resource['Vhost']
         }
       end
@@ -203,13 +203,52 @@ module CfnGuardian
         }
       end
     end
+
+    class EKSContainerInsightsClusterAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'EKSContainerInsightsCluster'
+        @namespace = 'ContainerInsights'
+        @dimensions = { ClusterName: resource['Id'] }
+      end
+    end
     
+    class EKSContainerInsightsNamespaceAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'EKSContainerInsightsNamespace'
+        @namespace = 'ContainerInsights'
+        @dimensions = { 
+          ClusterName: resource['Cluster'],
+          Namespace: resource['Id']
+        }
+      end
+    end
+
     class ElastiCacheReplicationGroupAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
         @group = 'ElastiCacheReplicationGroup'
         @namespace = 'AWS/ElastiCache'
         @dimensions = { CacheClusterId: resource['Id'] }
+      end
+    end
+
+    class ElasticSearchAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'ElasticSearch'
+        @namespace = 'AWS/ES'
+        @dimensions = { 
+          DomainName: resource['Domain'], 
+          ClientId: resource['Id'] 
+        }
+        @comparison_operator = 'GreaterThanOrEqualToThreshold'
+        @threshold = 1
+        @evaluation_periods = 5
+        @treat_missing_data = 'breaching'
+        @period = 60
+        @data_points_to_alarm = 1
       end
     end
     

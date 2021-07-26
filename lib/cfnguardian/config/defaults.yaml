@@ -8,7 +8,7 @@ Resources:
     Node: Default
   AmazonMQRabbitMQQueue:
   - Id: Default
-    Queue: Default
+    Broker: Default
     Vhost: Default
   ApiGateway:
   - Id: Default
@@ -30,10 +30,18 @@ Resources:
   ECSService:
   - Id: Default
     Cluster: Default
+  EKSContainerInsightsCluster:
+  - Id: Default
+  EKSContainerInsightsNamespace:
+  - Id: Default
+    Cluster: Default
   ElasticFileSystem:
   - Id: Default
   ElasticLoadBalancer:
   - Id: Default
+  ElasticSearch:
+  - Id: Default
+    Domain: Default
   ElastiCacheReplicationGroup:
   - Id: Default
   Http:

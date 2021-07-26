@@ -54,6 +54,7 @@ Resources:
 | Lambda                      | Id               |
 | CloudFrontDistribution      | Id               |
 | SQSQueue                    | Id               |
+| ElasticSearch               | Id, Domain       |
 
 
 ## Custom Resource Groups
