@@ -70,6 +70,7 @@ module CfnGuardian::Resource
         alarm.threshold = 25000
         alarm.evaluation_periods = 1
         alarm.alarm_action = 'Critical'
+        alarm.statistic = 'Minimum'
         alarm.comparison_operator = 'LessThanOrEqualToThreshold'
         @alarms.push(alarm)  
        
