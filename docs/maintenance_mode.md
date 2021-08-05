@@ -8,8 +8,8 @@ Alarms can be provided to the function the following ways
 Alarm names be provided by a space delimited list using the `--alarms` switch.
 
 ```bash
-cfn-guardian disable-alarms --group alarm-1 alarm-2
-cfn-guardian enable-alarms --group alarm-1 alarm-2
+cfn-guardian disable-alarms --alarms alarm-1 alarm-2
+cfn-guardian enable-alarms --alarms alarm-1 alarm-2
 ```
 
 ## Alarm Name Prefix
@@ -60,10 +60,14 @@ Resources:
     StatusCode: 200
 
 # Define the top level key
-MaintenaceGroups:
+MaintenanceGroups:
   
   # Define the group name
   AppUpdate:
+    # Optionally set a schedule for enabling/disabling
+    Schedule:
+      Disable: '30 0 * * ? *'
+      Enable: '00 1 * * ? *'
     # Define the resource group
     ECSService:
       # define the alarms in the resource group
@@ -83,3 +87,5 @@ MaintenaceGroups:
 cfn-guardian disable-alarms --group AppUpdate
 cfn-guardian enable-alarms --group AppUpdate
 ```
+
+Optionally add a Schedule for disabling and enabling alarm actions as shown in the example above to deploy a lambda function that will be invoked by event rules created with the given cron expressions.

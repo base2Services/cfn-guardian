@@ -22,12 +22,42 @@ module CfnGuardian
           parameter.Default sns
           parameters[name] = Ref(name)
         end
-        
+
+        if !maintenance_groups.empty?
+          add_lambda(CfnGuardian::Models::MaintenanceGroupCheck.new(maintenance_groups))
+        end
+
         maintenance_groups.each do |group|
-          topic = @template.SNS_Topic(group)
-          topic.TopicName group
+
+          group_name = "#{group[0]}MaintenanceGroup"
+
+          topic = @template.SNS_Topic(group_name)
+          topic.TopicName group_name
           topic.Tags([{ Key: 'Environment', Value: 'guardian' }])
-          parameters[group] = Ref(group)
+          parameters[group_name] = Ref(group_name)
+
+          if group[1].key?('Schedules')
+            enable_cron = group[1]['Schedules']['Enable']
+            disable_cron = group[1]['Schedules']['Disable']
+
+            event = @template.Events_Rule("#{group_name}EnableEvent")
+            event.Name "#{group_name}EnableEvent"
+            event.ScheduleExpression "cron(#{enable_cron})"
+            event.Targets([{ 
+              Arn: FnGetAtt('MaintenanceGroupCheckFunction', 'Arn'), 
+              Id: "#{group_name}EnableTarget", 
+              Input: "{\"action\":\"enable_alarms\",\"maintenance_group\":\"#{group_name}\"}"
+            }])
+
+            event = @template.Events_Rule("#{group_name}DisableEvent")
+            event.Name "#{group_name}DisableEvent"
+            event.ScheduleExpression "cron(#{disable_cron})"            
+            event.Targets([{ 
+              Arn: FnGetAtt('MaintenanceGroupCheckFunction', 'Arn'), 
+              Id: "#{group_name}DisableTarget", 
+              Input: "{\"action\":\"disable_alarms\",\"maintenance_group\":\"#{group_name}\"}"
+            }])
+          end
         end
         
         add_iam_role(ssm_parameters)
@@ -70,6 +100,17 @@ module CfnGuardian
               Effect: 'Allow',
               Action: [ 'ec2:CreateNetworkInterface', 'ec2:DescribeNetworkInterfaces', 'ec2:DeleteNetworkInterface' ],
               Resource: '*'
+            }]
+          }
+        }
+        policies << {
+          PolicyName: 'maintenance-group-actions',
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+              Effect: 'Allow',
+              Action: [ 'cloudwatch:DescribeAlarms', 'cloudwatch:DisableAlarmActions', 'cloudwatch:EnableAlarmActions' ],
+              Resource: FnSub("arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*")
             }]
           }
         }

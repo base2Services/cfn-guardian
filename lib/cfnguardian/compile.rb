@@ -61,7 +61,7 @@ module CfnGuardian
       @composites = config.fetch('Composites',{})
       @templates = config.fetch('Templates',{})
       @topics = config.fetch('Topics',{})
-      @maintenance_groups = config.fetch('MaintenaceGroups', {})
+      @maintenance_groups = config.fetch('MaintenanceGroups', {})
       @event_subscriptions = config.fetch('EventSubscriptions', {})
       
       # Make sure the default topics exist if they aren't supplied in the alarms.yaml
@@ -69,7 +69,6 @@ module CfnGuardian
         @topics[topic] = '' unless @topics.has_key?(topic)
       end
 
-      @maintenance_group_list = @maintenance_groups.keys.map {|group| "#{group}MaintenanceGroup"}
       @resources = []
       @stacks = []
       @checks = []
@@ -116,6 +115,9 @@ module CfnGuardian
       
       @maintenance_groups.each do |maintenance_group,resource_groups|
         resource_groups.each do |group, alarms|
+          if group == 'Schedules' 
+            next
+          end
           alarms.each do |alarm, resources|
             resources.each do |resource|
 
@@ -190,7 +192,7 @@ module CfnGuardian
       resources = split_resources(bucket,path)
       
       main_stack = CfnGuardian::Stacks::Main.new()
-      main_stack.build_template(@stacks,@checks,@topics,@maintenance_group_list,@ssm_parameters)
+      main_stack.build_template(@stacks,@checks,@topics,@maintenance_groups,@ssm_parameters)
       valid = main_stack.template.validate
       FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
