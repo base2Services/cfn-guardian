@@ -211,7 +211,7 @@ module CfnGuardian
         @name = 'MaintenanceGroupCheck'
         @package = 'maintenance-group-check'
         @handler = 'handler.maintenance_group_check'
-        @version = 'dd1341b1001ac2763588254a37728845ee61d030'
+        @version = 'fa8e6fb5340e5baa710f18089270086b326cee6e'
         @runtime = 'python3.7'
       end 
     end

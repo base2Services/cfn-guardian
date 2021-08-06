@@ -65,9 +65,11 @@ MaintenanceGroups:
   # Define the group name
   AppUpdate:
     # Optionally set a schedule for enabling/disabling
-    Schedule:
+    Schedules:
       Disable: '30 0 * * ? *'
       Enable: '00 1 * * ? *'
+      #Optionally specify and set to true to enable logging on lambda
+      Debug: true
     # Define the resource group
     ECSService:
       # define the alarms in the resource group
