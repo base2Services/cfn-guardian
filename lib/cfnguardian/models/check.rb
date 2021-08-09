@@ -205,5 +205,16 @@ module CfnGuardian
       end
     end
 
+    class MaintenanceGroupCheck < BaseCheck
+      def initialize(resource)
+        super(resource)
+        @name = 'MaintenanceGroupCheck'
+        @package = 'maintenance-group-check'
+        @handler = 'handler.maintenance_group_check'
+        @version = '5b795e6509068d1767e4be80f2e6868cbeb3b425'
+        @runtime = 'python3.7'
+      end 
+    end
+
   end
 end

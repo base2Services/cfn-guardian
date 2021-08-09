@@ -4,6 +4,7 @@ module CfnGuardian
   module Stacks
     class Main
       include CfnDsl::CloudFormation
+      include Logging
       
       attr_reader :parameters, :template
       
@@ -22,12 +23,10 @@ module CfnGuardian
           parameter.Default sns
           parameters[name] = Ref(name)
         end
-        
-        maintenance_groups.each do |group|
-          topic = @template.SNS_Topic(group)
-          topic.TopicName group
-          topic.Tags([{ Key: 'Environment', Value: 'guardian' }])
-          parameters[group] = Ref(group)
+
+        if maintenance_groups.any?
+          add_lambda(CfnGuardian::Models::MaintenanceGroupCheck.new(maintenance_groups))
+          maintenance_groups.each {|group,config| add_maintenance_group(group,config,parameters)}
         end
         
         add_iam_role(ssm_parameters)
@@ -70,6 +69,17 @@ module CfnGuardian
               Effect: 'Allow',
               Action: [ 'ec2:CreateNetworkInterface', 'ec2:DescribeNetworkInterfaces', 'ec2:DeleteNetworkInterface' ],
               Resource: '*'
+            }]
+          }
+        }
+        policies << {
+          PolicyName: 'maintenance-group-actions',
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+              Effect: 'Allow',
+              Action: [ 'cloudwatch:DescribeAlarms', 'cloudwatch:DisableAlarmActions', 'cloudwatch:EnableAlarmActions', 'cloudwatch:SetAlarmState' ],
+              Resource: FnSub("arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*")
             }]
           }
         }
@@ -165,7 +175,37 @@ module CfnGuardian
           end
         end
       end
-      
+
+      def add_maintenance_group(group,config,parameters)
+        group_name = "#{group}MaintenanceGroup"
+        schedules = config.fetch('Schedules', {})
+        logging = config.dig('Schedules', 'Debug').to_s
+
+        topic = @template.SNS_Topic(group_name)
+        topic.TopicName group_name
+        topic.Tags([{ Key: 'Environment', Value: 'guardian' }])
+        parameters[group_name] = Ref(group_name)
+
+        if schedules.any?
+          event = @template.Events_Rule("#{group_name}EnableEvent")
+          event.Name "#{group_name}EnableEvent"
+          event.ScheduleExpression "cron(#{schedules['Enable']})"
+          event.Targets([{ 
+            Arn: FnGetAtt('MaintenanceGroupCheckFunction', 'Arn'), 
+            Id: "#{group_name}EnableTarget", 
+            Input: {action:"enable_alarms", maintenance_group: group_name, logging: logging}.to_json
+          }])
+
+          event = @template.Events_Rule("#{group_name}DisableEvent")
+          event.Name "#{group_name}DisableEvent"
+          event.ScheduleExpression "cron(#{schedules['Disable']})"            
+          event.Targets([{ 
+            Arn: FnGetAtt('MaintenanceGroupCheckFunction', 'Arn'), 
+            Id: "#{group_name}DisableTarget", 
+            Input: {action:"disable_alarms", maintenance_group: group_name, logging: logging}.to_json
+          }])
+        end
+      end
     end
   end
 end
