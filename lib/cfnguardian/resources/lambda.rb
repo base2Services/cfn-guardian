@@ -24,6 +24,7 @@ module CfnGuardian::Resource
       alarm.name = 'IteratorAge'
       alarm.metric_name = 'IteratorAge'
       alarm.threshold = 600000
+      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::LambdaAlarm.new(@resource)
@@ -31,6 +32,7 @@ module CfnGuardian::Resource
       alarm.metric_name = 'Duration'
       alarm.statistic = 'Average'
       alarm.threshold = 30
+      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
     end
     
