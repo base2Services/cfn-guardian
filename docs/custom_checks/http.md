@@ -32,6 +32,8 @@ Resources:
     Method: post
     # specify headers using "key=value key=value"
     Headers: content-type=application/json
+    # specify a useragent that contains spaces
+    UserAgent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Base2/Lambda
     # pass in custom payload for the request
     Payload: '{"name": "john"}'
 ```

@@ -52,6 +52,7 @@ module CfnGuardian
         @status_code = resource.fetch('StatusCode',200)
         @body_regex = resource.fetch('BodyRegex',nil)
         @headers = resource.fetch('Headers',nil)
+        @user_agent = resource.fetch('UserAgent',nil)
         @payload = resource.fetch('Payload',nil)
         @compressed = resource.fetch('Compressed',false)
       end
@@ -65,6 +66,7 @@ module CfnGuardian
         }
         payload['BODY_REGEX_MATCH'] = @body_regex unless @body_regex.nil?
         payload['HEADERS'] = @headers unless @headers.nil?
+        payload['USER_AGENT'] = @user_agent unless @user_agent.nil?
         payload['PAYLOAD'] = @payload unless @payload.nil?
         payload['COMPRESSED'] = '1' if @compressed
         return payload.to_json
