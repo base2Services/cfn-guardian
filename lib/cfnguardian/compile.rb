@@ -44,6 +44,7 @@ require 'cfnguardian/resources/step_functions'
 require 'cfnguardian/resources/vpn_tunnel'
 require 'cfnguardian/resources/vpn_connection'
 require 'cfnguardian/resources/elastic_search'
+require 'cfnguardian/resources/jenkins'
 require 'cfnguardian/version'
 require 'cfnguardian/error'
 

@@ -10,3 +10,4 @@
 cfn-guardian-*.gem
 
 out/
+alarms.yaml

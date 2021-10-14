@@ -485,6 +485,15 @@ module CfnGuardian
       end
     end
 
+    class JenkinsAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'Jenkins'
+        @namespace = 'Ciinabox/Jenkins'
+        @dimensions = { Jenkins: resource['Id'], Monitoring: 'JenkMon' }
+      end
+    end
+
     class VPNTunnelAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
