@@ -1,5 +1,5 @@
 module CfnGuardian::Resource
-    class AmazonMQRabbitMQBroker < Base
+    class Jenkins < Base
 
         def default_alarms
             alarm = CfnGuardian::Models::JenkinsAlarm.new(@resource)
