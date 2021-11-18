@@ -26,6 +26,9 @@ module CfnGuardian::Resource
     end
     
     def get_alarms(group,overides={})
+      # deep copying the overrides to preserse it's reference before doing any changes to it
+      overides = Marshal.load(Marshal.dump(overides))
+
       # generate default alarms
       default_alarms()
 
