@@ -13,7 +13,7 @@ module CfnGuardian::Resource
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
-      alarm.name = 'CpuCreditBalanceCritical'
+      alarm.name = 'CpuCreditBalanceWarning'
       alarm.metric_name = 'CpuCreditBalance'
       alarm.comparison_operator = 'LessThanThreshold'
       alarm.statistic = 'Minimum'
