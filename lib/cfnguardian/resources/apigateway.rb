@@ -26,6 +26,7 @@ module CfnGuardian::Resource
       alarm.statistic = 'Average'
       alarm.threshold = 1000
       alarm.evaluation_periods = 2
+      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
     end
     
