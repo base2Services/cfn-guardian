@@ -11,6 +11,7 @@ module CfnGuardian::Resource
         alarm = CfnGuardian::Models::LogGroupAlarm.new(@resource)
         alarm.name = filter['MetricName']
         alarm.metric_name = filter['MetricName']
+        alarm.treat_missing_data = 'notBreaching'
         @alarms.push(alarm)
       end
     end
