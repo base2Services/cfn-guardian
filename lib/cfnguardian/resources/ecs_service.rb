@@ -36,6 +36,7 @@ module CfnGuardian
         alarm.treat_missing_data = 'breaching'
         alarm.alarm_action = 'Critical'
         alarm.datapoints_to_alarm = 4
+        alarm.treat_missing_data = 'notBreaching'
         alarm.enabled = false
         @alarms.push(alarm)
         
@@ -48,6 +49,7 @@ module CfnGuardian
         alarm.evaluation_periods = 5
         alarm.treat_missing_data = 'breaching'
         alarm.datapoints_to_alarm = 4
+        alarm.treat_missing_data = 'notBreaching'
         alarm.alarm_action = 'Warning'
         alarm.enabled = false
         @alarms.push(alarm)   
@@ -62,6 +64,7 @@ module CfnGuardian
         alarm.treat_missing_data = 'breaching'
         alarm.alarm_action = 'Critical'
         alarm.datapoints_to_alarm = 4
+        alarm.treat_missing_data = 'notBreaching'
         alarm.enabled = false
         @alarms.push(alarm)
         
@@ -74,6 +77,7 @@ module CfnGuardian
         alarm.evaluation_periods = 5
         alarm.treat_missing_data = 'breaching'
         alarm.datapoints_to_alarm = 4
+        alarm.treat_missing_data = 'notBreaching'
         alarm.alarm_action = 'Warning'
         alarm.enabled = false
         @alarms.push(alarm)      
