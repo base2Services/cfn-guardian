@@ -10,7 +10,6 @@ module CfnGuardian
         alarm.statistic = 'SampleCount'
         alarm.threshold = 0
         alarm.evaluation_periods = 10
-        alarm.treat_missing_data = 'breaching'
         alarm.datapoints_to_alarm = 8
         @alarms.push(alarm)
         
@@ -21,7 +20,6 @@ module CfnGuardian
         alarm.statistic = 'SampleCount'
         alarm.threshold = 1
         alarm.evaluation_periods = 10
-        alarm.treat_missing_data = 'breaching'
         alarm.datapoints_to_alarm = 8
         alarm.alarm_action = 'Warning'
         @alarms.push(alarm)
