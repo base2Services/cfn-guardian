@@ -6,7 +6,7 @@ module CfnGuardian
         alarm = CfnGuardian::Models::ECSServiceAlarm.new(@resource)
         alarm.name = 'UnhealthyTaskCritical'
         alarm.metric_name = 'MemoryUtilization'
-        alarm.comparison_operator = 'LessThanOrEqualToThreshold'
+        alarm.comparison_operator = 'LessThanThreshold'
         alarm.statistic = 'SampleCount'
         alarm.threshold = 0
         alarm.evaluation_periods = 10
@@ -17,7 +17,7 @@ module CfnGuardian
         alarm = CfnGuardian::Models::ECSServiceAlarm.new(@resource)
         alarm.name = 'UnhealthyTaskWarning'
         alarm.metric_name = 'MemoryUtilization'
-        alarm.comparison_operator = 'LessThanOrEqualToThreshold'
+        alarm.comparison_operator = 'LessThanThreshold'
         alarm.statistic = 'SampleCount'
         alarm.threshold = 1
         alarm.evaluation_periods = 10
