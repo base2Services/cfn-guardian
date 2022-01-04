@@ -36,6 +36,7 @@ module CfnGuardian::Resource
         alarm.name = 'ExpiresInDaysCritical'
         alarm.metric_name = 'ExpiresInDays'
         alarm.threshold = 5
+        alarm.treat_missing_data = 'notBreaching'
         @alarms.push(alarm)
         
         alarm = CfnGuardian::Models::SslAlarm.new(@resource)
@@ -43,6 +44,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'ExpiresInDays'
         alarm.alarm_action = 'Task'
         alarm.threshold = 30
+        alarm.treat_missing_data = 'notBreaching'
         @alarms.push(alarm)
       end
     end
