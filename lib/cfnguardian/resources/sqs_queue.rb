@@ -7,7 +7,6 @@ module CfnGuardian::Resource
       alarm.metric_name = 'ApproximateAgeOfOldestMessage'
       alarm.threshold = 0.5
       alarm.evaluation_periods = 5
-      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::SQSQueueAlarm.new(@resource)
@@ -15,7 +14,6 @@ module CfnGuardian::Resource
       alarm.metric_name = 'ApproximateNumberOfMessagesVisible'
       alarm.threshold = 0.5
       alarm.evaluation_periods = 5
-      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
     end
     

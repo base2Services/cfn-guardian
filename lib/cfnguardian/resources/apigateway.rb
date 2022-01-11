@@ -8,7 +8,6 @@ module CfnGuardian::Resource
       alarm.statistic = 'Sum'
       alarm.threshold = 5
       alarm.evaluation_periods = 2
-      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::ApiGatewayAlarm.new(@resource)
@@ -17,7 +16,6 @@ module CfnGuardian::Resource
       alarm.statistic = 'Sum'
       alarm.threshold = 5
       alarm.evaluation_periods = 2
-      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::ApiGatewayAlarm.new(@resource)
@@ -26,7 +24,6 @@ module CfnGuardian::Resource
       alarm.statistic = 'Average'
       alarm.threshold = 1000
       alarm.evaluation_periods = 2
-      alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
     end
     

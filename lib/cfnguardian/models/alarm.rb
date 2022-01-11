@@ -71,6 +71,7 @@ module CfnGuardian
         @group = 'ApiGateway'
         @namespace = 'AWS/ApiGateway'
         @dimensions = { ApiName: resource['Id'] }
+        @treat_missing_data = 'notBreaching'
       end
     end
     
@@ -189,6 +190,7 @@ module CfnGuardian
         @threshold = 75
         @alarm_action = 'Warning'
         @evaluation_periods = 10
+        @treat_missing_data = 'notBreaching'
       end
     end
     
@@ -201,6 +203,7 @@ module CfnGuardian
           ServiceName: resource['Id'],
           ClusterName: resource['Cluster'] 
         }
+        @treat_missing_data = 'breaching'
       end
     end
 
@@ -341,6 +344,7 @@ module CfnGuardian
         @dimensions = { FunctionName: resource['Id'] }
         @statistic = 'Average'
         @evaluation_periods = 5
+        @treat_missing_data = 'notBreaching'
       end
     end
     
@@ -426,6 +430,7 @@ module CfnGuardian
         @dimensions = { QueueName: resource['Id'] }
         @statistic = 'Average'
         @period = 300
+        @treat_missing_data = 'notBreaching'
       end
     end
     
@@ -438,6 +443,7 @@ module CfnGuardian
         @threshold = 1
         @period = 300
         @alarm_action = 'Informational'
+        @treat_missing_data = 'notBreaching'
       end
     end
     
