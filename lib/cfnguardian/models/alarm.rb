@@ -141,6 +141,7 @@ module CfnGuardian
         }
         @statistic = 'Average'
         @evaluation_periods = 5
+        @treat_missing_data = 'notBreaching'
       end
     end
     
