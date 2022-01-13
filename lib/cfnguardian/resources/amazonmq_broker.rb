@@ -8,7 +8,9 @@ module CfnGuardian::Resource
       alarm.comparison_operator = 'LessThanThreshold'
       alarm.statistic = 'Minimum'
       alarm.threshold = 15
-      alarm.evaluation_periods = 1
+      alarm.period = 300
+      alarm.datapoints_to_alarm = 2
+      alarm.evaluation_periods = 2
       alarm.treat_missing_data = 'notBreaching'
       @alarms.push(alarm)
       
@@ -18,7 +20,9 @@ module CfnGuardian::Resource
       alarm.comparison_operator = 'LessThanThreshold'
       alarm.statistic = 'Minimum'
       alarm.threshold = 30
-      alarm.evaluation_periods = 1
+      alarm.period = 300
+      alarm.datapoints_to_alarm = 2
+      alarm.evaluation_periods = 2
       alarm.treat_missing_data = 'notBreaching'
       alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
