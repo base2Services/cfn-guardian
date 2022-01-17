@@ -34,6 +34,18 @@ EventSubscriptions:
     InstanceTerminated: false
 ```
 
+## Enabling Default Events
+
+Some templates may have events that are disabled by default, they can be enabled using a slightly different syntax to disabling.
+
+```yaml
+EventSubscriptions:
+  RDSInstance:
+    # set the replication failure event to true to enable the event
+    ReplicationFailure: 
+      Enabled: true
+```
+
 ## Creating Custom Events
 
 Custom events can be created if there are not defaults for that event. They can be inherited from a default event or from the base event model.
