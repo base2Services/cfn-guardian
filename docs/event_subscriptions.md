@@ -10,7 +10,7 @@ As with the default alarms in Guardian, there are default events for some resour
 
 ## Overriding Defaults
 
-Default properites of the events can be overridden through the config YAML using the `EventsSubscriptions` top level key.
+Default properties of the events can be overridden through the config YAML using the `EventsSubscriptions` top level key.
 For example here we are changing the topic the event is being send to.
 
 ```yaml
