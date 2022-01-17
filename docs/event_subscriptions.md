@@ -10,14 +10,14 @@ As with the default alarms in Guardian, there are default events for some resour
 
 ## Overriding Defaults
 
-Default properites of the events can be overridden through the config YAML using the `EventsSubscription` top level key.
+Default properites of the events can be overridden through the config YAML using the `EventsSubscriptions` top level key.
 For example here we are changing the topic the event is being send to.
 
 ```yaml
 Topics:
     CustomEvents: arn:aws:sns....
 
-EventSubscription:
+EventSubscriptions:
   Ec2Instance:
     InstanceTerminated:
       Topic: CustomEvents
@@ -28,7 +28,7 @@ EventSubscription:
 Default events can be disabled, the same way default alarms can be disabled through the config YAML.
 
 ```yaml
-EventSubscription:
+EventSubscriptions:
   Ec2Instance:
     # set the instance terminated event to false to disable the event
     InstanceTerminated: false
@@ -44,7 +44,7 @@ This is useful if you want to create a new event and a default event already has
 The following example inherits the `MasterPasswordReset` RDS event and creates a new event that captures the security group add to an rds instance event.
 
 ```yaml
-EventSubscription:
+EventSubscriptions:
   RDSInstance:
     # Create a new event name
     DBNewSecurityGroup:
@@ -59,7 +59,7 @@ EventSubscription:
 If there are no default events that match the format you require you can create an event of the base event subscription model.
 
 ```yaml
-EventSubscription:
+EventSubscriptions:
   ECSCluster:
     ContainerInstanceStateChange:
       Source: aws.ecs
