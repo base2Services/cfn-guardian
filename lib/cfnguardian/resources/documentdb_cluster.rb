@@ -30,6 +30,7 @@ module CfnGuardian::Resource
         alarm.metric_name = 'FreeableMemory'
         alarm.threshold = 1000000000
         alarm.evaluation_periods = 3
+        alarm.comparison_operator = 'LessThanThreshold'
         @alarms.push(alarm)
       end
       
