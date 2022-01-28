@@ -39,6 +39,7 @@ Resources:
 | ApiGateway                  | Id               |
 | AmazonMQBroker              | Id               |
 | AutoScalingGroup            | Id               |
+| DocumentDBCluster           | Id               |
 | DynamoDBTable               | Id               |
 | ElastiCacheReplicationGroup | Id               |
 | ElasticFileSystem           | Id               |

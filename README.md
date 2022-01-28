@@ -29,6 +29,7 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
 - Network TargetGroups
 - AutoScalingGroups
 - CloudFront Distributions
+- DocumentDB Clusters
 - DynamoDB Tables
 - EC2 Instances
 - ECS Clusters
