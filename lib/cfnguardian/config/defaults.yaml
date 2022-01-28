@@ -19,6 +19,8 @@ Resources:
   - Id: Default
   CloudFrontDistribution:
   - Id: Default
+  DocumentDBCluster:
+  - Id: Default
   DomainExpiry:
   - Id: Default
   DynamoDBTable:

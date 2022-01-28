@@ -153,6 +153,15 @@ module CfnGuardian
         @dimensions = { AutoScalingGroupName: resource['Id'] }
       end
     end
+
+    class DocumentDBClusterAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'DocumentDBCluster'
+        @namespace = 'AWS/DocDB'
+        @dimensions = { DBClusterIdentifier: resource['Id'] }
+      end
+    end
     
     class DomainExpiryAlarm < BaseAlarm
       def initialize(resource)
