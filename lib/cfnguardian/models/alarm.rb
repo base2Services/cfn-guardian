@@ -154,6 +154,29 @@ module CfnGuardian
       end
     end
 
+    class DMSTaskAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'DMSTask'
+        @namespace = 'AWS/DMS'
+        @dimensions = { 
+          ReplicationTaskIdentifier: resource['Id'],
+          ReplicationInstanceIdentifier: resource['Instance']
+         }
+      end
+    end
+
+    class DMSClusterAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'DMSCluster'
+        @namespace = 'AWS/DMS'
+        @dimensions = { 
+          ReplicationInstanceIdentifier: resource['Id']
+         }
+      end
+    end
+
     class DocumentDBClusterAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
