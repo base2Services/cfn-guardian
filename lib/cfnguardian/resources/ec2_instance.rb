@@ -14,8 +14,9 @@ module CfnGuardian
         alarm = CfnGuardian::Models::Ec2InstanceAlarm.new(@resource)
         alarm.name = 'StatusCheckFailed'
         alarm.metric_name = 'StatusCheckFailed'
-        alarm.threshold = 90
-        alarm.evaluation_periods = 10
+        alarm.threshold = 0
+        alarm.evaluation_periods = 1
+        alarm.comparison_operator = 'GreaterThanThreshold'
         @alarms.push(alarm)
 
         alarm = CfnGuardian::Models::Ec2InstanceAlarm.new(@resource)
