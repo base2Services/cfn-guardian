@@ -1,6 +1,6 @@
 FROM ruby:2.7-alpine
 
-ARG GUARDIAN_VERSION="0.7.7"
+ARG GUARDIAN_VERSION="0.7.11"
 
 COPY . /src
 

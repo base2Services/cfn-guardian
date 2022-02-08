@@ -56,6 +56,8 @@ Resources:
 | CloudFrontDistribution      | Id               |
 | SQSQueue                    | Id               |
 | ElasticSearch               | Id, Domain       |
+| DMSCluster                  | Id               |
+| DMSTask                     | Id, Instance     |
 
 
 ## Custom Resource Groups

@@ -6,7 +6,7 @@
 3. [Alarm Templates](alarm_templates.md)
 4. Custom Checks
     1. [HTTP](custom_checks/http.md)
-    2. [Domain Expirey](custom_checks/domain_expirey.md)
+    2. [Domain Expiry](custom_checks/domain_expiry.md)
     3. [LogGroup Metric Filters](custom_checks/log_group_metric_filters.md)
     4. [NRPE](custom_checks/nrpe.md)
     5. [Port](custom_checks/port.md)
