@@ -24,10 +24,10 @@ Topics:
   Informational: arn:aws:sns:ap-southeast-2:123456789012:Informational
   Custom: arn:aws:sns:ap-southeast-2:123456789012:Custom
 
-Template:
+Templates:
   Ec2Instance:
     GroupOverrides:
-      AlarmActions:
+      AlarmAction:
       - Critical
       - Custom
 ```
