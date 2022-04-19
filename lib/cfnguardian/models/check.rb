@@ -64,7 +64,7 @@ module CfnGuardian
         @package = 'port-check'
         @handler = 'handler.port_check'
         @version = '356203b2a720ba0730622f978e677b88f8d0c328'
-        @runtime = 'python3.6'
+        @runtime = 'python3.7'
       end
     end
     
@@ -152,7 +152,7 @@ module CfnGuardian
         @package = 'ecs-containder-instance-check'
         @handler = 'handler.run_check'
         @version = '4f650d5846d6e8d19f0139bccdeeb147f03f0dd6'
-        @runtime = 'python3.6'
+        @runtime = 'python3.7'
       end
     end
     
