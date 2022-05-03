@@ -529,7 +529,11 @@ module CfnGuardian
         super(resource)
         @group = 'Jenkins'
         @namespace = 'Ciinabox/Jenkins'
-        @dimensions = { Jenkins: resource['Id'], Monitoring: 'JenkMon' }
+        @dimensions = { 
+          Jenkins: resource['Id'],
+          Label: resource['Lable'],
+          Monitoring: 'JenkMon'
+        }
       end
     end
 
