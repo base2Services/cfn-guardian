@@ -9,8 +9,7 @@ module CfnGuardian::Resource
             alarm.treat_missing_data = 'breaching'
             alarm.alarm_action = 'Warning'
             alarm.period = 3600 # 1 hour
-            alarm.evaluation_periods = 86400 # 24 hours
-            alarm.datapoints_to_alarm = 24
+            alarm.evaluation_periods = 24 # 24 hours
             alarm.comparison_operator = 'LessThanThreshold'
             alarm.threshold = 1
             @alarms.push(alarm)
