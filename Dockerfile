@@ -1,6 +1,8 @@
 FROM ruby:2.7-alpine
 
-ARG GUARDIAN_VERSION="0.7.11"
+LABEL "org.opencontainers.image.source"="https://github.com/base2Services/cfn-guardian"
+
+ARG GUARDIAN_VERSION="*"
 
 COPY . /src
 
