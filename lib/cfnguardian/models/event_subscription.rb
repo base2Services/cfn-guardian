@@ -66,6 +66,7 @@ module CfnGuardian
     class RDSClusterEventSubscription < RDSEventSubscription
       def initialize(resource)
         super(resource)
+        @detail_type = 'RDS DB Cluster Event'
         @source_type = 'DB_CLUSTER'
       end
     end
