@@ -14,6 +14,7 @@ module CfnGuardian
       @template_path = "out/guardian.compiled.yaml"
       @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/guardian.compiled.yaml"
       @parameters = parameters
+      @tags = opts.fetch(:tags, {})
       @client = Aws::CloudFormation::Client.new()
     end
 
@@ -63,22 +64,21 @@ module CfnGuardian
         end
       end
 
+      default_tags = {
+        guardian:version: CfnGuardian::VERSION,
+        Environment: 'guardian'
+      }
+      default_tags.merge!(@tags)
+      tags = default_tags.map {|k,v| {key: k, value: v}}
+      logger.debug "tagging stack with tags #{tags}"
+      
       logger.debug "Creating changeset"
       change_set = @client.create_change_set({
         stack_name: @stack_name,
         template_url: @template_url,
         capabilities: ["CAPABILITY_IAM"],
         parameters: params,
-        tags: [
-          {
-            key: "guardian:version",
-            value: CfnGuardian::VERSION,
-          },
-          { 
-            key: 'Environment', 
-            value: 'guardian' 
-          }
-        ],
+        tags: tags,
         change_set_name: change_set_name,
         change_set_type: change_set_type
       })
