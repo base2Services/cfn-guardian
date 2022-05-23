@@ -65,13 +65,13 @@ module CfnGuardian
       end
 
       default_tags = {
-        guardian:version: CfnGuardian::VERSION,
+        'guardian:version': CfnGuardian::VERSION,
         Environment: 'guardian'
       }
       default_tags.merge!(@tags)
       tags = default_tags.map {|k,v| {key: k, value: v}}
       logger.debug "tagging stack with tags #{tags}"
-      
+
       logger.debug "Creating changeset"
       change_set = @client.create_change_set({
         stack_name: @stack_name,
