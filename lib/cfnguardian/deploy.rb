@@ -72,9 +72,8 @@ module CfnGuardian
 
       tags = get_tags()
       logger.debug "tagging stack with tags #{tags}"
-      exit
-      logger.debug "Creating changeset"
-      change_set = @client.create_change_set({
+
+      changeset_request = {
         stack_name: @stack_name,
         template_url: @template_url,
         capabilities: ["CAPABILITY_IAM"],
@@ -82,7 +81,14 @@ module CfnGuardian
         tags: tags,
         change_set_name: change_set_name,
         change_set_type: change_set_type
-      })
+      }
+
+      if opts.has_key?("role_arn")
+        changeset_request[:role_arn] = opts[:role_arn]
+      end
+
+      logger.debug "Creating changeset"
+      change_set = @client.create_change_set(changeset_request)
       return change_set, change_set_type
     end
 
