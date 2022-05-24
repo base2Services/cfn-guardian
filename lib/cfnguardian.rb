@@ -86,6 +86,7 @@ module CfnGuardian
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
+    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
 
     def deploy
       set_log_level(options[:debug])
