@@ -14,6 +14,7 @@ module CfnGuardian
       @template_path = "out/guardian.compiled.yaml"
       @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/guardian.compiled.yaml"
       @parameters = parameters
+      @changeset_role_arn = opts.fetch(:role_arn, nil)
 
       @tags = {}
       if opts.has_key?("tag_yaml")
@@ -83,8 +84,8 @@ module CfnGuardian
         change_set_type: change_set_type
       }
 
-      if opts.has_key?("role_arn")
-        changeset_request[:role_arn] = opts[:role_arn]
+      unless @changeset_role_arn.nil?
+        changeset_request[:role_arn] = @changeset_role_arn
       end
 
       logger.debug "Creating changeset"
