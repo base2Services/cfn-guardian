@@ -85,6 +85,9 @@ module CfnGuardian
     method_option :sns_task, type: :string, desc: "sns topic arn for the task alarms"
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
+    method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
+    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
+    method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
 
     def deploy
       set_log_level(options[:debug])
