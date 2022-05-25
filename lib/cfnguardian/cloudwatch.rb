@@ -9,6 +9,10 @@ module CfnGuardian
       alarm_id = alarm.resource_name.nil? ? alarm.resource_id : alarm.resource_name
       return "guardian-#{alarm.group}-#{alarm_id}-#{alarm.name}"
     end
+
+    def self.get_alarm_arn(alarm)
+      return "arn:aws:cloudwatch:#{Aws.config[:region]}:#{aws_account_id()}:alarm:#{self.get_alarm_name(alarm)}"
+    end
         
     def self.get_alarms_by_prefix(prefix:, state: nil, action_prefix: nil)
       client = Aws::CloudWatch::Client.new()

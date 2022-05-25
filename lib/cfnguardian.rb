@@ -11,6 +11,7 @@ require "cfnguardian/display_formatter"
 require "cfnguardian/drift"
 require "cfnguardian/codecommit"
 require "cfnguardian/codepipeline"
+require "cfnguardian/tagger"
 
 module CfnGuardian
   class Cli < Thor
@@ -117,14 +118,37 @@ module CfnGuardian
       deployer.execute_change_set(change_set.id)
       deployer.wait_for_execute(change_set_type)
     end
-        
+
+    desc "tag-alarms", "apply tags to the cloudwatch alarms deployed"
+    long_desc <<-LONG
+    Because Cloudformation desn't support tagging cloudwatch alarms this command
+    applies tags to each cloudwatch alarm created by guardian.
+    Guardian defines default tags and this can be added to through the alarms.yaml config.
+    LONG
+    method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+
+    def tag_alarms
+      set_log_level(options[:debug])
+      set_region(options[:region],true)
+
+      compiler = CfnGuardian::Compile.new(options[:config])
+      compiler.get_resources
+      alarms = compiler.alarms
+
+      tagger = CfnGuardian::Tagger.new()
+      alarms.each do |alarm|
+        tagger.tag_alarm(alarm, compiler.global_tags)
+      end
+    end
+
     desc "show-drift", "Cloudformation drift detection"
     long_desc <<-LONG
     Displays any cloudformation drift detection in the cloudwatch alarms from the deployed stacks
     LONG
     method_option :stack_name, aliases: :s, type: :string, default: 'guardian', desc: "set the Cloudformation stack name"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    
+
     def show_drift
       set_region(options[:region],true)
       
