@@ -6,17 +6,9 @@ module CfnGuardian
   module Stacks
     class Resources
       include CfnDsl::CloudFormation
-      
-      attr_reader :template
-      
-      def initialize(parameters,stack_id)
-        @stack_id = stack_id
-
-        @template = CloudFormation("Guardian nested - stack-id:stk#{@stack_id}")
-        parameters.each do |name|
-          parameter = @template.Parameter(name)
-          parameter.Type 'String'
-        end
+            
+      def initialize(template)
+        @template = template
       end
       
       def build_template(resources)
@@ -41,13 +33,12 @@ module CfnGuardian
       def add_alarm(alarm)
         actions = alarm.alarm_action.kind_of?(Array) ? alarm.alarm_action.map{|action| Ref(action)} : [Ref(alarm.alarm_action)]
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
-        stack_id = @stack_id
 
         @template.declare do
           CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name.gsub(/[^0-9a-zA-Z]/i, '')}#{alarm.type}"[0..255]) do
             ActionsEnabled true
             AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
-            AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm) + "-stk#{stack_id}"
+            AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
             ComparisonOperator alarm.comparison_operator
             Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
             EvaluationPeriods alarm.evaluation_periods
@@ -75,7 +66,7 @@ module CfnGuardian
             ScheduleExpression "cron(#{event.cron})"
             Targets([
               { 
-                Arn: Ref(event.target),
+                Arn: FnGetAtt(event.target, :Arn),
                 Id: event.hash,
                 Input: FnSub(event.payload)
               }
@@ -85,13 +76,11 @@ module CfnGuardian
       end
       
       def add_composite_alarm(alarm)
-        stack_id = @stack_id
-
         @template.declare do
           CloudWatch_CompositeAlarm(alarm.name.gsub(/[^0-9a-zA-Z]/i, '')) do
             
             AlarmDescription alarm.description
-            AlarmName "guardian-#{alarm.name}-stk#{stack_id}"
+            AlarmName "guardian-#{alarm.name}"
             AlarmRule alarm.rule
             
             unless alarm.alarm_action.nil?

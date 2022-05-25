@@ -6,7 +6,7 @@ module CfnGuardian
       include CfnDsl::CloudFormation
       include Logging
       
-      attr_reader :parameters, :template
+      attr_reader :template
       
       def initialize()
         @parameters = []
@@ -32,9 +32,7 @@ module CfnGuardian
         add_iam_role(ssm_parameters)
                 
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
-        stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters,stack['Reference'])}
-        
-        @parameters = parameters.keys
+        stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters,stack['Reference'])}        
       end
       
       def add_iam_role(ssm_parameters)
