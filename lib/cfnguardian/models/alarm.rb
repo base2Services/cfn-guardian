@@ -29,7 +29,8 @@ module CfnGuardian
         :evaluate_low_sample_count_percentile,
         :unit,
         :maintenance_groups,
-        :additional_notifiers
+        :additional_notifiers,
+        :tags
       
       def initialize(resource)
         @type = 'Alarm'
@@ -56,6 +57,7 @@ module CfnGuardian
         @treat_missing_data = nil
         @maintenance_groups = []
         @additional_notifiers = []
+        @tags = {}
       end
       
       def metric_name=(metric_name)
@@ -63,7 +65,6 @@ module CfnGuardian
         @metric_name=metric_name
       end      
     end
-    
     
     class ApiGatewayAlarm < BaseAlarm
       def initialize(resource)

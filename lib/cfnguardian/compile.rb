@@ -57,7 +57,7 @@ module CfnGuardian
   class Compile
     include Logging
     
-    attr_reader :cost, :resources, :topics
+    attr_reader :cost, :resources, :topics, :global_tags
     
     def initialize(config_file)
       config = YAML.load_file(config_file)
@@ -68,6 +68,7 @@ module CfnGuardian
       @topics = config.fetch('Topics',{})
       @maintenance_groups = config.fetch('MaintenanceGroups', {})
       @event_subscriptions = config.fetch('EventSubscriptions', {})
+      @global_tags = config.fetch('GlobalTags', {})
       
       # Make sure the default topics exist if they aren't supplied in the alarms.yaml
       %w(Critical Warning Task Informational Events).each do |topic|
