@@ -40,7 +40,8 @@ module CfnGuardian
         'guardian:resource:group' => alarm.group,
         'guardian:alarm:name' => alarm.name,
         'guardian:alarm:metric' => alarm.metric_name,
-        'guardian:alarm:severity' => alarm.alarm_action
+        'guardian:alarm:severity' => alarm.alarm_action,
+        'guardian:alarm:id' => alarm.id
       }
       tags = global_tags.merge(defaults)
       return alarm.tags.merge(tags)

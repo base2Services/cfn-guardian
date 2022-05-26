@@ -10,6 +10,7 @@ module CfnGuardian
         
       attr_accessor :group,
         :name,
+        :id,
         :metric_name,
         :namespace,
         :dimensions,
@@ -36,6 +37,7 @@ module CfnGuardian
         @type = 'Alarm'
         @group = nil
         @name = ''
+        @id = ''
         @metric_name = nil
         @namespace = nil
         @dimensions = nil
