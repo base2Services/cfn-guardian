@@ -21,4 +21,4 @@
 8. [Composite Alarms](composite_alarms.md)
 9. [Alarms for Custom Metrics](custom_metrics.md)
 10. [Dimension Variables](variables.md)
-10. [Alarm Tags](alarm_tags.md)
+11. [Alarm Tags](alarm_tags.md)
