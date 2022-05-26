@@ -1,6 +1,6 @@
 # Guardian Alarm Tags
 
-AWS tags can be applied to Cloudwatch alarms created by guardian. This is available as a separate guardian alarm because Cloudformation doesn't support creating tags on Cloudwatch alarms.
+AWS tags can be applied to Cloudwatch alarms created by guardian. This is available as a separate guardian command [`cfn-guardian tag-alarms`] because Cloudformation doesn't support creating tags on Cloudwatch alarms.
 
 ## Default Tags
 
