@@ -180,34 +180,18 @@ module CfnGuardian
       raise CfnGuardian::ValidationError, "#{errors.size} errors found\n[*] #{errors.join("\n[*] ")}" if errors.any?
     end
     
-    def split_resources(bucket,path)
-      split = @resources.each_slice(200).to_a
-      split.each_with_index do |resources,index|
-        @stacks.push({
-          'Name' => "GuardianStack#{index}",
-          'TemplateURL' => "https://#{bucket}.s3.amazonaws.com/#{path}/guardian-stack-#{index}.compiled.yaml",
-          'Reference' => index
-        })
-      end
-      return split
-    end
-    
     def compile_templates(bucket,path)
       clean_out_directory()
-      resources = split_resources(bucket,path)
       
       main_stack = CfnGuardian::Stacks::Main.new()
       main_stack.build_template(@stacks,@checks,@topics,@maintenance_groups,@ssm_parameters)
+      
+      resource_stack = CfnGuardian::Stacks::Resources.new(main_stack.template)
+      resource_stack.build_template(@resources)
+
       valid = main_stack.template.validate
       FileUtils.mkdir_p 'out'
       File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
-      
-      resources.each_with_index do |resources,index|
-        stack = CfnGuardian::Stacks::Resources.new(main_stack.parameters,index)
-        stack.build_template(resources)
-        valid = stack.template.validate
-        File.write("out/guardian-stack-#{index}.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
-      end
     end
     
     def clean_out_directory
