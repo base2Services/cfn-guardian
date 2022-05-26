@@ -15,7 +15,6 @@ module CfnGuardian
       
       new_tags = get_tags(alarm, global_tags)
       current_tags = get_alarm_tags(alarm_arn)
-
       tags_to_delete = get_tags_to_delete(current_tags, new_tags)
 
       if tags_to_delete.any?
@@ -27,7 +26,6 @@ module CfnGuardian
       end
 
       if tags_changed?(current_tags, new_tags)
-        # Aws::CloudWatch::Errors::Throttling
         logger.debug "Updating tags on alarm #{alarm_arn}"
         @client.tag_resource({
           resource_arn: alarm_arn,
@@ -38,11 +36,11 @@ module CfnGuardian
 
     def get_tags(alarm, global_tags)
       defaults = {
-        'guardian:resource:id': alarm.resource_id,
-        'guardian:resource:group': alarm.group,
-        'guardian:alarm:name': alarm.name,
-        'guardian:alarm:metric': alarm.metric_name,
-        'guardian:alarm:severity': alarm.alarm_action
+        'guardian:resource:id' => alarm.resource_id,
+        'guardian:resource:group' => alarm.group,
+        'guardian:alarm:name' => alarm.name,
+        'guardian:alarm:metric' => alarm.metric_name,
+        'guardian:alarm:severity' => alarm.alarm_action
       }
       tags = global_tags.merge(defaults)
       return alarm.tags.merge(tags)
@@ -56,7 +54,7 @@ module CfnGuardian
     end
 
     def get_tags_to_delete(current_tags, new_tags)
-      return current_tags.select {|tag| !new_tags.has_key?(tag.key.to_sym)}.map {|tag| tag.key}
+      return current_tags.select {|tag| !new_tags.has_key?(tag.key)}.map {|tag| tag.key}
     end
 
     def tags_changed?(current_tags, new_tags)
@@ -64,7 +62,7 @@ module CfnGuardian
     end
 
     def tags_to_hash(tags)
-      return tags.map {|tag| {tag.key.to_sym => tag.value} }.reduce(Hash.new, :merge)
+      return tags.map {|tag| {tag.key => tag.value} }.reduce(Hash.new, :merge)
     end
 
   end
