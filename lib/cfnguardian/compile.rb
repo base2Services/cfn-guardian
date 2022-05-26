@@ -162,7 +162,7 @@ module CfnGuardian
         when 'Alarm'
           %w(metric_name namespace).each do |property|
             if resource.send(property).nil?
-              errors << "Alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}"
+              errors << "Alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
             end
           end
         when 'Check'
