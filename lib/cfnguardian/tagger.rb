@@ -7,7 +7,7 @@ module CfnGuardian
     include Logging
 
     def initialize()
-      @client = Aws::CloudWatch::Client.new()
+      @client = Aws::CloudWatch::Client.new(max_attempts: 5)
     end
 
     def tag_alarm(alarm, global_tags={})
