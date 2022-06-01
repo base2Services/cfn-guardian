@@ -65,8 +65,8 @@ module CfnGuardian
       end
 
       params.each do |param|
-        if !@parameters[param[:parameter_key]].nil?
-          param[:parameter_value] = @parameters[param[:parameter_key]]
+        if !@parameters[param[:parameter_key].to_sym].nil?
+          param[:parameter_value] = @parameters[param[:parameter_key].to_sym]
           param[:use_previous_value] = false
         end
       end
