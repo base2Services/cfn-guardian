@@ -27,6 +27,7 @@ module CfnGuardian::Resource
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::LambdaAlarm.new(@resource)
+      alarm.enabled = false
       alarm.name = 'Duration'
       alarm.metric_name = 'Duration'
       alarm.statistic = 'Average'
