@@ -26,9 +26,7 @@ module CfnGuardian::Resource
       alarm.threshold = 30
       alarm.evaluation_periods = 5
       alarm.period = 60
-      alarm.unit - 'Seconds'
       alarm.alarm_action = 'Warning'
-      alarm.treat_missing_data = 'missing'
       @alarms.push(alarm)
     end
     
