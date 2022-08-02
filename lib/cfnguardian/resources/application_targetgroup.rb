@@ -23,9 +23,12 @@ module CfnGuardian::Resource
       alarm = CfnGuardian::Models::ApplicationTargetGroupAlarm.new(@resource)
       alarm.name = 'TargetResponseTime'
       alarm.metric_name = 'TargetResponseTime'
-      alarm.threshold = 5
+      alarm.threshold = 30
       alarm.evaluation_periods = 5
-      alarm.treat_missing_data = 'notBreaching'
+      alarm.period = 60
+      alarm.unit - 'Seconds'
+      alarm.alarm_action = 'Warningg'
+      alarm.treat_missing_data = 'missing'
       @alarms.push(alarm)
     end
     
