@@ -299,11 +299,14 @@ module CfnGuardian
     end
     
     class ElasticFileSystemAlarm < BaseAlarm
-      def initialize(resource)
+      def initialize(resource, storage_class = nil)
         super(resource)
         @group = 'ElasticFileSystem'
         @namespace = 'AWS/EFS'
         @dimensions = { FileSystemId: resource['Id'] }
+        unless storage_class.nil?
+          @dimensions[:StorageClass] = storage_class
+        end
       end
     end
     
