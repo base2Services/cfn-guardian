@@ -25,7 +25,6 @@ module CfnGuardian::Resource
       alarm.metric_name = 'TargetResponseTime'
       alarm.threshold = 30
       alarm.evaluation_periods = 5
-      alarm.period = 60
       alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
     end
