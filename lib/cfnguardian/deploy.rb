@@ -7,12 +7,12 @@ module CfnGuardian
   class Deploy
     include Logging
 
-    def initialize(opts,bucket,parameters)
-      @stack_name = opts.fetch(:stack_name,'guardian')
+    def initialize(opts,bucket,parameters,template_file,stack_name)
+      @stack_name = stack_name
       @bucket = bucket
       @prefix = @stack_name
-      @template_path = "out/guardian.compiled.yaml"
-      @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/guardian.compiled.yaml"
+      @template_path = "out/#{template_file}"
+      @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/#{template_file}"
       @parameters = parameters
       @changeset_role_arn = opts.fetch(:role_arn, nil)
 
@@ -26,16 +26,14 @@ module CfnGuardian
     end
 
     def upload_templates
-      Dir["out/*.yaml"].each do |template|
-        prefix = "#{@prefix}/#{template.split('/').last}"
-        body = File.read(template)
-        client = Aws::S3::Client.new()
-        client.put_object({
-          body: body,
-          bucket: @bucket,
-          key: prefix
-        })
-      end
+      prefix = "#{@prefix}/#{template_file}"
+      body = File.read(@template_path)
+      client = Aws::S3::Client.new()
+      client.put_object({
+        body: body,
+        bucket: @bucket,
+        key: prefix
+      })
     end
 
     # TODO: check for REVIEW_IN_PROGRESS
