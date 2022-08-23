@@ -10,9 +10,9 @@ module CfnGuardian
     def initialize(opts,bucket,parameters,template_file,stack_name)
       @stack_name = stack_name
       @bucket = bucket
-      @prefix = @stack_name
+      @s3_path = "#{stack_name}/#{template_file}"
       @template_path = "out/#{template_file}"
-      @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/#{template_file}"
+      @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@s3_path}"
       @parameters = parameters
       @changeset_role_arn = opts.fetch(:role_arn, nil)
 
@@ -26,13 +26,12 @@ module CfnGuardian
     end
 
     def upload_templates
-      prefix = "#{@prefix}/#{template_file}"
       body = File.read(@template_path)
       client = Aws::S3::Client.new()
       client.put_object({
         body: body,
         bucket: @bucket,
-        key: prefix
+        key: @s3_path
       })
     end
 

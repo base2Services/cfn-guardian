@@ -157,12 +157,9 @@ module CfnGuardian
       compiled = []
 
       options[:config].each do |config|
-        if config == 'alarms.yaml'
-          template_file = "guardian.#{template_file_suffix}"
-        else
-          template_file_prefix = config.gsub("alarms.", "").gsub(".yaml", "")
-          template_file = "#{template_file_prefix}.#{template_file_suffix}"
-        end
+        config_basename = File.basename(config, ".yaml")
+        template_file_prefix = config_basename == 'alarms' ? "guardian" : config_basename.gsub("alarms.", "")
+        template_file = "#{template_file_prefix}.#{template_file_suffix}"
 
         compiler = CfnGuardian::Compile.new(config)
         compiler.get_resources
@@ -183,8 +180,8 @@ module CfnGuardian
       end
 
       compiled.each do |stack|
-        stack_name = options[:template_file].gsub('compiled.yaml', '')
-        deployer = CfnGuardian::Deploy.new(options,s3.bucket,parameters,options[:template_file],stack_name)
+        stack_name = stack[:template_file].gsub('.compiled.yaml', '')
+        deployer = CfnGuardian::Deploy.new(options,s3.bucket,stack[:parameters],stack[:template_file],stack_name)
         deployer.upload_templates
         logger.info("creating changeset for stack #{stack_name}")
         stack[:change_set], stack[:change_set_type] = deployer.create_change_set()
