@@ -130,7 +130,7 @@ module CfnGuardian
     The templates are copied to the s3 bucket and the cloudformation stacks are deployed.
     The names of the Cloudformation stacks are determined by the config yaml name. e.g. alarms.myenv.yaml will deploy the stack myenv-guardian
     LONG
-    method_option :configs, aliases: :c, type: :array, desc: "yaml config files", required: true
+    method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
     method_option :bucket, type: :string, desc: "provide custom bucket name, will create a default bucket if not provided"
     method_option :path, type: :string, default: "guardian", desc: "S3 path location for nested stacks"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
@@ -156,7 +156,7 @@ module CfnGuardian
 
       compiled = []
 
-      options[:configs].each do |config|
+      options[:config].each do |config|
         if config == 'alarms.yaml'
           template_file = "guardian.#{template_file_suffix}"
         else
@@ -208,20 +208,23 @@ module CfnGuardian
     applies tags to each cloudwatch alarm created by guardian.
     Guardian defines default tags and this can be added to through the alarms.yaml config.
     LONG
-    method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
+    method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
 
     def tag_alarms
       set_log_level(options[:debug])
       set_region(options[:region],true)
 
-      compiler = CfnGuardian::Compile.new(options[:config])
-      compiler.get_resources
-      alarms = compiler.alarms
+      options[:config].each do |config|
+        logger.info "tagging alarms from config file #{config}"
+        compiler = CfnGuardian::Compile.new(config)
+        compiler.get_resources
+        alarms = compiler.alarms
 
-      tagger = CfnGuardian::Tagger.new()
-      alarms.each do |alarm|
-        tagger.tag_alarm(alarm, compiler.global_tags)
+        tagger = CfnGuardian::Tagger.new()
+        alarms.each do |alarm|
+          tagger.tag_alarm(alarm, compiler.global_tags)
+        end
       end
     end
 
