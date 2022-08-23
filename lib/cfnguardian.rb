@@ -179,23 +179,26 @@ module CfnGuardian
         logger.info "Cloudformation templates were validated successfully"
       end
 
+      changesets = []
+
       compiled.each do |stack|
         stack_name = stack[:template_file].gsub('.compiled.yaml', '')
         deployer = CfnGuardian::Deploy.new(options,s3.bucket,stack[:parameters],stack[:template_file],stack_name)
         deployer.upload_templates
         logger.info("creating changeset for stack #{stack_name}")
-        stack[:change_set], stack[:change_set_type] = deployer.create_change_set()
+        change_set, change_set_type = deployer.create_change_set()
+        changesets << {deployer: deployer, id: change_set.id, type: change_set_type}
       end
 
-      compiled.each do |stack|
-        deployer.wait_for_changeset(stack[:change_set].id)
-        logger.info("executing changeset #{change_set.id} for stack #{stack_name}")
-        deployer.execute_change_set(stack[:change_set].id)
+      changesets.each do |changeset|
+        changeset[:deployer].wait_for_changeset(changeset[:id])
+        logger.info("executing changeset #{changeset[:id]} for stack #{stack_name}")
+        changeset[:deployer].execute_change_set(changeset[:id])
       end
 
-      compiled.each do |stack|
-        logger.info("waiting for changeset #{change_set.id} for stack #{stack_name}")
-        deployer.wait_for_execute(stack[:change_set_type])
+      changesets.each do |changeset|
+        logger.info("waiting for changeset #{changeset[:id]} for stack #{stack_name}")
+        changeset[:deployer].wait_for_execute(changeset[:type])
       end
     end
 
