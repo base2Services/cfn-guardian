@@ -210,21 +210,28 @@ module CfnGuardian
     LONG
     method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
+    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
 
     def tag_alarms
       set_log_level(options[:debug])
       set_region(options[:region],true)
+
+      tags = {}
+      if opts.has_key?("tag_yaml")
+        tags.merge!(YAML.load_file(opts[:tag_yaml]))
+      end
+      tags.merge!(opts.fetch(:tags, {}))
 
       options[:config].each do |config|
         logger.info "tagging alarms from config file #{config}"
         compiler = CfnGuardian::Compile.new(config)
         compiler.get_resources
         alarms = compiler.alarms
+        global_tags = compiler.global_tags.merge(tags)
 
         tagger = CfnGuardian::Tagger.new()
-        alarms.each do |alarm|
-          tagger.tag_alarm(alarm, compiler.global_tags)
-        end
+        alarms.each {|alarm| tagger.tag_alarm(alarm, global_tags) }
       end
     end
 
