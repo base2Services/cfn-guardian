@@ -21,11 +21,12 @@ module CfnGuardian::Resource
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::ApplicationTargetGroupAlarm.new(@resource)
+      alarm.enabled = false
       alarm.name = 'TargetResponseTime'
       alarm.metric_name = 'TargetResponseTime'
-      alarm.threshold = 30
+      alarm.extended_statistic = 'p95'
+      alarm.threshold = 5
       alarm.evaluation_periods = 5
-      alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
     end
     
