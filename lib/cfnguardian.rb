@@ -164,7 +164,7 @@ module CfnGuardian
           template_file = "#{template_file_prefix}.#{template_file_suffix}"
         end
 
-        compiler = CfnGuardian::Compile.new(options[:config])
+        compiler = CfnGuardian::Compile.new(config)
         compiler.get_resources
         compiler.compile_templates(template_file)
         logger.info "compiled template to out/#{template_file} from yaml config #{config}"
