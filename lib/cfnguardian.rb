@@ -152,8 +152,8 @@ module CfnGuardian
       compiled = []
 
       options[:config].each do |config|
-        config_basename = File.basename(config, ".yaml")
-        template_file_prefix = config_basename != 'alarms' ? "#{config_basename.gsub("alarms.", "")}-" : ""
+        config_basename = File.basename(config, "alarms.yaml")
+        template_file_prefix = config_basename != "" ? "#{config_basename}-" : ""
         template_file = "#{template_file_prefix}guardian.#{template_file_suffix}"
 
         compiler = CfnGuardian::Compile.new(config)
@@ -224,11 +224,11 @@ module CfnGuardian
       end
 
       options[:config].each do |config|
-        config_basename = File.basename(config, ".yaml")
-        stack_name_prefix = config_basename != 'alarms' ? "#{config_basename.gsub("alarms.", "")}-" : ""
+        config_basename = File.basename(config, "alarms.yaml")
+        stack_name_prefix = config_basename != "" ? "#{config_basename}-" : ""
         tags[:'guardian:stack:name'] = "#{stack_name_prefix}guardian"
         tags[:'guardian:config:yaml'] = config
-        
+
         logger.info "tagging alarms from config file #{config}"
         compiler = CfnGuardian::Compile.new(config)
         compiler.get_resources
