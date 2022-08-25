@@ -92,7 +92,7 @@ module CfnGuardian
     method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
     method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
-    method_option :ignore_empty_change_set, type: :boolean, default: false, desc: "ignore a cloudformation changeset if it contains no changes"
+    method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
 
     def deploy
       set_log_level(options[:debug])
@@ -138,7 +138,7 @@ module CfnGuardian
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
     method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
-    method_option :ignore_empty_change_set, type: :boolean, default: false, desc: "ignore a cloudformation changeset if it contains no changes"
+    method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
 
     def bulk_deploy
       set_log_level(options[:debug])
@@ -187,11 +187,11 @@ module CfnGuardian
         begin 
           changeset[:deployer].wait_for_changeset(changeset[:id])
         rescue CfnGuardian::EmptyChangeSetError => e
-          if options[:ignore_empty_change_set]
+          if options[:fail_empty_change_set]
+            raise e
+          else
             Logger.info e.message
             next
-          else
-            raise
           end
         end
         logger.info("executing changeset #{changeset[:id]}")
