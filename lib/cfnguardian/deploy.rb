@@ -19,7 +19,7 @@ module CfnGuardian
 
       @tags = opts.fetch(:tags, {})
       if ENV.has_key?('CODEBUILD_RESOLVED_SOURCE_VERSION')
-        tags[:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
+        @tags[:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
       end
 
       @client = Aws::CloudFormation::Client.new()
