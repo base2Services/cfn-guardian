@@ -2,6 +2,7 @@ require 'aws-sdk-cloudformation'
 require 'fileutils'
 require 'cfnguardian/version'
 require 'cfnguardian/log'
+require 'cfnguardian/error'
 
 module CfnGuardian
   class Deploy
@@ -96,8 +97,11 @@ module CfnGuardian
         @client.wait_until :change_set_create_complete, change_set_name: change_set_id
       rescue Aws::Waiters::Errors::FailureStateError => e
         change_set = get_change_set(change_set_id)
-        logger.error("change set status: #{change_set.status} reason: #{change_set.status_reason}")
-        exit 1
+        if change_set.status_reason.include?("The submitted information didn't contain changes.") || change_set.status_reason.include?("No updates are to be performed") && @ignore_empty_change_set
+          raise CfnGuardian::EmptyChangeSetError, "No changes to deploy. Stack #{@stack_name} is up to date"
+        else
+          raise CfnGuardian::ChangeSetError, "Failed to create the changeset : #{e.message} Status: #{change_set.status} Reason: #{change_set.status_reason}"
+        end
       end
     end
 

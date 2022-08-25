@@ -16,6 +16,10 @@ require "cfnguardian/tagger"
 module CfnGuardian
   class Cli < Thor
     include Logging
+
+    def self.exit_on_failure?
+      true
+    end
     
     map %w[--version -v] => :__print_version
     desc "--version, -v", "print the version"
@@ -57,13 +61,9 @@ module CfnGuardian
       if options[:validate]
         s3.create_bucket_if_not_exists()
         validator = CfnGuardian::Validate.new(s3.bucket)
-        if validator.validate
-          logger.error("One or more templates failed to validate")
-          exit(1)
-        else
-          logger.info "Cloudformation templates were validated successfully"
-        end
+        validator.validate
       end
+
       logger.warn "AWS cloudwatch alarms defined in the templates will cost roughly $#{'%.2f' % compiler.cost} per month"
 
       if options[:template_config]
@@ -92,6 +92,7 @@ module CfnGuardian
     method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
     method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
+    method_option :ignore_empty_change_set, type: :boolean, default: false, desc: "ignore a cloudformation changeset if it contains no changes"
 
     def deploy
       set_log_level(options[:debug])
@@ -109,12 +110,7 @@ module CfnGuardian
 
       s3.create_bucket_if_not_exists
       validator = CfnGuardian::Validate.new(s3.bucket)
-      if validator.validate
-        logger.error("One or more templates failed to validate")
-        exit(1)
-      else
-        logger.info "Cloudformation templates were validated successfully"
-      end
+      validator.validate
       
       deployer = CfnGuardian::Deploy.new(options,s3.bucket,parameters,options[:template_file],options[:stack_name])
       deployer.upload_templates
@@ -142,6 +138,7 @@ module CfnGuardian
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
     method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
+    method_option :ignore_empty_change_set, type: :boolean, default: false, desc: "ignore a cloudformation changeset if it contains no changes"
 
     def bulk_deploy
       set_log_level(options[:debug])
@@ -172,12 +169,7 @@ module CfnGuardian
       end
 
       validator = CfnGuardian::Validate.new(s3.bucket)
-      if validator.validate
-        logger.error("One or more templates failed to validate")
-        exit(1)
-      else
-        logger.info "Cloudformation templates were validated successfully"
-      end
+      validator.validate
 
       changesets = []
 
@@ -190,13 +182,24 @@ module CfnGuardian
         changesets << {deployer: deployer, id: change_set.id, type: change_set_type}
       end
 
+      changesets_executed = []
       changesets.each do |changeset|
-        changeset[:deployer].wait_for_changeset(changeset[:id])
+        begin 
+          changeset[:deployer].wait_for_changeset(changeset[:id])
+        rescue CfnGuardian::EmptyChangeSetError => e
+          if options[:ignore_empty_change_set]
+            Logger.info e.message
+            next
+          else
+            raise
+          end
+        end
         logger.info("executing changeset #{changeset[:id]}")
         changeset[:deployer].execute_change_set(changeset[:id])
+        changesets_executed << changeset
       end
 
-      changesets.each do |changeset|
+      changesets_executed.each do |changeset|
         logger.info("waiting for changeset #{changeset[:id]} to complete")
         changeset[:deployer].wait_for_execute(changeset[:type])
       end
@@ -258,7 +261,6 @@ module CfnGuardian
                 :title => "Guardian Alarm Drift".green, 
                 :headings => ['Alarm Name', 'Property', 'Expected', 'Actual', 'Type'], 
                 :rows => rows.flatten(1))
-        exit(1)
       end
     end
     
@@ -282,8 +284,7 @@ module CfnGuardian
       elsif options[:defaults]
         config_file = default_config()
       else
-        logger.error('one of `--config YAML` or `--defaults` must be supplied')
-        exit -1
+        raise Thor::Error, 'one of `--config YAML` or `--defaults` must be supplied'
       end
       
       compiler = CfnGuardian::Compile.new(config_file)
@@ -291,8 +292,7 @@ module CfnGuardian
       alarms = filter_compiled_alarms(compiler.alarms,options[:filter])
 
       if alarms.empty?
-        logger.error "No matches found" 
-        exit 1
+        raise Thor::Error, "No matches found" 
       end
       
       headings = ['Property', 'Config']
@@ -522,8 +522,7 @@ module CfnGuardian
         Aws.config.update({region: ENV['AWS_DEFAULT_REGION']})
       else
         if required
-          logger.error("No AWS region found. Please suppy the region using option `--region` or setting environment variables `AWS_REGION` `AWS_DEFAULT_REGION`")
-          exit(1)
+          raise Thor::Error "No AWS region found. Please suppy the region using option `--region` or setting environment variables `AWS_REGION` `AWS_DEFAULT_REGION`"
         end
       end
     end
