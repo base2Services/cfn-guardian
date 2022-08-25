@@ -190,7 +190,7 @@ module CfnGuardian
           if options[:fail_empty_change_set]
             raise e
           else
-            Logger.info e.message
+            logger.info e.message
             next
           end
         end
