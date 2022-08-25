@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 require "cfnguardian"
-
+$stdout.sync = true
 CfnGuardian::Cli.start( ARGV )
