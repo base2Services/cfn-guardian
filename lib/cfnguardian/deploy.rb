@@ -17,11 +17,10 @@ module CfnGuardian
       @parameters = parameters
       @changeset_role_arn = opts.fetch(:role_arn, nil)
 
-      @tags = {}
-      if opts.has_key?("tag_yaml")
-        @tags.merge!(YAML.load_file(opts[:tag_yaml]))
+      @tags = opts.fetch(:tags, {})
+      if ENV.has_key?('CODEBUILD_RESOLVED_SOURCE_VERSION')
+        tags[:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
       end
-      @tags.merge!(opts.fetch(:tags, {}))
 
       @client = Aws::CloudFormation::Client.new()
     end

@@ -89,7 +89,6 @@ module CfnGuardian
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
-    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
     method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
     method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
@@ -136,7 +135,6 @@ module CfnGuardian
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
-    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
     method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
 
@@ -155,8 +153,8 @@ module CfnGuardian
 
       options[:config].each do |config|
         config_basename = File.basename(config, ".yaml")
-        template_file_prefix = config_basename == 'alarms' ? "guardian" : config_basename.gsub("alarms.", "")
-        template_file = "#{template_file_prefix}.#{template_file_suffix}"
+        template_file_prefix = config_basename != 'alarms' ? "#{config_basename.gsub("alarms.", "")}-" : ""
+        template_file = "#{template_file_prefix}guardian.#{template_file_suffix}"
 
         compiler = CfnGuardian::Compile.new(config)
         compiler.get_resources
@@ -214,19 +212,23 @@ module CfnGuardian
     method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
-    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
 
     def tag_alarms
       set_log_level(options[:debug])
       set_region(options[:region],true)
 
-      tags = {}
-      if opts.has_key?("tag_yaml")
-        tags.merge!(YAML.load_file(opts[:tag_yaml]))
+      tags = options.fetch(:tags, {})
+
+      if ENV.has_key?('CODEBUILD_RESOLVED_SOURCE_VERSION')
+        tags[:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
       end
-      tags.merge!(opts.fetch(:tags, {}))
 
       options[:config].each do |config|
+        config_basename = File.basename(config, ".yaml")
+        stack_name_prefix = config_basename != 'alarms' ? "#{config_basename.gsub("alarms.", "")}-" : ""
+        tags[:'guardian:stack:name'] = "#{stack_name_prefix}guardian"
+        tags[:'guardian:config:yaml'] = config
+        
         logger.info "tagging alarms from config file #{config}"
         compiler = CfnGuardian::Compile.new(config)
         compiler.get_resources
