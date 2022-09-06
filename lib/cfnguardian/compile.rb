@@ -93,7 +93,7 @@ module CfnGuardian
             if @templates.has_key?(group) && @templates[group].has_key?('Inherit')
               begin
                 resource_class = Kernel.const_get("CfnGuardian::Resource::#{@templates[group]['Inherit']}").new(resource, group)
-                logger.debug "Inheritited resource group #{@templates[group]['Inherit']} for group #{group}"
+                logger.debug "Inherited resource group #{@templates[group]['Inherit']} for group #{group}"
               rescue NameError => e
                 logger.warn "'#{@templates[group]['Inherit']}' resource group doesn't exist and is unable to be inherited from"
                 next
