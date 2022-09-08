@@ -20,13 +20,13 @@ module CfnGuardian::Resource
       @event_subscriptions = []
     end
     
-    # Overidden by inheritted classes to define default alarms
+    # Overidden by inherited classes to define default alarms
     def default_alarms()
       return @alarms
     end
     
     def get_alarms(group,overides={})
-      # deep copying the overrides to preserse it's reference before doing any changes to it
+      # deep copying the overrides to preserve its reference before doing any changes to it
       overides = Marshal.load(Marshal.dump(overides))
 
       # generate default alarms
@@ -72,12 +72,12 @@ module CfnGuardian::Resource
           alarm = find_alarm(properties['Inherit'])
           if !alarm.nil?
             logger.debug("creating new alarm #{name} for alarm group #{self.class.to_s.split('::').last} inheriting properties from alarm #{properties['Inherit']}")
-            inheritited_alarm = alarm.clone
+            inherited_alarm = alarm.clone
             alarm.name = name
-            properties.each {|attr,value| update_object(inheritited_alarm,attr,value)}
-            @alarms.push(inheritited_alarm)
+            properties.each {|attr,value| update_object(inherited_alarm,attr,value)}
+            @alarms.push(inherited_alarm)
           else
-            logger.warn "alarm '#{properties['Inherit']}' doesn't exists and cannot be inherited"
+            logger.warn "alarm '#{properties['Inherit']}' doesn't exist and cannot be inherited"
           end
           next
         end
@@ -124,7 +124,7 @@ module CfnGuardian::Resource
       return @alarms.select{|a| a.enabled}
     end
     
-    # Overidden by inheritted classes to define default events
+    # Overidden by inherited classes to define default events
     def default_events()
       return @events
     end
@@ -134,7 +134,7 @@ module CfnGuardian::Resource
       return @events.select{|e| e.enabled}
     end
     
-    # Overidden by inheritted classes to define default checks
+    # Overidden by inherited classes to define default checks
     def default_checks()
       return @checks
     end
@@ -144,7 +144,7 @@ module CfnGuardian::Resource
       return @checks
     end
     
-    # Overidden by inheritted classes to define default checks
+    # Overidden by inherited classes to define default checks
     def default_metric_filters()
       return @metric_filters
     end
@@ -154,20 +154,20 @@ module CfnGuardian::Resource
       return @metric_filters
     end
 
-    # Overidden by inheritted classes to define default checks
+    # Overidden by inherited classes to define default checks
     def default_event_subscriptions()
       return @event_subscriptions
     end
     
     def get_event_subscriptions(group, overides)
-      # generate defailt event subscriptions
+      # generate default event subscriptions
       default_event_subscriptions()
 
-      # overide the defaults
+      # override the defaults
       overides.each do |name, properties|
         event_subscription = find_event_subscriptions(name)
 
-        # disbable the event subscription if the value is false
+        # disable the event subscription if the value is false
         if [false].include?(properties)
           unless event_subscription.nil?
             event_subscription.enabled = false
