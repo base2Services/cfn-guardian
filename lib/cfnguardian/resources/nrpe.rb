@@ -17,12 +17,14 @@ module CfnGuardian::Resource
           alarm.name = "#{command.to_camelcase}Warning"
           alarm.metric_name = command
           alarm.threshold = 0
+          alarm.alarm_action = 'Warning'
           @alarms.push(alarm)
           
           alarm = CfnGuardian::Models::NrpeAlarm.new(host,@environment)
           alarm.name = "#{command.to_camelcase}Critical"
           alarm.metric_name = command
           alarm.threshold = 1
+          alarm.alarm_action = 'Critical'
           @alarms.push(alarm)
         end
       end
