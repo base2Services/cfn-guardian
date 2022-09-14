@@ -3,6 +3,7 @@ require 'fileutils'
 require 'cfnguardian/version'
 require 'cfnguardian/log'
 require 'cfnguardian/s3'
+require 'cfnguardian/error'
 
 module CfnGuardian
   class Validate
@@ -25,7 +26,10 @@ module CfnGuardian
           success << validate_local(template)
         end
       end
-      return success.include?(false)
+
+      if success.include?(false)
+        raise CfnGuardian::TemplateValidationError, "One or more templates failed to validate"
+      end
     end
     
     def validate_local(path)

@@ -16,6 +16,10 @@ require "cfnguardian/tagger"
 module CfnGuardian
   class Cli < Thor
     include Logging
+
+    def self.exit_on_failure?
+      true
+    end
     
     map %w[--version -v] => :__print_version
     desc "--version, -v", "print the version"
@@ -40,28 +44,26 @@ module CfnGuardian
     method_option :sns_task, type: :string, desc: "sns topic arn for the task alarms"
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
-
+    method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
 
     def compile
       set_log_level(options[:debug])
       
       set_region(options[:region],options[:validate])
       s3 = CfnGuardian::S3.new(options[:bucket],options[:path])
-      
+
+      clean_out_directory()
+
       compiler = CfnGuardian::Compile.new(options[:config])
       compiler.get_resources
-      compiler.compile_templates(s3.bucket,s3.path)
+      compiler.compile_templates(options[:template_file])
       logger.info "Cloudformation templates compiled successfully in out/ directory"
       if options[:validate]
         s3.create_bucket_if_not_exists()
         validator = CfnGuardian::Validate.new(s3.bucket)
-        if validator.validate
-          logger.error("One or more templates failed to validate")
-          exit(1)
-        else
-          logger.info "Cloudformation templates were validated successfully"
-        end
+        validator.validate
       end
+
       logger.warn "AWS cloudwatch alarms defined in the templates will cost roughly $#{'%.2f' % compiler.cost} per month"
 
       if options[:template_config]
@@ -80,15 +82,16 @@ module CfnGuardian
     method_option :bucket, type: :string, desc: "provide custom bucket name, will create a default bucket if not provided"
     method_option :path, type: :string, default: "guardian", desc: "S3 path location for nested stacks"
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
-    method_option :stack_name, aliases: :s, type: :string, desc: "set the Cloudformation stack name. Defaults to `guardian`"
+    method_option :stack_name, aliases: :s, type: :string, default: 'guardian', desc: "set the Cloudformation stack name. Defaults to `guardian`"
     method_option :sns_critical, type: :string, desc: "sns topic arn for the critical alarms"
     method_option :sns_warning, type: :string, desc: "sns topic arn for the warning alarms"
     method_option :sns_task, type: :string, desc: "sns topic arn for the task alarms"
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
-    method_option :tag_yaml, type: :string, desc: "additional tags on the cloudformation stack in a yaml file"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
+    method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
+    method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
 
     def deploy
       set_log_level(options[:debug])
@@ -96,27 +99,108 @@ module CfnGuardian
       set_region(options[:region],true)
       s3 = CfnGuardian::S3.new(options[:bucket],options[:path])
       
+      clean_out_directory()
+
       compiler = CfnGuardian::Compile.new(options[:config])
       compiler.get_resources
-      compiler.compile_templates(s3.bucket,s3.path)
+      compiler.compile_templates(options[:template_file])
       parameters = compiler.load_parameters(options)
       logger.info "Cloudformation templates compiled successfully in out/ directory"
 
       s3.create_bucket_if_not_exists
       validator = CfnGuardian::Validate.new(s3.bucket)
-      if validator.validate
-        logger.error("One or more templates failed to validate")
-        exit(1)
-      else
-        logger.info "Cloudformation templates were validated successfully"
-      end
+      validator.validate
       
-      deployer = CfnGuardian::Deploy.new(options,s3.bucket,parameters)
+      deployer = CfnGuardian::Deploy.new(options,s3.bucket,parameters,options[:template_file],options[:stack_name])
       deployer.upload_templates
       change_set, change_set_type = deployer.create_change_set()
       deployer.wait_for_changeset(change_set.id)
       deployer.execute_change_set(change_set.id)
       deployer.wait_for_execute(change_set_type)
+    end
+
+    desc "bulk-deploy", "Generates and deploys multiple monitoring CloudFormation templates from multiple config yamls"
+    long_desc <<-LONG
+    For each alarm configuration yamll file provided guardian will generate a CloudFormation template in output to the out/ directory.
+    The templates are copied to the s3 bucket and the cloudformation stacks are deployed.
+    The names of the Cloudformation stacks are determined by the config yaml name. e.g. alarms.myenv.yaml will deploy the stack myenv-guardian
+    LONG
+    method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
+    method_option :bucket, type: :string, desc: "provide custom bucket name, will create a default bucket if not provided"
+    method_option :path, type: :string, default: "guardian", desc: "S3 path location for nested stacks"
+    method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :sns_critical, type: :string, desc: "sns topic arn for the critical alarms"
+    method_option :sns_warning, type: :string, desc: "sns topic arn for the warning alarms"
+    method_option :sns_task, type: :string, desc: "sns topic arn for the task alarms"
+    method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
+    method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
+    method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
+    method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
+    method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
+
+    def bulk_deploy
+      set_log_level(options[:debug])
+      
+      set_region(options[:region],true)
+      s3 = CfnGuardian::S3.new(options[:bucket],options[:path])
+      s3.create_bucket_if_not_exists
+      
+      clean_out_directory()
+
+      template_file_suffix = 'compiled.yaml'
+
+      compiled = []
+
+      options[:config].each do |config|
+        config_basename = File.basename(config, ".alarms.yaml")
+        guardian_name = config_basename == "alarms.yaml" ? "" : "-#{config_basename}"
+        template_file = "guardian#{guardian_name}.#{template_file_suffix}"
+
+        compiler = CfnGuardian::Compile.new(config)
+        compiler.get_resources
+        compiler.compile_templates(template_file)
+        logger.info "compiled template to out/#{template_file} from yaml config #{config}"
+        parameters = compiler.load_parameters(options)
+
+        compiled << {template_file: template_file, parameters: parameters}
+        logger.debug("template file #{template_file} generated with parameters: #{parameters}")
+      end
+
+      validator = CfnGuardian::Validate.new(s3.bucket)
+      validator.validate
+
+      changesets = []
+
+      compiled.each do |stack|
+        stack_name = stack[:template_file].gsub(".#{template_file_suffix}", "")
+        deployer = CfnGuardian::Deploy.new(options,s3.bucket,stack[:parameters],stack[:template_file],stack_name)
+        deployer.upload_templates
+        logger.info("creating changeset for stack #{stack_name}")
+        change_set, change_set_type = deployer.create_change_set()
+        changesets << {deployer: deployer, id: change_set.id, type: change_set_type}
+      end
+
+      changesets_executed = []
+      changesets.each do |changeset|
+        begin 
+          changeset[:deployer].wait_for_changeset(changeset[:id])
+        rescue CfnGuardian::EmptyChangeSetError => e
+          if options[:fail_empty_change_set]
+            raise e
+          else
+            logger.info e.message
+            next
+          end
+        end
+        logger.info("executing changeset #{changeset[:id]}")
+        changeset[:deployer].execute_change_set(changeset[:id])
+        changesets_executed << changeset
+      end
+
+      changesets_executed.each do |changeset|
+        logger.info("waiting for changeset #{changeset[:id]} to complete")
+        changeset[:deployer].wait_for_execute(changeset[:type])
+      end
     end
 
     desc "tag-alarms", "apply tags to the cloudwatch alarms deployed"
@@ -125,20 +209,49 @@ module CfnGuardian
     applies tags to each cloudwatch alarm created by guardian.
     Guardian defines default tags and this can be added to through the alarms.yaml config.
     LONG
-    method_option :config, aliases: :c, type: :string, desc: "yaml config file", required: true
+    method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
+    method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
 
     def tag_alarms
       set_log_level(options[:debug])
       set_region(options[:region],true)
 
-      compiler = CfnGuardian::Compile.new(options[:config])
-      compiler.get_resources
-      alarms = compiler.alarms
+      tags = options.fetch(:tags, {})
 
-      tagger = CfnGuardian::Tagger.new()
-      alarms.each do |alarm|
-        tagger.tag_alarm(alarm, compiler.global_tags)
+      if ENV.has_key?('CODEBUILD_RESOLVED_SOURCE_VERSION')
+        tags[:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
+      end
+
+      options[:config].each do |config|
+        config_basename = File.basename(config, "alarms.yaml")
+        stack_name_suffix = config_basename != "" ? "#{config_basename}-" : ""
+        tags[:'guardian:stack:name'] = "guardian#{stack_name_suffix}"
+        tags[:'guardian:config:yaml'] = config
+
+        logger.info "tagging alarms from config file #{config}"
+        compiler = CfnGuardian::Compile.new(config)
+        compiler.get_resources
+        alarms = compiler.alarms
+        global_tags = compiler.global_tags.merge(tags)
+
+        tagger = CfnGuardian::Tagger.new()
+        
+        counter = 0
+        max_retries = 3
+        alarms.each do |alarm| 
+          begin
+            tagger.tag_alarm(alarm, global_tags)
+          rescue Aws::CloudWatch::Errors::Throttling => e
+            logger.info "cloud watch throttling alarm tagging requests, retrying ..."
+            if (counter += 1) < max_retries
+              sleep(1)
+              redo 
+            else
+              loger.warn "throttled max times (#{max_retries}) tagging alarm #{alarm.name}, skipping ..."
+            end
+          end
+        end
       end
     end
 
@@ -165,7 +278,6 @@ module CfnGuardian
                 :title => "Guardian Alarm Drift".green, 
                 :headings => ['Alarm Name', 'Property', 'Expected', 'Actual', 'Type'], 
                 :rows => rows.flatten(1))
-        exit(1)
       end
     end
     
@@ -189,8 +301,7 @@ module CfnGuardian
       elsif options[:defaults]
         config_file = default_config()
       else
-        logger.error('one of `--config YAML` or `--defaults` must be supplied')
-        exit -1
+        raise Thor::Error, 'one of `--config YAML` or `--defaults` must be supplied'
       end
       
       compiler = CfnGuardian::Compile.new(config_file)
@@ -198,8 +309,7 @@ module CfnGuardian
       alarms = filter_compiled_alarms(compiler.alarms,options[:filter])
 
       if alarms.empty?
-        logger.error "No matches found" 
-        exit 1
+        raise Thor::Error, "No matches found" 
       end
       
       headings = ['Property', 'Config']
@@ -429,8 +539,7 @@ module CfnGuardian
         Aws.config.update({region: ENV['AWS_DEFAULT_REGION']})
       else
         if required
-          logger.error("No AWS region found. Please suppy the region using option `--region` or setting environment variables `AWS_REGION` `AWS_DEFAULT_REGION`")
-          exit(1)
+          raise Thor::Error "No AWS region found. Please suppy the region using option `--region` or setting environment variables `AWS_REGION` `AWS_DEFAULT_REGION`"
         end
       end
     end
@@ -461,5 +570,9 @@ module CfnGuardian
       return !parameter.nil? ? parameter.parameter_value : nil
     end
     
+    def clean_out_directory
+      Dir["out/*.yaml"].each {|file| File.delete(file)}
+    end
+
   end
 end

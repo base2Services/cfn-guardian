@@ -2,40 +2,37 @@ require 'aws-sdk-cloudformation'
 require 'fileutils'
 require 'cfnguardian/version'
 require 'cfnguardian/log'
+require 'cfnguardian/error'
 
 module CfnGuardian
   class Deploy
     include Logging
 
-    def initialize(opts,bucket,parameters)
-      @stack_name = opts.fetch(:stack_name,'guardian')
+    def initialize(opts,bucket,parameters,template_file,stack_name)
+      @stack_name = stack_name
       @bucket = bucket
-      @prefix = @stack_name
-      @template_path = "out/guardian.compiled.yaml"
-      @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@prefix}/guardian.compiled.yaml"
+      @s3_path = "#{stack_name}/#{template_file}"
+      @template_path = "out/#{template_file}"
+      @template_url = "https://#{@bucket}.s3.amazonaws.com/#{@s3_path}"
       @parameters = parameters
       @changeset_role_arn = opts.fetch(:role_arn, nil)
 
-      @tags = {}
-      if opts.has_key?("tag_yaml")
-        @tags.merge!(YAML.load_file(opts[:tag_yaml]))
+      @tags = opts.fetch(:tags, {})
+      if ENV.has_key?('CODEBUILD_RESOLVED_SOURCE_VERSION')
+        @tags[:'guardian:config:commit'] = ENV['CODEBUILD_RESOLVED_SOURCE_VERSION']
       end
-      @tags.merge!(opts.fetch(:tags, {}))
 
       @client = Aws::CloudFormation::Client.new()
     end
 
     def upload_templates
-      Dir["out/*.yaml"].each do |template|
-        prefix = "#{@prefix}/#{template.split('/').last}"
-        body = File.read(template)
-        client = Aws::S3::Client.new()
-        client.put_object({
-          body: body,
-          bucket: @bucket,
-          key: prefix
-        })
-      end
+      body = File.read(@template_path)
+      client = Aws::S3::Client.new()
+      client.put_object({
+        body: body,
+        bucket: @bucket,
+        key: @s3_path
+      })
     end
 
     # TODO: check for REVIEW_IN_PROGRESS
@@ -99,8 +96,11 @@ module CfnGuardian
         @client.wait_until :change_set_create_complete, change_set_name: change_set_id
       rescue Aws::Waiters::Errors::FailureStateError => e
         change_set = get_change_set(change_set_id)
-        logger.error("change set status: #{change_set.status} reason: #{change_set.status_reason}")
-        exit 1
+        if change_set.status_reason.include?("The submitted information didn't contain changes.") || change_set.status_reason.include?("No updates are to be performed") && @ignore_empty_change_set
+          raise CfnGuardian::EmptyChangeSetError, "No changes to deploy. Stack #{@stack_name} is up to date"
+        else
+          raise CfnGuardian::ChangeSetError, "Failed to create the changeset : #{e.message} Status: #{change_set.status} Reason: #{change_set.status_reason}"
+        end
       end
     end
 

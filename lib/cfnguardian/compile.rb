@@ -181,9 +181,7 @@ module CfnGuardian
       raise CfnGuardian::ValidationError, "#{errors.size} errors found\n[*] #{errors.join("\n[*] ")}" if errors.any?
     end
     
-    def compile_templates(bucket,path)
-      clean_out_directory()
-      
+    def compile_templates(template_file)      
       main_stack = CfnGuardian::Stacks::Main.new()
       main_stack.build_template(@stacks,@checks,@topics,@maintenance_groups,@ssm_parameters)
       
@@ -192,11 +190,7 @@ module CfnGuardian
 
       valid = main_stack.template.validate
       FileUtils.mkdir_p 'out'
-      File.write("out/guardian.compiled.yaml", JSON.parse(valid.to_json).to_yaml)
-    end
-    
-    def clean_out_directory
-      Dir["out/*.yaml"].each {|file| File.delete(file)}
+      File.write("out/#{template_file}", JSON.parse(valid.to_json).to_yaml)
     end
 
     def load_parameters(options)
