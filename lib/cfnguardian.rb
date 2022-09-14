@@ -236,7 +236,22 @@ module CfnGuardian
         global_tags = compiler.global_tags.merge(tags)
 
         tagger = CfnGuardian::Tagger.new()
-        alarms.each {|alarm| tagger.tag_alarm(alarm, global_tags) }
+        
+        counter = 0
+        max_retries = 3
+        alarms.each do |alarm| 
+          begin
+            tagger.tag_alarm(alarm, global_tags)
+          rescue Aws::CloudWatch::Errors::Throttling => e
+            logger.info "cloud watch throttling alarm tagging requests, retrying ..."
+            if (counter += 1) < max_retries
+              sleep(1)
+              redo 
+            else
+              loger.warn "throttled max times (#{max_retries}) tagging alarm #{alarm.name}, skipping ..."
+            end
+          end
+        end
       end
     end
 
