@@ -248,7 +248,7 @@ module CfnGuardian
               sleep(1)
               redo 
             else
-              loger.warn "throttled max times (#{max_retries}) tagging alarm #{alarm.name}, skipping ..."
+              logger.warn "throttled max times (#{max_retries}) tagging alarm #{alarm.name}, skipping ..."
             end
           end
         end
