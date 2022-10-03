@@ -17,10 +17,8 @@ module CfnGuardian
         alarm.metric_name = 'BurstCreditBalance'
         alarm.comparison_operator = 'LessThanThreshold'
         alarm.statistic = 'Minimum'
-        alarm.threshold = 1000000000000
-        alarm.evaluation_periods = 5
-        alarm.treat_missing_data = 'notBreaching'
-        alarm.datapoints_to_alarm = 5
+        alarm.threshold = 1000
+        alarm.evaluation_periods = 1
         @alarms.push(alarm)
 
         alarm = CfnGuardian::Models::ElasticFileSystemAlarm.new(@resource, 'Total')
