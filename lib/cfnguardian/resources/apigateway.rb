@@ -24,6 +24,7 @@ module CfnGuardian::Resource
       alarm.statistic = 'Average'
       alarm.threshold = 1000
       alarm.evaluation_periods = 2
+      alarm.enabled = false
       @alarms.push(alarm)
     end
     
