@@ -136,7 +136,7 @@ module CfnGuardian
           Lambda_Function("#{check.name}Function#{check.environment}") do
             Code({ 
               S3Bucket: FnSub("base2.guardian.lambda.checks.${AWS::Region}"), 
-              S3Key: "#{check.package}/master/#{check.version}.zip"
+              S3Key: "#{check.package}/#{check.branch}/#{check.version}.zip"
             })
             Handler check.handler
             MemorySize check.memory

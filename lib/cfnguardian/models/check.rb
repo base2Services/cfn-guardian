@@ -15,7 +15,8 @@ module CfnGuardian
         :subnets, 
         :vpc,
         :memory,
-        :timeout
+        :timeout,
+        :branch
         
       def initialize(resource)
         @type = 'Check'
@@ -30,6 +31,7 @@ module CfnGuardian
         @vpc = nil
         @memory = 128
         @timeout = 120
+        @branch = "master"
       end
     end
     
@@ -42,6 +44,18 @@ module CfnGuardian
         @handler = 'handler.http_check'
         @version = '0e945240f9d93242f807e86d1a9b3383a1764b96'
         @runtime = 'python3.7'
+      end
+    end
+    class WebSocketCheck < BaseCheck      
+      def initialize(resource)
+        super(resource)
+        @group = 'WebSocket'
+        @name = 'WebSocketCheck'
+        @package = 'websocket-check'
+        @handler = 'handler.websocket_check'
+        @version = '1f242f6741f6b561f22f6761a1287e7a0b69d06f'
+        @runtime = 'python3.7'
+        @branch = 'main'
       end
     end
     

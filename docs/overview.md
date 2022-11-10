@@ -15,6 +15,7 @@
     8. [TLS](custom_checks/tls.md)
     9. [Azure File Check](custom_checks/azure_file_check.md)
     10. [ECS Container Instance Check](custom_checks/ecs_container_instance_check.md)
+    11. [Web Socket](custom_checks/websocket.md)
 5. [Event Subscriptions](event_subscriptions.md)
 6. [Notifiers](notifiers.md)
 7. [Maintenance Mode](maintenance_mode.md)
