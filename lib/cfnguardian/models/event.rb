@@ -89,6 +89,8 @@ module CfnGuardian
         @name = 'WebSocketEvent'
         @target = 'WebSocketCheckFunction'
         @endpoint = resource['Id']
+        @message = resource.fetch('Message',nil)
+        @expected_response = resource.fetch('Expected_Response',nil)
         @timeout = resource.fetch('Timeout',50)
         @payload = resource.fetch('Payload',nil)
       end
