@@ -76,11 +76,9 @@ module CfnGuardian
     class WebSocketEvent < BaseEvent
       
       attr_accessor :endpoint,
-        :method,
+        :message,
+        :expected_response,
         :timeout,
-        :status_code,
-        :body_regex,
-        :headers,
         :payload
       
       def initialize(resource)
