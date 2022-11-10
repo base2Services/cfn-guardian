@@ -322,6 +322,18 @@ module CfnGuardian
       end
     end
 
+    class WebSocketAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'WebSocket'
+        @namespace = 'WebSocketCheck'
+        @dimensions = { Endpoint: resource['Id'] }
+        @comparison_operator = 'LessThanThreshold'
+        @threshold = 1
+        @evaluation_periods = 2
+      end
+    end
+
     class InternalHttpAlarm < HttpAlarm
       def initialize(resource)
         super(resource)

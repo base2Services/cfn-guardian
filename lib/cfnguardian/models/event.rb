@@ -30,7 +30,7 @@ module CfnGuardian
         @ssm_parameters = []
       end      
     end
-    
+
     class HttpEvent < BaseEvent
       
       attr_accessor :endpoint,
@@ -69,6 +69,37 @@ module CfnGuardian
         payload['USER_AGENT'] = @user_agent unless @user_agent.nil?
         payload['PAYLOAD'] = @payload unless @payload.nil?
         payload['COMPRESSED'] = '1' if @compressed
+        return payload.to_json
+      end
+    end
+
+    class WebSocketEvent < BaseEvent
+      
+      attr_accessor :endpoint,
+        :method,
+        :timeout,
+        :status_code,
+        :body_regex,
+        :headers,
+        :payload
+      
+      def initialize(resource)
+        super(resource)
+        @group = 'WebSocket'
+        @name = 'WebSocketEvent'
+        @target = 'WebSocketCheckFunction'
+        @endpoint = resource['Id']
+        @timeout = resource.fetch('Timeout',50)
+        @payload = resource.fetch('Payload',nil)
+      end
+      
+      def payload
+        payload = {
+          'ENDPOINT' => @endpoint,
+          'MESSAGE' => @message,
+          'EXPECTED_RESPONSE' => @expected_response
+        }
+        payload['PAYLOAD'] = @payload unless @payload.nil?
         return payload.to_json
       end
     end

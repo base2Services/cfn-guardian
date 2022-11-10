@@ -44,6 +44,17 @@ module CfnGuardian
         @runtime = 'python3.7'
       end
     end
+    class WebSocketCheck < BaseCheck      
+      def initialize(resource)
+        super(resource)
+        @group = 'WebSocket'
+        @name = 'WebSocketCheck'
+        @package = 'websocket-check'
+        @handler = 'handler.websocket_check'
+        @version = 'a746d69492c54a899847a765dee86c28c93066ac'
+        @runtime = 'python3.7'
+      end
+    end
     
     class InternalHttpCheck < HttpCheck
       def initialize(resource)
