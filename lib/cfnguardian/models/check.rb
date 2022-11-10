@@ -53,7 +53,7 @@ module CfnGuardian
         @name = 'WebSocketCheck'
         @package = 'websocket-check'
         @handler = 'handler.websocket_check'
-        @version = 'eba2ddf3643f128b54db901ee57b204423d66610'
+        @version = '1f242f6741f6b561f22f6761a1287e7a0b69d06f'
         @runtime = 'python3.7'
         @branch = 'main'
       end
