@@ -14,7 +14,7 @@ module CfnGuardian::Resource
       alarm.comparison_operator = 'GreaterThanThreshold'
       alarm.metric_name = 'TimeTaken'
       alarm.statistic = 'Minimum'
-      alarm.threshold = 1000
+      alarm.threshold = 5000
       alarm.period = 300
       alarm.evaluation_periods = 1
       @alarms.push(alarm)
