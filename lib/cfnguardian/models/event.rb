@@ -97,7 +97,7 @@ module CfnGuardian
         payload = {
           'ENDPOINT' => @endpoint,
           'MESSAGE' => @message,
-          'EXPECTED_RESPONSE' => @expected_response
+          'EXPECTED_RESPONSE' => @expected_response,
           'TIMEOUT' => @timeout
         }
         payload['PAYLOAD'] = @payload unless @payload.nil?
