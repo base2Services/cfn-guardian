@@ -89,7 +89,7 @@ module CfnGuardian
         @endpoint = resource['Id']
         @message = resource.fetch('Message',nil)
         @expected_response = resource.fetch('Expected_Response',nil)
-        @timeout = resource.fetch('Timeout',50)
+        @timeout = resource.fetch('Timeout',30)
         @payload = resource.fetch('Payload',nil)
       end
       
@@ -97,7 +97,8 @@ module CfnGuardian
         payload = {
           'ENDPOINT' => @endpoint,
           'MESSAGE' => @message,
-          'EXPECTED_RESPONSE' => @expected_response
+          'EXPECTED_RESPONSE' => @expected_response,
+          'TIMEOUT' => @timeout
         }
         payload['PAYLOAD'] = @payload unless @payload.nil?
         return payload.to_json
