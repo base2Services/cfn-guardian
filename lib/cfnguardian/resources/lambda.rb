@@ -6,18 +6,24 @@ module CfnGuardian::Resource
       alarm.name = 'LambdaErrors'
       alarm.metric_name = 'Errors'
       alarm.threshold = 0.5
+      alarms.evaluation_periods = 1
+      alarms.datapoints_to_alarm = 1
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::LambdaAlarm.new(@resource)
       alarm.name = 'Throttles'
       alarm.metric_name = 'Throttles'
       alarm.threshold = 0.5
+      alarms.evaluation_periods = 1
+      alarms.datapoints_to_alarm = 1
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::LambdaAlarm.new(@resource)
       alarm.name = 'DeadLetterErrors'
       alarm.metric_name = 'DeadLetterErrors'
       alarm.threshold = 0.5
+      alarms.evaluation_periods = 1
+      alarms.datapoints_to_alarm = 1
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::LambdaAlarm.new(@resource)
