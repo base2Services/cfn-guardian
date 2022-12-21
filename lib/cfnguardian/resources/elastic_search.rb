@@ -20,6 +20,7 @@ module CfnGuardian::Resource
         alarm.evaluation_periods = 5
         alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Warning'
+        alarm.enabled = false
         @alarms.push(alarm)
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
@@ -28,6 +29,7 @@ module CfnGuardian::Resource
         alarm.threshold = 92
         alarm.evaluation_periods = 5
         alarm.alarm_action = 'Critical'
+        alarm.enabled = false
         @alarms.push(alarm)
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
