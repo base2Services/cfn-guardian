@@ -23,8 +23,8 @@ module CfnGuardian::Resource
       
       alarm = CfnGuardian::Models::ECSClusterAlarm.new(@resource)
       alarm.namespace = 'EcsCICheck'
-      alarm.name = 'ECSContianerInstancesDisconnected'
-      alarm.metric_name = 'ECSContianerInstancesDisconnected'
+      alarm.name = 'ECSContainerInstancesDisconnected'
+      alarm.metric_name = 'ECSContainerInstancesDisconnected'
       alarm.alarm_action = 'Critical'
       alarm.threshold = 0
       alarm.period = 300

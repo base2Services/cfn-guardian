@@ -13,6 +13,6 @@ Resources:
 Templates:
   ECSCluster:
     # override the alarm defaults
-    ECSContianerInstancesDisconnected:
+    ECSContainerInstancesDisconnected:
       ...
 ```
