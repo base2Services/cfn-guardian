@@ -11,15 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: set up ruby 2.7
-      uses: actions/setup-ruby@v1
+    - name: Check out the repo
+      uses: actions/checkout@v3
+    
+    - name: Set up ruby 2.7
+      uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.7.x
+        ruby-version: 2.7
+
     - name: rspec
       run: |
         gem install rspec
         rspec
+
     - name: build gem
       run: |
         gem build cfn-guardian.gemspec
