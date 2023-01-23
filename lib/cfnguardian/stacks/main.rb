@@ -81,6 +81,17 @@ module CfnGuardian
             }]
           }
         }
+        policies << {
+          PolicyName: 'container-instance-check',
+          PolicyDocument: {
+            Version: '2012-10-17',
+            Statement: [{
+              Effect: 'Allow',
+              Action: [ 'ecs:ListContainerInstances' ],
+              Resource: '*'
+            }]
+          }
+        }
         if ssm_parameters.any?
           policies << {
             PolicyName: 'ssm-parameters',
