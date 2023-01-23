@@ -163,9 +163,9 @@ module CfnGuardian
         super(resource)
         @group = 'ContainerInstance'
         @name = 'ContainerInstanceCheck'
-        @package = 'ecs-containder-instance-check'
+        @package = 'ecs-container-instance-check'
         @handler = 'handler.run_check'
-        @version = '4f650d5846d6e8d19f0139bccdeeb147f03f0dd6'
+        @version = '387446fbe2eb18fb4f75462c27cc07caad4a26b8'
         @runtime = 'python3.7'
       end
     end
