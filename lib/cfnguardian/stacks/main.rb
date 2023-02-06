@@ -87,7 +87,7 @@ module CfnGuardian
             Version: '2012-10-17',
             Statement: [{
               Effect: 'Allow',
-              Action: [ 'ecs:ListContainerInstances' ],
+              Action: [ 'ecs:ListContainerInstances','ecs:DescribeContainerInstances' ],
               Resource: '*'
             }]
           }
