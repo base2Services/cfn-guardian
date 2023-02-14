@@ -25,6 +25,7 @@ module CfnGuardian::Resource
       alarm.threshold = 5
       alarm.evaluation_periods = 5
       alarm.treat_missing_data = 'notBreaching'
+      alarm.enabled = false
       @alarms.push(alarm)
     end
     
