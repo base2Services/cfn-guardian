@@ -121,7 +121,7 @@ module CfnGuardian
         client.set_alarm_state({
           alarm_name: alarm,
           state_value: "OK",
-          state_reason: "End of guardian maintenance peroid"
+          state_reason: "End of guardian maintenance period"
         })
       end
     end
