@@ -27,10 +27,15 @@ module CfnGuardian
 
       if tags_changed?(current_tags, new_tags)
         logger.debug "Updating tags on alarm #{alarm_arn}"
-        @client.tag_resource({
-          resource_arn: alarm_arn,
-          tags: new_tags.map {|key,value| {key: key, value: value}}
-        })
+        new_tags.delete_if {|key, value| value.include?('?')}
+        begin
+          @client.tag_resource({
+            resource_arn: alarm_arn,
+            tags: new_tags.map {|key,value| {key: key, value: value}}
+          })
+        rescue Aws::CloudWatch::Errors::InvalidParameterValue => e
+          logger.debug "Failed due to invalid character in tags for: #{alarm_arn}"
+        end
       end
     end
 
