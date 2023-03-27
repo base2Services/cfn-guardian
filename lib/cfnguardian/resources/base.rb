@@ -84,8 +84,11 @@ module CfnGuardian::Resource
         
         alarms = find_alarms(name)
 
-        if alarms.empty?
+        if alarms.empty? && !['LogGroup'].any?(group)
           # if the alarm doesn't exist and it's not being inherited from another alarm create a new alarm
+          # and is a supported a resource group.
+          # unsupported resource groups
+          # - LogGroup: this is not required as alarms are defined in the Metric Filters object in the resource group
           resources = @resource.has_key?('Hosts') ? @resource['Hosts'] : [@resource]
           resources.each do |res|
             alarm = Kernel.const_get("CfnGuardian::Models::#{self.class.to_s.split('::').last}Alarm").new(res)
