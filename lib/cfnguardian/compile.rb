@@ -131,7 +131,7 @@ module CfnGuardian
               res = @resources.find {|r| 
                 (r.type == 'Alarm') && 
                 (r.group == group && r.name == alarm) &&
-                (r.resource_id == resource['Id'] || r.resource_name == resource['Name'])}
+                (r.resource_id == resource['Id'] || (!resource['Name'].nil? && r.resource_name == resource['Name']))}
 
               unless res.nil?
                 res.maintenance_groups.append("#{maintenance_group}MaintenanceGroup")
