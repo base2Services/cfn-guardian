@@ -1,3 +1,5 @@
+require 'aws-sdk-ec2'
+
 module CfnGuardian
   module Resource
     class Ec2Instance < Base
@@ -40,6 +42,13 @@ module CfnGuardian
           'state' => ['terminated']
         }
         @event_subscriptions.push(event_subscription)
+      end
+
+      def resource_exists?
+        client = Aws::EC2::Client.new
+        resource = Aws::EC2::Resource.new(client: client)
+        instance = resource.instance(@resource['Id'])
+        return instance.exists?
       end
 
     end

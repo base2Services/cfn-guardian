@@ -60,7 +60,7 @@ module CfnGuardian
     
     attr_reader :cost, :resources, :topics, :global_tags
     
-    def initialize(config_file)
+    def initialize(config_file, check_resources_exist)
       config = YAML.load_file(config_file)
             
       @resource_groups = config.fetch('Resources',{})
@@ -70,6 +70,8 @@ module CfnGuardian
       @maintenance_groups = config.fetch('MaintenanceGroups', {})
       @event_subscriptions = config.fetch('EventSubscriptions', {})
       @global_tags = config.fetch('GlobalTags', {})
+      @check_resources_exist = check_resources_exist
+      @errors = []
       
       # Make sure the default topics exist if they aren't supplied in the alarms.yaml
       %w(Critical Warning Task Informational Events).each do |topic|
@@ -87,6 +89,10 @@ module CfnGuardian
     def get_resources
       @resource_groups.each do |group,resources|
         resources.each do |resource|
+          if !resource.has_key?('Id')
+            @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
+            next
+          end
           
           begin
             resource_class = Kernel.const_get("CfnGuardian::Resource::#{group}").new(resource)
@@ -103,6 +109,10 @@ module CfnGuardian
               logger.error(e)
               next
             end
+          end
+
+          if @check_resources_exist && !resource_class.resource_exists?
+            @errors << "CfnGuardian::ResourceNotExistsError - #{group} #{resource['Id']} doesn't exist"
           end
           
           template_overides = @templates.has_key?(group) ? @templates[group] : {}
@@ -150,6 +160,10 @@ module CfnGuardian
       @ssm_parameters = @resources.select {|resource| resource.type == 'Event'}.map {|event| event.ssm_parameters}.flatten.uniq
 
       validate_resources()
+
+      if @errors.any?
+        raise CfnGuardian::ValidationError, "#{@errors.size} errors found\n[*] #{@errors.join("\n[*] ")}"
+      end
     end
     
     def alarms
@@ -157,13 +171,12 @@ module CfnGuardian
     end
 
     def validate_resources()
-      errors = []
       @resources.each do |resource|
         case resource.type
         when 'Alarm'
           %w(metric_name namespace).each do |property|
             if resource.send(property).nil?
-              errors << "Alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
             end
           end
         when 'Check'
@@ -178,8 +191,6 @@ module CfnGuardian
           # no validation check yet
         end
       end
-
-      raise CfnGuardian::ValidationError, "#{errors.size} errors found\n[*] #{errors.join("\n[*] ")}" if errors.any?
     end
     
     def compile_templates(template_file)      

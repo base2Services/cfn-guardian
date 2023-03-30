@@ -45,6 +45,7 @@ module CfnGuardian
     method_option :sns_informational, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :sns_events, type: :string, desc: "sns topic arn for the informational alarms"
     method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
+    method_option :check_resources_exist, type: :boolean, default: true, desc: "check each resource exists in the aws account"
 
     def compile
       set_log_level(options[:debug])
@@ -54,7 +55,7 @@ module CfnGuardian
 
       clean_out_directory()
 
-      compiler = CfnGuardian::Compile.new(options[:config])
+      compiler = CfnGuardian::Compile.new(options[:config], options[:check_resources_exist])
       compiler.get_resources
       compiler.compile_templates(options[:template_file])
       logger.info "Cloudformation templates compiled successfully in out/ directory"
@@ -92,6 +93,7 @@ module CfnGuardian
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
     method_option :template_file, type: :string, default: 'guardian.compiled.yaml', desc: "name of the compiled cloudformation template file"
     method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
+    method_option :check_resources_exist, type: :boolean, default: true, desc: "check each resource exists in the aws account"
 
     def deploy
       set_log_level(options[:debug])
@@ -101,7 +103,7 @@ module CfnGuardian
       
       clean_out_directory()
 
-      compiler = CfnGuardian::Compile.new(options[:config])
+      compiler = CfnGuardian::Compile.new(options[:config], options[:check_resources_exist])
       compiler.get_resources
       compiler.compile_templates(options[:template_file])
       parameters = compiler.load_parameters(options)
@@ -137,6 +139,7 @@ module CfnGuardian
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
     method_option :role_arn, type: :string, desc: "IAM role arn that CloudFormation assumes when executing the change set"
     method_option :fail_empty_change_set, type: :boolean, default: true, desc: "fail a cloudformation changeset if it contains no changes"
+    method_option :check_resources_exist, type: :boolean, default: true, desc: "check each resource exists in the aws account"
 
     def bulk_deploy
       set_log_level(options[:debug])
@@ -156,7 +159,7 @@ module CfnGuardian
         guardian_name = config_basename == "alarms.yaml" ? "" : "-#{config_basename}"
         template_file = "guardian#{guardian_name}.#{template_file_suffix}"
 
-        compiler = CfnGuardian::Compile.new(config)
+        compiler = CfnGuardian::Compile.new(config, options[:check_resources_exist])
         compiler.get_resources
         compiler.compile_templates(template_file)
         logger.info "compiled template to out/#{template_file} from yaml config #{config}"
