@@ -214,6 +214,10 @@ module CfnGuardian::Resource
     def get_cost()
       return @alarms.length * 0.10
     end
+
+    def resource_exists?
+      return true
+    end
     
     private
     

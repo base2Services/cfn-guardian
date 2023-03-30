@@ -16,6 +16,20 @@ module CfnGuardian::Resource
         @event_subscriptions.push(event_subscription)
       end
   
+      def resource_exists?
+        client = Aws::RDS::Client.new
+        resource = Aws::RDS::Resource.new(client: client)
+        instance = resource.db_cluster(@resource['Id'])
+  
+        begin
+          instance.load
+        rescue Aws::RDS::Errors::DBClusterNotFoundFault
+          return false
+        end
+        
+        return true
+      end
+
     end
   end
   

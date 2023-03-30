@@ -30,11 +30,13 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'cfndsl', '~> 1.0', '<2'
   spec.add_dependency "terminal-table", '~> 1', '<2'
   spec.add_dependency 'term-ansicolor', '~> 1', '<2'
-  spec.add_dependency 'aws-sdk-s3', '~> 1.60', '<2'
-  spec.add_dependency 'aws-sdk-cloudformation', '~> 1.31', '<2'
-  spec.add_dependency 'aws-sdk-cloudwatch', '~> 1.28', '<2'
-  spec.add_dependency 'aws-sdk-codecommit', '~> 1.28', '<2'
-  spec.add_dependency 'aws-sdk-codepipeline', '~> 1.28', '<2'
+  spec.add_dependency 'aws-sdk-s3', '~> 1.119', '<2'
+  spec.add_dependency 'aws-sdk-ec2', '~> 1.371', '<2'
+  spec.add_dependency 'aws-sdk-rds', '~> 1.174', '<2'
+  spec.add_dependency 'aws-sdk-cloudformation', '~> 1.76', '<2'
+  spec.add_dependency 'aws-sdk-cloudwatch', '~> 1.72', '<2'
+  spec.add_dependency 'aws-sdk-codecommit', '~> 1.53', '<2'
+  spec.add_dependency 'aws-sdk-codepipeline', '~> 1.55', '<2'
   
   spec.add_runtime_dependency('rexml', '>= 0')
   

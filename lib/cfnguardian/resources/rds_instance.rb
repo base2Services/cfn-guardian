@@ -1,3 +1,5 @@
+require 'aws-sdk-rds'
+
 module CfnGuardian::Resource
   class RDSInstance < Base
     
@@ -121,6 +123,20 @@ module CfnGuardian::Resource
       event_subscription.rds_event_category = 'read replica'
       event_subscription.message = 'Replication on the read replica was manually stopped.'
       @event_subscriptions.push(event_subscription)
+    end
+
+    def resource_exists?
+      client = Aws::RDS::Client.new
+      resource = Aws::RDS::Resource.new(client: client)
+      instance = resource.db_instance(@resource['Id'])
+
+      begin
+        instance.load
+      rescue Aws::RDS::Errors::DBInstanceNotFound
+        return false
+      end
+      
+      return true
     end
 
   end
