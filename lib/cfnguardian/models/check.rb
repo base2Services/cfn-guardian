@@ -189,7 +189,7 @@ module CfnGuardian
         @name = 'SFTPCheck'
         @package = 'sftp-check'
         @handler = 'handler.sftp_check'
-        @version = '987e71f2607347e13e3f156535059d6d3ce1ceed'
+        @version = '901a63a0b9bbb4f09d1efae7049b20de4a1a22e2'
         @runtime = 'python3.7'
       end
     end
