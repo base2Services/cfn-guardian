@@ -287,6 +287,7 @@ module CfnGuardian
         @private_key_pass = resource.fetch('PrivateKeyPass', nil)
         @file = resource.fetch('File', nil)
         @file_regex_match = resource.fetch('FileRegexMatch', nil)
+        @timeout = resource.fetch('Timeout', nil)
       end
       
       def payload
@@ -301,6 +302,7 @@ module CfnGuardian
         payload['PRIVATEKEY_PASSWORD'] = @private_key_pass unless @private_key_pass.nil?
         payload['FILE'] = @file unless @file.nil?
         payload['FILE_REGEX_MATCH'] = @file_regex_match unless @file_regex_match.nil?
+        payload['TIMEOUT'] = @timeout unless @timeout.nil?
         return payload.to_json
       end
       

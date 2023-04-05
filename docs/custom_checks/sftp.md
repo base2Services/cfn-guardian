@@ -39,6 +39,8 @@ Resources:
     File: file.txt
     # optionally check for a regex match pattern in the body of the file
     FileBodyMatch: ok
+    # optionally override the default connection timeout of 10 seconds
+    Timeout: 10
 ```
 
 ## Private SFTP Check
@@ -70,4 +72,5 @@ Resources:
       PrivateKeyPass: /ssm/path/privatekey/password
       File: file.txt
       FileBodyMatch: ok
+      Timeout: 10
 ```
