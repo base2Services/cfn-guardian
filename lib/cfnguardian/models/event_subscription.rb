@@ -40,36 +40,24 @@ module CfnGuardian
       def initialize(resource)
         super(resource)
         @source = 'aws.rds'
-        @detail_type = 'RDS DB Instance Event'
-        @source_id = ''
-        @rds_event_category = ''
-        @message = ''
+        @event_id = nil
       end
 
       def detail
+        if @event_id.nil?
+          raise "#{self.class} missing `EventID` property"
+        end
+
         return {
-          EventCategories: [@rds_event_category],
-          SourceType: [@source_type],
-          SourceIdentifier: ["rds:#{@resource_id}"],
-          Message: [@message]
+          EventID: [@event_id],
+          SourceIdentifier: ["rds:#{@resource_id}"]
         }
       end
     end
 
-    class RDSInstanceEventSubscription < RDSEventSubscription
-      def initialize(resource)
-        super(resource)
-        @source_type = 'DB_INSTANCE'
-      end
-    end
-
-    class RDSClusterEventSubscription < RDSEventSubscription
-      def initialize(resource)
-        super(resource)
-        @detail_type = 'RDS DB Cluster Event'
-        @source_type = 'DB_CLUSTER'
-      end
-    end
+    class RDSInstanceEventSubscription < RDSEventSubscription; end
+    class RDSClusterEventSubscription < RDSEventSubscription; end
+    class RDSClusterInstanceEventSubscription < RDSEventSubscription; end
 
     class Ec2InstanceEventSubscription < BaseEventSubscription
       def initialize(resource)
