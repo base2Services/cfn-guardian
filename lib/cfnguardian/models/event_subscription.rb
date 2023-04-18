@@ -48,16 +48,31 @@ module CfnGuardian
           raise "#{self.class} missing `EventID` property"
         end
 
-        return {
-          EventID: [@event_id],
-          SourceIdentifier: ["rds:#{@resource_id}"]
-        }
+        return { EventID: [@event_id] }
       end
     end
 
-    class RDSInstanceEventSubscription < RDSEventSubscription; end
-    class RDSClusterEventSubscription < RDSEventSubscription; end
-    class RDSClusterInstanceEventSubscription < RDSEventSubscription; end
+    class RDSInstanceEventSubscription < RDSEventSubscription
+      def initialize(resource)
+        super(resource)
+        @resource_arn = "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:#{@resource_id}"
+      end
+    end
+
+    class RDSClusterEventSubscription < RDSEventSubscription
+      def initialize(resource)
+        super(resource)
+        @resource_arn = "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:#{@resource_id}"
+      end
+    end
+
+
+    class RDSClusterInstanceEventSubscription < RDSEventSubscription
+      def initialize(resource)
+        super(resource)
+        @resource_arn = "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:#{@resource_id}"
+      end
+    end
 
     class Ec2InstanceEventSubscription < BaseEventSubscription
       def initialize(resource)
