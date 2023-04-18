@@ -35,7 +35,7 @@ module CfnGuardian
     end
 
     class RDSEventSubscription < BaseEventSubscription
-      attr_accessor :source_id, :rds_event_category, :message
+      attr_accessor :event_id
 
       def initialize(resource)
         super(resource)
