@@ -112,7 +112,7 @@ module CfnGuardian
 
       def add_event_subscription(subscription)
         event_pattern = {}
-        event_pattern['detail-type'] = [subscription.detail_type]
+        event_pattern['detail-type'] = [subscription.detail_type] unless subscription.detail_type.empty?
         event_pattern['source'] = [subscription.source]
         event_pattern['resources'] = [subscription.resource_arn] unless subscription.resource_arn.empty?
         event_pattern['detail'] = subscription.detail unless subscription.detail.empty?

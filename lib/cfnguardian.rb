@@ -215,6 +215,7 @@ module CfnGuardian
     method_option :config, aliases: :c, type: :array, desc: "yaml config files", required: true
     method_option :region, aliases: :r, type: :string, desc: "set the AWS region"
     method_option :tags, type: :hash, desc: "additional tags on the cloudformation stack"
+    method_option :check_resources_exist, type: :boolean, default: true, desc: "check each resource exists in the aws account"
 
     def tag_alarms
       set_log_level(options[:debug])
@@ -233,7 +234,7 @@ module CfnGuardian
         tags[:'guardian:config:yaml'] = config
 
         logger.info "tagging alarms from config file #{config}"
-        compiler = CfnGuardian::Compile.new(config)
+        compiler = CfnGuardian::Compile.new(config, options[:check_resources_exist])
         compiler.get_resources
         alarms = compiler.alarms
         global_tags = compiler.global_tags.merge(tags)

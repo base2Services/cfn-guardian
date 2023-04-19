@@ -35,39 +35,42 @@ module CfnGuardian
     end
 
     class RDSEventSubscription < BaseEventSubscription
-      attr_accessor :source_id, :rds_event_category, :message
+      attr_accessor :event_id
 
       def initialize(resource)
         super(resource)
         @source = 'aws.rds'
-        @detail_type = 'RDS DB Instance Event'
-        @source_id = ''
-        @rds_event_category = ''
-        @message = ''
+        @event_id = nil
       end
 
       def detail
-        return {
-          EventCategories: [@rds_event_category],
-          SourceType: [@source_type],
-          SourceIdentifier: ["rds:#{@resource_id}"],
-          Message: [@message]
-        }
+        if @event_id.nil?
+          raise "#{self.class} missing `EventID` property"
+        end
+
+        return { EventID: [@event_id] }
       end
     end
 
     class RDSInstanceEventSubscription < RDSEventSubscription
       def initialize(resource)
         super(resource)
-        @source_type = 'DB_INSTANCE'
+        @resource_arn = "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:#{@resource_id}"
       end
     end
 
     class RDSClusterEventSubscription < RDSEventSubscription
       def initialize(resource)
         super(resource)
-        @detail_type = 'RDS DB Cluster Event'
-        @source_type = 'DB_CLUSTER'
+        @resource_arn = "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:#{@resource_id}"
+      end
+    end
+
+
+    class RDSClusterInstanceEventSubscription < RDSEventSubscription
+      def initialize(resource)
+        super(resource)
+        @resource_arn = "arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:#{@resource_id}"
       end
     end
 

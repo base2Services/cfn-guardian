@@ -4,15 +4,22 @@ module CfnGuardian::Resource
       def default_event_subscriptions()
         event_subscription = CfnGuardian::Models::RDSClusterEventSubscription.new(@resource)
         event_subscription.name = 'FailoverFailed'
-        event_subscription.rds_event_category = 'failover'
-        event_subscription.message = 'A failover for the DB cluster has failed.'
+        event_subscription.event_id = 'RDS-EVENT-0069'
         @event_subscriptions.push(event_subscription)
 
         event_subscription = CfnGuardian::Models::RDSClusterEventSubscription.new(@resource)
         event_subscription.name = 'FailoverFinished'
-        event_subscription.rds_event_category = 'failover'
-        event_subscription.message = 'A failover for the DB cluster has finished.'
-        event_subscription.enabled = false
+        event_subscription.event_id = 'RDS-EVENT-0071'
+        @event_subscriptions.push(event_subscription)
+
+        event_subscription = CfnGuardian::Models::RDSClusterEventSubscription.new(@resource)
+        event_subscription.name = 'FailoverStartedSameAZ'
+        event_subscription.event_id = 'RDS-EVENT-0072'
+        @event_subscriptions.push(event_subscription)
+
+        event_subscription = CfnGuardian::Models::RDSClusterEventSubscription.new(@resource)
+        event_subscription.name = 'FailoverStartedDifferentAZ'
+        event_subscription.event_id = 'RDS-EVENT-0073'
         @event_subscriptions.push(event_subscription)
       end
   

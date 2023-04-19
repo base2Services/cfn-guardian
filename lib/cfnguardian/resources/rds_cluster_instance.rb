@@ -25,6 +25,23 @@ module CfnGuardian::Resource
       alarm.evaluation_periods = 10
       @alarms.push(alarm)
     end
+
+    def default_event_subscriptions()
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'MasterPasswordReset'
+      event_subscription.event_id = 'RDS-EVENT-0016'
+      @event_subscriptions.push(event_subscription)
+
+      event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'MasterPasswordResetFailure'
+      event_subscription.event_id = 'RDS-EVENT-0067'
+      @event_subscriptions.push(event_subscription)
+      
+      event_subscription = CfnGuardian::Models::RDSClusterInstanceEventSubscription.new(@resource)
+      event_subscription.name = 'AuroraStorageLow'
+      event_subscription.event_id = 'RDS-EVENT-0227'
+      @event_subscriptions.push(event_subscription)
+    end
     
   end
 end
