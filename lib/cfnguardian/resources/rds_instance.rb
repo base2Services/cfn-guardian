@@ -107,12 +107,12 @@ module CfnGuardian::Resource
 
       event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
       event_subscription.name = 'MultiAZFailoverStarted'
-      event_subscription.event_id = 'RDS-EVENT-0049'
+      event_subscription.event_id = 'RDS-EVENT-0050'
       @event_subscriptions.push(event_subscription)
 
       event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
       event_subscription.name = 'MultiAZFailoverCompleted'
-      event_subscription.event_id = 'RDS-EVENT-0050'
+      event_subscription.event_id = 'RDS-EVENT-0049'
       @event_subscriptions.push(event_subscription)
 
       event_subscription = CfnGuardian::Models::RDSInstanceEventSubscription.new(@resource)
