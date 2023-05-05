@@ -41,22 +41,6 @@ module CfnGuardian::Resource
         @alarms.push(alarm)  
         
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
-        alarm.name = 'MasterNodeCPUUtilisationWarning'
-        alarm.metric_name = 'MasterCPUUtilization'
-        alarm.threshold = 75
-        alarm.evaluation_periods = 60
-        alarm.alarm_action = 'Warning'
-        @alarms.push(alarm)  
-
-        alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
-        alarm.name = 'MasterNodeCPUUtilisationCrit'
-        alarm.metric_name = 'MasterCPUUtilization'
-        alarm.threshold = 95
-        alarm.evaluation_periods = 10
-        alarm.alarm_action = 'Critical'
-        @alarms.push(alarm)  
-
-        alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
         alarm.name = 'FreeStorageSpaceWarning'
         alarm.metric_name = 'FreeStorageSpace'
         alarm.threshold = 50000
@@ -94,25 +78,6 @@ module CfnGuardian::Resource
         alarm.datapoints_to_alarm = 3
         alarm.alarm_action = 'Critical'
         alarm.statistic = 'Average'
-        @alarms.push(alarm)  
-
-        alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
-        alarm.name = 'KMSKeyError'
-        alarm.metric_name = 'KMSKeyError'
-        alarm.threshold = 1
-        alarm.evaluation_periods = 1
-        alarm.alarm_action = 'Warning'
-        alarm.statistic = 'Minimum'
-        @alarms.push(alarm)  
-
-        alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
-        alarm.name = 'KMSKeyInaccessible'
-        alarm.metric_name = 'KMSKeyInaccessible'
-        alarm.threshold = 1
-        alarm.evaluation_periods = 1
-        alarm.alarm_action = 'Critical'
-        alarm.statistic = 'Minimum'
-        alarm.enabled = false
         @alarms.push(alarm)  
 
         alarm = CfnGuardian::Models::ElasticSearchAlarm.new(@resource)
