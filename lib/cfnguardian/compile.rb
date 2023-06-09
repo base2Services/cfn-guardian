@@ -90,8 +90,15 @@ module CfnGuardian
       @resource_groups.each do |group,resources|
         resources.each do |resource|
           if !resource.has_key?('Id')
-            @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
-            next
+            if !resource.has_key?('Hosts')
+              @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
+              next
+            else
+              if !resource['Hosts'].has_key?('Id')
+                @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
+                next
+              end
+            end
           end
           
           begin
