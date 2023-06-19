@@ -94,10 +94,13 @@ module CfnGuardian
               @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
               next
             else
-              if !resource['Hosts'].has_key?('Id')
-                @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
-                next
-              end
+              resource['Hosts'].each { |host|
+                if !host.has_key?('Id')
+                  @errors << "CfnGuardian::NoIdKeyForResourceError - resource: #{resource} in resource group: #{group} doesn't have the `Id:` key"
+                  next
+                end
+              }
+              
             end
           end
           
