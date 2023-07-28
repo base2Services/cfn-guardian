@@ -390,7 +390,12 @@ module CfnGuardian
         super(resource)
         @group = 'Lambda'
         @namespace = 'AWS/Lambda'
-        @dimensions = { FunctionName: resource['Id'] }
+        if resource['Id'].include?(':')
+          lambda_name, lambda_alias = resource['Id'].split(':', 2)
+          @dimensions = { FunctionName: lambda_name, Resource: resource['Id'] }
+        else
+          @dimensions = { FunctionName: resource['Id'] }
+        end     
         @statistic = 'Average'
         @evaluation_periods = 5
         @treat_missing_data = 'notBreaching'
