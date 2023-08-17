@@ -29,7 +29,11 @@ module CfnGuardian
         logger.debug "Updating tags on alarm #{alarm_arn}"
         new_tags.delete_if {|key, value| value.include?('?')}
         begin
-          @client.tag_resource({
+          alarm_severity = new_tags["guardian:alarm:severity"]
+          if alarm_severity.is_a?(Array)
+            new_tags["guardian:alarm:severity"] = new_tags["guardian:alarm:severity"].join("/")
+          end
+            @client.tag_resource({
             resource_arn: alarm_arn,
             tags: new_tags.map {|key,value| {key: key, value: value}}
           })
