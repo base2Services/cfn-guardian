@@ -36,6 +36,7 @@ Resources:
 
 | Resource Group              | Require Keys     |
 | --------------------------- | ---------------- |
+| Acm                         | Id               |
 | ApiGateway                  | Id               |
 | AmazonMQBroker              | Id               |
 | AutoScalingGroup            | Id               |

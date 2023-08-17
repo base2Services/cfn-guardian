@@ -71,7 +71,7 @@ module CfnGuardian
         super(resource)
         @group = 'Acm'
         @namespace = 'AWS/CertificateManager'
-        @dimensions = { CertificateArn: resource['Id'] }
+        @dimensions = { CertificateArn: { "Fn::Sub" => "arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/#{resource['Id']}"}}
       end
     end
 

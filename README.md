@@ -22,7 +22,7 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
     - tls version checking
 
 **Supported AWS Resources**
-
+- ACM Certificates
 - AmazonMq(RabbitMQ and ActiveMQ)
 - ApiGateway
 - Application Targetgroups
