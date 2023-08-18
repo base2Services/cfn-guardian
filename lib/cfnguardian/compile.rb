@@ -140,6 +140,9 @@ module CfnGuardian
           @cost += resource_class.get_cost
         end
       end
+
+      # Add default event subscriptions
+      @resources.concat generate_default_event_subscriptions()
       
       @maintenance_groups.each do |maintenance_group,resource_groups|
         resource_groups.each do |group, alarms|
@@ -252,6 +255,19 @@ module CfnGuardian
 
       File.write("out/template-config.guardian.json", template.to_json)
     end
-        
+       
+    def generate_default_event_subscriptions()
+      # List of Classes which default events should be deployed
+      default_resource_classes = ['CfnGuardian::Resource::Acm']
+      default_event_subscriptions = []
+
+      default_resource_classes.each do |resource_class|
+        resource_instance = Kernel.const_get(resource_class).new({"Id"=>resource_class}) # Dummy ID 
+        default_event_subscriptions.concat(resource_instance.default_event_subscriptions())
+      end
+
+      return default_event_subscriptions
+    end
+
   end
 end
