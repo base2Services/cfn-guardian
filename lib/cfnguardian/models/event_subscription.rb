@@ -95,6 +95,7 @@ module CfnGuardian
       end
     end
 
+    class AcmEventSubscription < BaseEventSubscription; end
     class ApiGatewayEventSubscription < BaseEventSubscription; end
     class ApplicationTargetGroupEventSubscription < BaseEventSubscription; end
     class AmazonMQBrokerEventSubscription < BaseEventSubscription; end

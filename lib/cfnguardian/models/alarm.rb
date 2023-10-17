@@ -66,6 +66,15 @@ module CfnGuardian
       end      
     end
     
+    class AcmAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'Acm'
+        @namespace = 'AWS/CertificateManager'
+        @dimensions = { CertificateArn: { "Fn::Sub" => "arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/#{resource['Id']}"}}
+      end
+    end
+
     class ApiGatewayAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
