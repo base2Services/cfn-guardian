@@ -23,12 +23,12 @@ module CfnGuardian
         @alarms.push(alarm)
         
         alarm = CfnGuardian::Models::ElastiCacheReplicationGroupAlarm.new(@resource)
-        alarm.name = 'CurrentConnectionsTask'
+        alarm.name = 'CurrentConnectionsWarning'
         alarm.metric_name = 'CurrConnections'
         alarm.comparison_operator = 'GreaterThanThreshold'
         alarm.threshold = 50000
         alarm.evaluation_periods = 10
-        alarm.alarm_action = 'Task'
+        alarm.alarm_action = 'Warning'
         @alarms.push(alarm)
         
         alarm = CfnGuardian::Models::ElastiCacheReplicationGroupAlarm.new(@resource)
