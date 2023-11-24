@@ -42,8 +42,8 @@ module CfnGuardian
         @name = 'HttpCheck'
         @package = 'http-check'
         @handler = 'handler.http_check'
-        @version = '0e945240f9d93242f807e86d1a9b3383a1764b96'
-        @runtime = 'python3.7'
+        @version = '077c726ed691a1176caf95497b8b02f05f00e0cb'
+        @runtime = 'python3.11'
       end
     end
     class WebSocketCheck < BaseCheck      
@@ -53,8 +53,8 @@ module CfnGuardian
         @name = 'WebSocketCheck'
         @package = 'websocket-check'
         @handler = 'handler.websocket_check'
-        @version = 'fb374fcf606b921d3745d7171d81ab5a32135d2f'
-        @runtime = 'python3.7'
+        @version = 'bb0125e878e127028dfb3d4a0de93e580e77305e'
+        @runtime = 'python3.11'
         @branch = 'main'
       end
     end
@@ -77,8 +77,8 @@ module CfnGuardian
         @name = 'PortCheck'
         @package = 'port-check'
         @handler = 'handler.port_check'
-        @version = '356203b2a720ba0730622f978e677b88f8d0c328'
-        @runtime = 'python3.7'
+        @version = 'd773db7333fddea1f4e1781f9906bb05c363dd42'
+        @runtime = 'python3.11'
       end
     end
     
@@ -165,8 +165,8 @@ module CfnGuardian
         @name = 'ContainerInstanceCheck'
         @package = 'ecs-container-instance-check'
         @handler = 'handler.run_check'
-        @version = '387446fbe2eb18fb4f75462c27cc07caad4a26b8'
-        @runtime = 'python3.7'
+        @version = '5cb604acccd0823c74b21e83d7e40612ef38e313'
+        @runtime = 'python3.11'
       end
     end
     
@@ -177,8 +177,8 @@ module CfnGuardian
         @name = 'TLSCheck'
         @package = 'tls-version-check'
         @handler = 'handler.run_check'
-        @version = 'de83afdde0d976364af37ad7552a8496c3c94ab5'
-        @runtime = 'python3.7'
+        @version = '2b4fcbf55e266e793ee06e72013ed098f4eb2c0a'
+        @runtime = 'python3.11'
       end
     end
     
@@ -189,8 +189,8 @@ module CfnGuardian
         @name = 'SFTPCheck'
         @package = 'sftp-check'
         @handler = 'handler.sftp_check'
-        @version = '901a63a0b9bbb4f09d1efae7049b20de4a1a22e2'
-        @runtime = 'python3.7'
+        @version = '03e934328939cd87e5fb41fb01d6a690a94dc94c'
+        @runtime = 'python3.11'
       end
     end
     
@@ -212,8 +212,8 @@ module CfnGuardian
         @name = 'AzureFileCheck'
         @package = 'azure-file-check'
         @handler = 'handler.file_check'
-        @version = 'cc37aa8fe4855570132431611b507274b390f4c1'
-        @runtime = 'python3.7'
+        @version = '6a5abdbed4408592a3045638a1a5a74c89a37e12'
+        @runtime = 'python3.11'
         @memory = 256
         @timeout = 600
       end
@@ -225,8 +225,8 @@ module CfnGuardian
         @name = 'MaintenanceGroupCheck'
         @package = 'maintenance-group-check'
         @handler = 'handler.maintenance_group_check'
-        @version = '5b795e6509068d1767e4be80f2e6868cbeb3b425'
-        @runtime = 'python3.7'
+        @version = '5e880ffc7d0c478383fa353e28fe3e9f8310a93c'
+        @runtime = 'python3.11'
       end 
     end
 
