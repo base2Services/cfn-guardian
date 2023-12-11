@@ -4,7 +4,7 @@ require 'cfnguardian/string'
 module CfnGuardian::Resource
   class Nrpe < Base
     
-    def initialize(resource)
+    def initialize(resource, override_group = nil)
       super(resource)
       @resource_list = resource['Hosts']
       @environment = resource['Environment']
