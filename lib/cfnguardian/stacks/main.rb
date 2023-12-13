@@ -32,7 +32,12 @@ module CfnGuardian
         add_iam_role(ssm_parameters)
                 
         checks.each {|check| parameters["#{check.name}Function#{check.environment}"] = add_lambda(check)}
-        stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters,stack['Reference'])}        
+        #stacks.each {|stack| add_stack(stack['Name'],stack['TemplateURL'],parameters,stack['Reference'])}       
+        
+        stacks.each_with_index do |stack, index|
+          depends_on_stack = index.zero? ? nil : stacks[index - 1]['Name']
+          add_stack(stack['Name'], stack['TemplateURL'], parameters, stack['Reference'], depends_on_stack)
+        end
       end
       
       def add_iam_role(ssm_parameters)
@@ -171,9 +176,10 @@ module CfnGuardian
         return FnGetAtt("#{check.name}Function#{check.environment}", :Arn)
       end
       
-      def add_stack(name,url,stack_parameters,stack_id)
+      def add_stack(name,url,stack_parameters,stack_id, depends_on_stack = nil)
         @template.declare do
           CloudFormation_Stack(name) do
+            DependsOn depends_on_stack unless depdepends_on_stackendson.nil?
             Parameters stack_parameters
             TemplateURL url
             TimeoutInMinutes 15
