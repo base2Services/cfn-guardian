@@ -27,6 +27,7 @@ module CfnGuardian::Resource
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::LambdaAlarm.new(@resource)
+      alarm.enabled = false
       alarm.name = 'IteratorAge'
       alarm.metric_name = 'IteratorAge'
       alarm.threshold = 600000
