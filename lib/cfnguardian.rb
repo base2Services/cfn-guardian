@@ -197,10 +197,6 @@ module CfnGuardian
         end
         logger.info("executing changeset #{changeset[:id]}")
         changeset[:deployer].execute_change_set(changeset[:id])
-        changesets_executed << changeset
-      end
-
-      changesets_executed.each do |changeset|
         logger.info("waiting for changeset #{changeset[:id]} to complete")
         changeset[:deployer].wait_for_execute(changeset[:type])
       end
