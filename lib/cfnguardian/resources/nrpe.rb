@@ -5,7 +5,7 @@ module CfnGuardian::Resource
   class Nrpe < Base
     
     def initialize(resource, override_group = nil)
-      super(resource)
+      super(resource, override_group)
       @resource_list = resource['Hosts']
       @environment = resource['Environment']
     end
