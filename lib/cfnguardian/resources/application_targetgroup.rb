@@ -9,7 +9,6 @@ module CfnGuardian::Resource
       alarm.statistic = 'Minimum'
       alarm.threshold = 2
       alarm.evaluation_periods = 1
-      alarm.comparison_operator = 'LessThanThreshold'
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::ApplicationTargetGroupAlarm.new(@resource)
