@@ -30,6 +30,7 @@ jobs:
     - name: Build and push Container Image to GitHub Container Repository
       uses: docker/build-push-action@v6
       with:
+        context: .
         file: ./Dockerfile
         push: true
         tags: ghcr.io/base2services/guardian:snapshot_${{env.GITHUB_REF_SLUG}}
