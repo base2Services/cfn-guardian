@@ -394,6 +394,34 @@ module CfnGuardian
       end
     end
 
+    class KafkaClusterAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'KafkaCluster'
+        @namespace = 'AWS/Kafka'
+        @dimensions = { ClusterName: resource['Id'] }
+        @statistic = 'Average'
+        @evaluation_periods = 1
+        @datapoints_to_alarm = 1
+        @period = 300
+        @treat_missing_data = 'breaching'
+      end
+    end
+
+    class KafkaTopicAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'KafkaTopic'
+        @namespace = 'AWS/Kafka'
+        @dimensions = { ClusterName: resource['ClusterName'], Topic: resource['Id'] }
+        @statistic = 'Average'
+        @evaluation_periods = 1
+        @datapoints_to_alarm = 1
+        @period = 300
+        @treat_missing_data = 'breaching'
+      end
+    end
+
     class LambdaAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
