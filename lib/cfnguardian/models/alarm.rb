@@ -395,11 +395,11 @@ module CfnGuardian
     end
 
     class KafkaClusterAlarm < BaseAlarm
-      def initialize(resource)
+      def initialize(resource,broker)
         super(resource)
         @group = 'KafkaCluster'
         @namespace = 'AWS/Kafka'
-        @dimensions = { ClusterName: resource['Id'] }
+        @dimensions = { 'Cluster Name': resource['Id'], 'Broker ID': broker }
         @statistic = 'Average'
         @evaluation_periods = 1
         @datapoints_to_alarm = 1
@@ -409,11 +409,11 @@ module CfnGuardian
     end
 
     class KafkaTopicAlarm < BaseAlarm
-      def initialize(resource)
+      def initialize(resource,broker)
         super(resource)
         @group = 'KafkaTopic'
         @namespace = 'AWS/Kafka'
-        @dimensions = { ClusterName: resource['ClusterName'], Topic: resource['Id'] }
+        @dimensions = { 'Cluster Name': resource['ClusterName'], 'Broker ID': broker, Topic: resource['Id'] }
         @statistic = 'Average'
         @evaluation_periods = 1
         @datapoints_to_alarm = 1
