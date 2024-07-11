@@ -63,7 +63,7 @@ module CfnGuardian
     end
 
     def get_tags_to_delete(current_tags, new_tags)
-      return current_tags.select {|tag| !new_tags.has_key?(tag.key)}.map {|tag| tag.key}
+      return current_tags.select {|tag| !new_tags.has_key?(tag.key) && !tag.key.start_with?('aws:') }.map { |tag| tag.key }
     end
 
     def tags_changed?(current_tags, new_tags)

@@ -20,8 +20,8 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_PUSH_TOKEN }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Container Image to GitHub Container Repository
       uses: docker/build-push-action@v2

@@ -8,7 +8,7 @@ COPY . /src
 
 WORKDIR /src
 
-RUN apk add --no-cache git \
+RUN apk add --no-cache git build-base \
     && gem build cfn-guardian.gemspec \
     && gem install cfn-guardian-${GUARDIAN_VERSION}.gem \
     && rm -rf /src
