@@ -190,9 +190,11 @@ module CfnGuardian
       @resources.each do |resource|
         case resource.type
         when 'Alarm'
-          %w(metric_name namespace).each do |property|
-            if resource.send(property).nil?
-              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
+          if resource.metrics.nil?
+            %w(metric_name namespace).each do |property|
+              if resource.send(property).nil?
+                @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
+              end
             end
           end
         when 'Check'
