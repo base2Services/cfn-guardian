@@ -13,6 +13,7 @@ module CfnGuardian
         :metric_name,
         :namespace,
         :dimensions,
+        :metrics,
         :threshold,
         :period,
         :evaluation_periods,
@@ -39,6 +40,7 @@ module CfnGuardian
         @metric_name = nil
         @namespace = nil
         @dimensions = nil
+        @metrics = nil
         @threshold = 0
         @period = 60
         @evaluation_periods = 1

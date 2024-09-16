@@ -110,9 +110,17 @@ module CfnGuardian::Resource
         @alarms.each {|a| a.group = @override_group}
       end
       
-      # String interpolation for alarm dimensions
       @alarms.each do |alarm|
-        next if alarm.dimensions.nil?
+        if ! alarm.metrics.nil?
+          alarm.metrics.each_with_index do |m,i|
+            m['Expression'] = { "Fn::Sub": [ m['Expression'], @resource ] }
+            m['Label'] = "#{alarm.name}#{i}" if m['Label'].nil?
+            m['Id'] = "q#{i}" if m['Id'].nil?
+            m['Period'] = alarm.period if m['Period'].nil?
+          end
+        end
+        # String interpolation for alarm dimensions
+        next if alarm.dimensions.nil? || ! alarm.metrics.nil?
         alarm.dimensions.each do |k,v|
           if v.is_a?(String) && v.match?(/^\${Resource::.*[A-Za-z]}$/)
             resource_key = v.tr('${}', '').split('Resource::').last
