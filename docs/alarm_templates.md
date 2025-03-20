@@ -29,6 +29,7 @@ cfn-guardian show-alarms --defaults --group ApplicationTargetGroup --alarm Targe
 | ActionsEnabled          | true                             |
 | AlarmAction             | Critical                         |
 | TreatMissingData        | notBreaching                     |
+| OkActionDisabled        | false                            |
 +-------------------------+----------------------------------+
 ```
 
@@ -111,6 +112,19 @@ Templates:
   Ec2Instance:
     # define the Alarm and set the value to false
     CPUUtilizationHigh: false
+```
+
+## Disabling The OK Action On An Alarm
+
+You can disable the OK action on an alarm by setting the OkActionDisabled flag to `true`. You might want to do this if you just want to receive alarm notifications rather than treat it as stateful.
+
+```yaml
+Templates:
+  # define the resource group
+  Ec2Instance:
+    # define the Alarm and set the OkActionDisabled value to true
+    CPUUtilizationHigh:
+    OkActionDisabled: true
 ```
 
 ## M Out Of N Metric Data Points
