@@ -48,7 +48,7 @@ module CfnGuardian
             MetricName alarm.metric_name
             Namespace alarm.namespace
             AlarmActions actions
-            OKActions actions
+            OKActions actions unless alarm.ok_action_disabled
             TreatMissingData alarm.treat_missing_data unless alarm.treat_missing_data.nil?
             DatapointsToAlarm alarm.datapoints_to_alarm unless alarm.datapoints_to_alarm.nil?
             ExtendedStatistic alarm.extended_statistic unless alarm.extended_statistic.nil?

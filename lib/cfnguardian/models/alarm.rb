@@ -19,6 +19,7 @@ module CfnGuardian
         :comparison_operator,
         :statistic,
         :actions_enabled,
+        :ok_action_disabled,
         :enabled,
         :resource_id,
         :resource_name,
@@ -45,6 +46,7 @@ module CfnGuardian
         @comparison_operator = 'GreaterThanThreshold'
         @statistic = 'Maximum'
         @actions_enabled = true
+        @ok_action_disabled = false
         @datapoints_to_alarm = nil
         @extended_statistic = nil
         @evaluate_low_sample_count_percentile = nil

@@ -32,6 +32,7 @@ module CfnGuardian
           ['EvaluateLowSampleCountPercentile', alarm.evaluate_low_sample_count_percentile],
           ['Unit', alarm.unit],
           ['AlarmAction', alarm.alarm_action],
+          ['OkActionDisabled', alarm.ok_action_disabled],
           ['TreatMissingData', alarm.treat_missing_data]
         ]
         
@@ -72,7 +73,8 @@ module CfnGuardian
           ['EvaluateLowSampleCountPercentile', alarm.evaluate_low_sample_count_percentile, metric_alarm.evaluate_low_sample_count_percentile],
           ['Unit', alarm.unit, metric_alarm.unit],
           ['TreatMissingData', alarm.treat_missing_data, metric_alarm.treat_missing_data],
-          ['AlarmAction', alarm.alarm_action, alarm.alarm_action]
+          ['AlarmAction', alarm.alarm_action, alarm.alarm_action],
+          ['OkActionDisabled', alarm.ok_action_disabled]
         ]
         
         rows.select! {|row| !row[1].nil?}.each {|row| colour_compare_row(row)}
