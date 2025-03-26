@@ -149,9 +149,9 @@ module CfnGuardian
         @group = 'Sql'
         @name = 'SqlCheck'
         @package = 'aws-lambda-sql-check'
-        @handler = 'main'
-        @version = '83bd6399c0376c98df90dd5f29e49d629c556cee'
-        @runtime = 'go1.x'
+        @handler = 'bootstrap'
+        @version = '21fc960d68550581bfe8fa8fef2014f5de832514'
+        @runtime = 'provided.al2'
         @subnets = resource['Subnets']
         @vpc = resource['VpcId']
         @environment = resource['Environment']
