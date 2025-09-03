@@ -43,6 +43,23 @@ module CfnGuardian::Resource
       alarm.treat_missing_data = 'notBreaching'
       alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
+
+      alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
+      alarm.name = 'StorePercentUsageCritical'
+      alarm.metric_name = 'StorePercentUsage'
+      alarm.threshold = 90
+      alarm.evaluation_periods = 2
+      alarm.treat_missing_data = 'notBreaching'
+      @alarms.push(alarm)
+      
+      alarm = CfnGuardian::Models::AmazonMQBrokerAlarm.new(@resource)
+      alarm.name = 'StorePercentUsageTask'
+      alarm.metric_name = 'StorePercentUsage'
+      alarm.threshold = 75
+      alarm.evaluation_periods = 10
+      alarm.treat_missing_data = 'notBreaching'
+      alarm.alarm_action = 'Task'
+      @alarms.push(alarm)
     end
     
   end
