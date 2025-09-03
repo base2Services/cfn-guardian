@@ -86,8 +86,8 @@ module CfnGuardian
             unless alarm.alarm_action.nil?
               ActionsEnabled true
               AlarmActions [Ref(alarm.alarm_action)]
-              # InsufficientDataActions [Ref(alarm.alarm_action)]
-              # OKActions [Ref(alarm.alarm_action)]
+              InsufficientDataActions [Ref(alarm.alarm_action)]
+              OKActions [Ref(alarm.alarm_action)]
             end
             
           end
