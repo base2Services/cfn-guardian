@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'aws-sdk-codepipeline', '~> 1.55', '<2'
   
   spec.add_runtime_dependency('rexml', '3.3.0')
+  spec.add_dependency 'tins', '~> 1.42.0'
   
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 13.0"
