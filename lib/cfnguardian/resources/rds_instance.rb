@@ -11,6 +11,7 @@ module CfnGuardian::Resource
       alarm.evaluation_periods = 1
       alarm.comparison_operator = 'LessThanThreshold'
       @alarms.push(alarm)
+      alarm.treat_missing_data = 'breaching'
       
       alarm = CfnGuardian::Models::RDSInstanceAlarm.new(@resource)
       alarm.name = 'FreeStorageSpaceTask'
