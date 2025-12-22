@@ -25,6 +25,7 @@ module CfnGuardian::Resource
       alarm.statistic = 'Minimum'
       alarm.threshold = 10000000000
       alarm.evaluation_periods = 1
+      alarm.comparison_operator = 'LessThanThreshold'
       @alarms.push(alarm)
       
       alarm = CfnGuardian::Models::DMSClusterAlarm.new(@resource)
@@ -34,6 +35,7 @@ module CfnGuardian::Resource
       alarm.threshold = 20000000000
       alarm.evaluation_periods = 1
       alarm.alarm_action = 'Warning'
+      alarm.comparison_operator = 'LessThanThreshold'
       @alarms.push(alarm)
     end
   end
