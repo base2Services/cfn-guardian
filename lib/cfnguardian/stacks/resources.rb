@@ -40,13 +40,14 @@ module CfnGuardian
             AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
             AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
             ComparisonOperator alarm.comparison_operator
+            Metrics alarm.metrics unless alarm.metrics.nil?
             Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
             EvaluationPeriods alarm.evaluation_periods
-            Statistic alarm.statistic if alarm.extended_statistic.nil?
-            Period alarm.period
+            Statistic alarm.statistic if alarm.extended_statistic.nil? && alarm.metrics.nil?
+            Period alarm.period if alarm.metrics.nil?
             Threshold alarm.threshold
-            MetricName alarm.metric_name
-            Namespace alarm.namespace
+            MetricName alarm.metric_name if alarm.metrics.nil?
+            Namespace alarm.namespace if alarm.metrics.nil?
             AlarmActions actions
             OKActions actions unless alarm.ok_action_disabled
             TreatMissingData alarm.treat_missing_data unless alarm.treat_missing_data.nil?
