@@ -42,7 +42,7 @@ Resources:
 
 For health endpoints that require authenticated requests, Guardian can send HMAC-signed headers so your application can verify the request came from Guardian and resist replay attacks.
 
-When enabled, the HTTP check Lambda (see [aws-lambda-http-check](https://github.com/base2/aws-lambda-http-check)) adds these headers to each request:
+When enabled, the HTTP check Lambda (see [aws-lambda-http-check](https://github.com/base2services/aws-lambda-http-check)) adds these headers to each request:
 
 | Header (default prefix `X-Health`) | Description |
 |-----------------------------------|-------------|
