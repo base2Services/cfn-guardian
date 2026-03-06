@@ -42,7 +42,7 @@ module CfnGuardian
         @name = 'HttpCheck'
         @package = 'http-check'
         @handler = 'handler.http_check'
-        @version = '077c726ed691a1176caf95497b8b02f05f00e0cb'
+        @version = '685c17ced2429954fccbf8b8b8f2132b37b3f4ff'
         @runtime = 'python3.11'
       end
     end

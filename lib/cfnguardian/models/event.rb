@@ -55,6 +55,10 @@ module CfnGuardian
         @user_agent = resource.fetch('UserAgent',nil)
         @payload = resource.fetch('Payload',nil)
         @compressed = resource.fetch('Compressed',false)
+        @hmac_secret_ssm = resource.fetch('HmacSecretSsm',nil)
+        @hmac_key_id = resource.fetch('HmacKeyId','default')
+        @hmac_header_prefix = resource.fetch('HmacHeaderPrefix','X-Health')
+        @report_response_body = resource.fetch('ReportResponseBody',false)
       end
       
       def payload
@@ -69,7 +73,17 @@ module CfnGuardian
         payload['USER_AGENT'] = @user_agent unless @user_agent.nil?
         payload['PAYLOAD'] = @payload unless @payload.nil?
         payload['COMPRESSED'] = '1' if @compressed
+        payload['REPORT_RESPONSE_BODY'] = '1' if @report_response_body
+        unless @hmac_secret_ssm.nil?
+          payload['HMAC_SECRET_SSM'] = @hmac_secret_ssm
+          payload['HMAC_KEY_ID'] = @hmac_key_id
+          payload['HMAC_HEADER_PREFIX'] = @hmac_header_prefix
+        end
         return payload.to_json
+      end
+
+      def ssm_parameters
+        @hmac_secret_ssm.nil? ? [] : [@hmac_secret_ssm]
       end
     end
 
