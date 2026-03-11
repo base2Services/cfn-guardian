@@ -18,6 +18,7 @@ module CfnGuardian::Resource
       alarm.threshold = 30
       alarm.evaluation_periods = 1
       alarm.enabled = false
+      alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
 
       alarm = CfnGuardian::Models::DMSTaskAlarm.new(@resource)
@@ -36,6 +37,7 @@ module CfnGuardian::Resource
       alarm.threshold = 30
       alarm.evaluation_periods = 1
       alarm.enabled = false
+      alarm.alarm_action = 'Warning'
       @alarms.push(alarm)
     end
   end
