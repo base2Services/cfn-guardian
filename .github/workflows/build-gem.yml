@@ -21,8 +21,9 @@ jobs:
 
     - name: rspec
       run: |
-        gem install rspec
-        rspec
+        gem install bundler
+        bundle install
+        bundle exec rspec
 
     - name: build gem
       run: |
