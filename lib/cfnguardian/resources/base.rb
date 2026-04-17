@@ -126,8 +126,8 @@ module CfnGuardian::Resource
 
         # String interpolation for search expressions
         if alarm.search_expression.is_a?(String)
-          alarm.search_expression = alarm.search_expression.gsub(/\${Resource::([A-Za-z]+)}/) do
-            resource_key = $1
+          alarm.search_expression = alarm.search_expression.gsub(/\${Resource::([A-Za-z0-9_]+)}/) do
+            resource_key = Regexp.last_match(1)
             if @resource.has_key?(resource_key)
               logger.debug "interpolating search_expression variable '#{resource_key}' with value '#{@resource[resource_key]}' for alarm #{alarm.name}"
               @resource[resource_key]

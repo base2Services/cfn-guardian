@@ -8,14 +8,14 @@ When a CloudFormation stack replaces an ASG on deployment, the physical ASG name
 
 ## How It Works
 
-Instead of emitting a CloudWatch alarm with fixed `Dimensions`, `MetricName`, `Namespace`, and `Statistic` properties, a search expression alarm emits `MetricDataQueries` with:
+Instead of emitting a CloudWatch alarm with fixed `Dimensions`, `MetricName`, `Namespace`, and `Statistic` properties, a search expression alarm emits the CloudFormation `Metrics` property (a list of `MetricDataQuery` objects) with:
 
 1. A **SEARCH()** expression that dynamically matches metrics by partial or exact name
 2. An **aggregation function** (e.g. `MAX`, `AVG`, `SUM`) that reduces the matched metrics to a single time series for threshold evaluation
 
 ## Configuration
 
-Add `SearchExpression` and optionally `SearchAggregation` to an alarm template. When `SearchExpression` is set, the `Dimensions`, `MetricName`, `Namespace`, `Statistic`, and `Period` properties are not used since CloudWatch treats these as mutually exclusive with `MetricDataQueries`.
+Add `SearchExpression` and optionally `SearchAggregation` to an alarm template. When `SearchExpression` is set, the `Dimensions`, `MetricName`, `Namespace`, `Statistic`, and `Period` properties are not used since CloudWatch treats these as mutually exclusive with the alarm `Metrics` property.
 
 ### Properties
 

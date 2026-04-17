@@ -191,8 +191,17 @@ module CfnGuardian
         case resource.type
         when 'Alarm'
           if resource.search_expression
-            if resource.search_expression.empty?
-              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has an empty SearchExpression."
+            if !resource.search_expression.is_a?(String) || resource.search_expression.strip.empty?
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has an invalid SearchExpression. Must be a non-empty string."
+            end
+            if resource.search_aggregation
+              valid_aggregations = %w(MAX MIN AVG SUM)
+              normalized = resource.search_aggregation.to_s.upcase
+              if valid_aggregations.include?(normalized)
+                resource.search_aggregation = normalized
+              else
+                @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid SearchAggregation '#{resource.search_aggregation}'. Must be one of: #{valid_aggregations.join(', ')}."
+              end
             end
           else
             %w(metric_name namespace).each do |property|

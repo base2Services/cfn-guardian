@@ -1,6 +1,8 @@
 require 'spec_helper'
 require 'json'
 require 'yaml'
+require 'fileutils'
+require 'tmpdir'
 require 'term/ansicolor'
 require 'cfnguardian/log'
 require 'cfnguardian/models/alarm'
@@ -179,35 +181,30 @@ RSpec.describe 'Search expression alarm support' do
   end
 
   describe 'Validation' do
-    let(:config_dir) { File.join(File.dirname(__FILE__), 'fixtures') }
-
     context 'when search expression alarm has no metric_name or namespace' do
       it 'does not raise validation errors' do
-        fixture = File.join(config_dir, 'search_expression_alarms.yaml')
-        FileUtils.mkdir_p(config_dir)
-        File.write(fixture, {
-          'Resources' => {
-            'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
-          },
-          'Templates' => {
-            'AutoScalingGroup' => {
-              'CPUUtilizationHighBase' => {
-                'SearchExpression' => "SEARCH('{AWS/EC2,AutoScalingGroupName} MetricName=\"CPUUtilization\" my-app', 'Minimum', 60)",
-                'SearchAggregation' => 'MAX'
-              },
-              'StatusCheckFailed' => false
+        Dir.mktmpdir do |tmpdir|
+          fixture = File.join(tmpdir, 'search_expression_alarms.yaml')
+          File.write(fixture, {
+            'Resources' => {
+              'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
+            },
+            'Templates' => {
+              'AutoScalingGroup' => {
+                'CPUUtilizationHighBase' => {
+                  'SearchExpression' => "SEARCH('{AWS/EC2,AutoScalingGroupName} MetricName=\"CPUUtilization\" my-app', 'Minimum', 60)",
+                  'SearchAggregation' => 'MAX'
+                },
+                'StatusCheckFailed' => false
+              }
             }
-          }
-        }.to_yaml)
+          }.to_yaml)
 
-        begin
           compile = CfnGuardian::Compile.new(fixture, false)
           compile.get_resources
           search_alarms = compile.alarms.select { |a| a.search_expression }
           expect(search_alarms.length).to eq(1)
           expect(search_alarms.first.search_expression).to include('SEARCH')
-        ensure
-          FileUtils.rm_f(fixture)
         end
       end
     end
