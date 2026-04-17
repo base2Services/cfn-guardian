@@ -20,7 +20,7 @@ Add `SearchExpression` and optionally `SearchAggregation` to an alarm template. 
 ### Properties
 
 | Property | Required | Default | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `SearchExpression` | Yes | - | A CloudWatch SEARCH() expression string. Supports `${Resource::...}` [variables](variables.md). |
 | `SearchAggregation` | No | `MAX` | Aggregation function applied to the search results. Valid values: `MAX`, `MIN`, `AVG`, `SUM`. |
 

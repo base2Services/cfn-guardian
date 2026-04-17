@@ -33,7 +33,7 @@ module CfnGuardian
       def add_alarm(alarm)
         actions = alarm.alarm_action.kind_of?(Array) ? alarm.alarm_action.map{|action| Ref(action)} : [Ref(alarm.alarm_action)]
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
-        use_search = alarm.search_expression ? true : false
+        use_search = alarm.search_expression.is_a?(String) && !alarm.search_expression.strip.empty?
 
         @template.declare do
           CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name.gsub(/[^0-9a-zA-Z]/i, '')}#{alarm.type}"[0..255]) do

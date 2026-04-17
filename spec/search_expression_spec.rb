@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'json'
 require 'yaml'
-require 'fileutils'
 require 'tmpdir'
 require 'term/ansicolor'
 require 'cfnguardian/log'
@@ -181,11 +180,85 @@ RSpec.describe 'Search expression alarm support' do
   end
 
   describe 'Validation' do
+    def compile_config(config)
+      Dir.mktmpdir do |tmpdir|
+        fixture = File.join(tmpdir, 'test_alarms.yaml')
+        File.write(fixture, config.to_yaml)
+        compile = CfnGuardian::Compile.new(fixture, false)
+        compile.get_resources
+        compile
+      end
+    end
+
     context 'when search expression alarm has no metric_name or namespace' do
       it 'does not raise validation errors' do
-        Dir.mktmpdir do |tmpdir|
-          fixture = File.join(tmpdir, 'search_expression_alarms.yaml')
-          File.write(fixture, {
+        result = compile_config({
+          'Resources' => {
+            'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
+          },
+          'Templates' => {
+            'AutoScalingGroup' => {
+              'CPUUtilizationHighBase' => {
+                'SearchExpression' => "SEARCH('{AWS/EC2,AutoScalingGroupName} MetricName=\"CPUUtilization\" my-app', 'Minimum', 60)",
+                'SearchAggregation' => 'MAX'
+              },
+              'StatusCheckFailed' => false
+            }
+          }
+        })
+
+        search_alarms = result.alarms.select { |a| a.search_expression }
+        expect(search_alarms.length).to eq(1)
+        expect(search_alarms.first.search_expression).to include('SEARCH')
+      end
+    end
+
+    context 'when search expression is blank' do
+      it 'raises a validation error' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
+            },
+            'Templates' => {
+              'AutoScalingGroup' => {
+                'CPUUtilizationHighBase' => {
+                  'SearchExpression' => '   ',
+                  'SearchAggregation' => 'MAX'
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid SearchExpression/)
+      end
+    end
+
+    context 'when search expression is not a string' do
+      it 'raises a validation error' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
+            },
+            'Templates' => {
+              'AutoScalingGroup' => {
+                'CPUUtilizationHighBase' => {
+                  'SearchExpression' => ['not', 'a', 'string'],
+                  'SearchAggregation' => 'MAX'
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid SearchExpression/)
+      end
+    end
+
+    context 'when search aggregation is invalid' do
+      it 'raises a validation error' do
+        expect {
+          compile_config({
             'Resources' => {
               'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
             },
@@ -193,19 +266,35 @@ RSpec.describe 'Search expression alarm support' do
               'AutoScalingGroup' => {
                 'CPUUtilizationHighBase' => {
                   'SearchExpression' => "SEARCH('{AWS/EC2,AutoScalingGroupName} MetricName=\"CPUUtilization\" my-app', 'Minimum', 60)",
-                  'SearchAggregation' => 'MAX'
+                  'SearchAggregation' => 'MEDIAN'
                 },
                 'StatusCheckFailed' => false
               }
             }
-          }.to_yaml)
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid SearchAggregation/)
+      end
+    end
 
-          compile = CfnGuardian::Compile.new(fixture, false)
-          compile.get_resources
-          search_alarms = compile.alarms.select { |a| a.search_expression }
-          expect(search_alarms.length).to eq(1)
-          expect(search_alarms.first.search_expression).to include('SEARCH')
-        end
+    context 'when search aggregation is lowercase' do
+      it 'normalizes to uppercase' do
+        result = compile_config({
+          'Resources' => {
+            'AutoScalingGroup' => [{ 'Id' => 'my-app-AsgGroup-abc123' }]
+          },
+          'Templates' => {
+            'AutoScalingGroup' => {
+              'CPUUtilizationHighBase' => {
+                'SearchExpression' => "SEARCH('{AWS/EC2,AutoScalingGroupName} MetricName=\"CPUUtilization\" my-app', 'Minimum', 60)",
+                'SearchAggregation' => 'avg'
+              },
+              'StatusCheckFailed' => false
+            }
+          }
+        })
+
+        search_alarms = result.alarms.select { |a| a.search_expression }
+        expect(search_alarms.first.search_aggregation).to eq('AVG')
       end
     end
   end
