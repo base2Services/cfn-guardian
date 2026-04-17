@@ -1,6 +1,6 @@
 ## Dimension Variables
 
-variables can be used to reference resource group values such as the resource Id within the dimensions section of an alarm template.
+Variables can be used to reference resource group values such as the resource Id within the dimensions section of an alarm template. They are also supported inside [search expressions](search_expressions.md).
 
 For example here we are creating an alarm for a disk usage metric for a group of EC2 instances.
 

@@ -34,6 +34,14 @@ module CfnGuardian
         actions = alarm.alarm_action.kind_of?(Array) ? alarm.alarm_action.map{|action| Ref(action)} : [Ref(alarm.alarm_action)]
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
 
+        if alarm.search_expression
+          add_search_expression_alarm(alarm, actions)
+        else
+          add_standard_alarm(alarm, actions)
+        end
+      end
+
+      def add_standard_alarm(alarm, actions)
         @template.declare do
           CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name.gsub(/[^0-9a-zA-Z]/i, '')}#{alarm.type}"[0..255]) do
             ActionsEnabled true
@@ -54,6 +62,38 @@ module CfnGuardian
             ExtendedStatistic alarm.extended_statistic unless alarm.extended_statistic.nil?
             EvaluateLowSampleCountPercentile alarm.evaluate_low_sample_count_percentile unless alarm.evaluate_low_sample_count_percentile.nil?
             Unit alarm.unit unless alarm.unit.nil?
+          end
+        end
+      end
+
+      def add_search_expression_alarm(alarm, actions)
+        search_expr = alarm.search_expression
+        aggregation = alarm.search_aggregation || 'MAX'
+
+        @template.declare do
+          CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name.gsub(/[^0-9a-zA-Z]/i, '')}#{alarm.type}"[0..255]) do
+            ActionsEnabled true
+            AlarmDescription "Guardian alarm #{alarm.name} for the resource #{alarm.resource_id} in alarm group #{alarm.group}"
+            AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
+            ComparisonOperator alarm.comparison_operator
+            EvaluationPeriods alarm.evaluation_periods
+            Threshold alarm.threshold
+            AlarmActions actions
+            OKActions actions unless alarm.ok_action_disabled
+            TreatMissingData alarm.treat_missing_data unless alarm.treat_missing_data.nil?
+            DatapointsToAlarm alarm.datapoints_to_alarm unless alarm.datapoints_to_alarm.nil?
+            Metrics [
+              {
+                Id: 'search_expression',
+                Expression: search_expr,
+                ReturnData: false
+              },
+              {
+                Id: 'aggregate',
+                Expression: "#{aggregation}(search_expression)",
+                ReturnData: true
+              }
+            ]
           end
         end
       end
