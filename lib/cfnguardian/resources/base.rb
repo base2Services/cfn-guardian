@@ -110,15 +110,29 @@ module CfnGuardian::Resource
         @alarms.each {|a| a.group = @override_group}
       end
       
-      # String interpolation for alarm dimensions
       @alarms.each do |alarm|
-        next if alarm.dimensions.nil?
-        alarm.dimensions.each do |k,v|
-          if v.is_a?(String) && v.match?(/^\${Resource::.*[A-Za-z]}$/)
-            resource_key = v.tr('${}', '').split('Resource::').last
+        # String interpolation for alarm dimensions
+        unless alarm.dimensions.nil?
+          alarm.dimensions.each do |k,v|
+            if v.is_a?(String) && v.match?(/^\${Resource::.*[A-Za-z]}$/)
+              resource_key = v.tr('${}', '').split('Resource::').last
+              if @resource.has_key?(resource_key)
+                logger.debug "overriding alarm #{alarm.name} dimension key '#{k}' with value '#{@resource[resource_key]}'" 
+                alarm.dimensions[k] = @resource[resource_key]
+              end
+            end
+          end
+        end
+
+        # String interpolation for search expressions
+        if alarm.search_expression.is_a?(String)
+          alarm.search_expression = alarm.search_expression.gsub(/\${Resource::([A-Za-z0-9_]+)}/) do
+            resource_key = Regexp.last_match(1)
             if @resource.has_key?(resource_key)
-              logger.debug "overriding alarm #{alarm.name} dimension key '#{k}' with value '#{@resource[resource_key]}'" 
-              alarm.dimensions[k] = @resource[resource_key]
+              logger.debug "interpolating search_expression variable '#{resource_key}' with value '#{@resource[resource_key]}' for alarm #{alarm.name}"
+              @resource[resource_key]
+            else
+              "${Resource::#{resource_key}}"
             end
           end
         end

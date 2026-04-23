@@ -190,9 +190,24 @@ module CfnGuardian
       @resources.each do |resource|
         case resource.type
         when 'Alarm'
-          %w(metric_name namespace).each do |property|
-            if resource.send(property).nil?
-              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
+          if resource.search_expression
+            if !resource.search_expression.is_a?(String) || resource.search_expression.strip.empty?
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has an invalid SearchExpression. Must be a non-empty string."
+            end
+            if resource.search_aggregation
+              valid_aggregations = %w(MAX MIN AVG SUM)
+              normalized = resource.search_aggregation.to_s.upcase
+              if valid_aggregations.include?(normalized)
+                resource.search_aggregation = normalized
+              else
+                @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid SearchAggregation '#{resource.search_aggregation}'. Must be one of: #{valid_aggregations.join(', ')}."
+              end
+            end
+          else
+            %w(metric_name namespace).each do |property|
+              if resource.send(property).nil?
+                @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
+              end
             end
           end
         when 'Check'

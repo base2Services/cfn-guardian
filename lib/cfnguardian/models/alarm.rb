@@ -31,7 +31,9 @@ module CfnGuardian
         :unit,
         :maintenance_groups,
         :additional_notifiers,
-        :tags
+        :tags,
+        :search_expression,
+        :search_aggregation
       
       def initialize(resource)
         @type = 'Alarm'
@@ -60,6 +62,8 @@ module CfnGuardian
         @maintenance_groups = []
         @additional_notifiers = []
         @tags = {}
+        @search_expression = nil
+        @search_aggregation = nil
       end
       
       def metric_name=(metric_name)
