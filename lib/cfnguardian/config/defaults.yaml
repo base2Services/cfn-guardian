@@ -110,6 +110,10 @@ Resources:
         Query: Default
   SQSQueue:
   - Id: Default
+  IoTCore:
+  - Id: MQTT
+  IoTRule:
+  - Id: Default
   VPNTunnel:
   - Id: Default
   VPNConnection:

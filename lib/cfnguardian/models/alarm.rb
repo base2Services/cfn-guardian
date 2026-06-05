@@ -623,5 +623,27 @@ module CfnGuardian
       end
     end
 
+    class IoTCoreAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'IoTCore'
+        @namespace = 'AWS/IoT'
+        @dimensions = { Protocol: resource['Id'] }
+        @statistic = 'Sum'
+        @treat_missing_data = 'notBreaching'
+      end
+    end
+
+    class IoTRuleAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'IoTRule'
+        @namespace = 'AWS/IoT'
+        @dimensions = { RuleName: resource['Id'] }
+        @statistic = 'Sum'
+        @treat_missing_data = 'notBreaching'
+      end
+    end
+
   end
 end
