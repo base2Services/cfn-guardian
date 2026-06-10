@@ -54,6 +54,7 @@ module CfnGuardian
                 {
                   Id: 'search_expression',
                   Expression: alarm.search_expression,
+                  Period: alarm.period,
                   ReturnData: false
                 },
                 {

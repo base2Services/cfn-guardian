@@ -122,6 +122,7 @@ RSpec.describe 'Search expression alarm support' do
 
         search_metric = metrics.find { |m| m['Id'] == 'search_expression' }
         expect(search_metric['Expression']).to include('SEARCH')
+        expect(search_metric['Period']).to eq(alarm.period)
         expect(search_metric['ReturnData']).to eq(false)
 
         agg_metric = metrics.find { |m| m['Id'] == 'aggregate' }
