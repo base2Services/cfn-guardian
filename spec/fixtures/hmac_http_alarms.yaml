@@ -1,0 +1,24 @@
+Resources:
+  Http:
+    - Id: https://api.example.com/health
+      StatusCode: 200
+      HmacSecretSsm: /guardian/test/hmac-secret
+      HmacKeyId: default
+      HmacHeaderPrefix: X-Health
+      HealthConfigOverrides:
+        roles:
+          my_service:
+            probes:
+              - id: my-probe
+                enabled: false
+
+  InternalHttp:
+    - Environment: Test
+      VpcId: vpc-test123
+      Subnets:
+        - subnet-test1
+      Hosts:
+        - Id: http://api.internal.example.com/health
+          StatusCode: 200
+          HmacSecretSsm: /guardian/test/internal-hmac-secret
+          HealthConfigOverrides: '{"enabled":true}'

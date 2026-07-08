@@ -58,6 +58,7 @@ When enabled, the HTTP check Lambda (see [aws-lambda-http-check](https://github.
 | `HmacSecretSsm` | Yes | SSM Parameter Store path to the HMAC secret (SecureString). The Guardian-generated IAM role grants the Lambda `ssm:GetParameter` for this path. |
 | `HmacKeyId` | No | Key id sent in the `Key-Id` header. Default: `default`. |
 | `HmacHeaderPrefix` | No | Prefix for all HMAC header names. Default: `X-Health` (yields `X-Health-Signature`, `X-Health-Key-Id`, etc.). |
+| `HealthConfigOverrides` | No | Request-scoped health check overrides sent as the `X-Health-Config-Overrides` header. Accepts a YAML object (serialized to JSON) or a raw JSON string. Included in the HMAC signature when `HmacSecretSsm` is set. |
 
 **Example:**
 
@@ -69,6 +70,12 @@ Resources:
     HmacSecretSsm: /guardian/myapp/hmac-secret
     HmacKeyId: default
     HmacHeaderPrefix: X-Health
+    HealthConfigOverrides:
+      roles:
+        my_service:
+          probes:
+          - id: my-probe
+            enabled: false
 ```
 
 Internal HTTP checks support the same keys under each host:
@@ -118,7 +125,7 @@ If you want Guardian to call a health endpoint that only accepts HMAC-authentica
 The Lambda signs this string (newline-separated, no trailing newline):
 
 ```
-METHOD\nPATH\nTIMESTAMP\nNONCE\nQUERY\nBODY_HASH
+METHOD\nPATH\nTIMESTAMP\nNONCE\nQUERY\nBODY_HASH\nOVERRIDE_HEADER_HASH
 ```
 
 - `METHOD` – HTTP method (e.g. `GET`).
@@ -127,6 +134,7 @@ METHOD\nPATH\nTIMESTAMP\nNONCE\nQUERY\nBODY_HASH
 - `NONCE` – Same value as the `{prefix}-Nonce` header.
 - `QUERY` – Raw query string (e.g. `foo=bar` or empty).
 - `BODY_HASH` – SHA-256 hex digest of the raw request body (empty string for GET; for POST/PUT, hash the body as sent).
+- `OVERRIDE_HEADER_HASH` – SHA-256 hex digest of the raw `X-Health-Config-Overrides` header value when sent, otherwise the SHA-256 digest of an empty string (`e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`).
 
 **Verification steps (pseudo code):**
 
@@ -175,6 +183,8 @@ def verify_health_request(request, secret_by_key_id, header_prefix="X-Health", m
         return False
 
     body_hash = hashlib.sha256(request.body or b"").hexdigest()
+    override_raw = request.headers.get("X-Health-Config-Overrides", "")
+    override_hash = hashlib.sha256(override_raw.encode()).hexdigest()
     canonical = "\n".join([
         request.method,
         request.path,
@@ -182,6 +192,7 @@ def verify_health_request(request, secret_by_key_id, header_prefix="X-Health", m
         nonce,
         request.query_string or "",
         body_hash,
+        override_hash,
     ])
     expected = hmac.new(secret.encode(), canonical.encode(), hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature)
