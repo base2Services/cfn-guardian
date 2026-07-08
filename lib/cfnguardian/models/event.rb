@@ -1,3 +1,4 @@
+require 'json'
 require 'cfnguardian/string'
 
 module CfnGuardian
@@ -58,7 +59,20 @@ module CfnGuardian
         @hmac_secret_ssm = resource.fetch('HmacSecretSsm',nil)
         @hmac_key_id = resource.fetch('HmacKeyId','default')
         @hmac_header_prefix = resource.fetch('HmacHeaderPrefix','X-Health')
+        @health_config_overrides = resource.fetch('HealthConfigOverrides',nil)
         @report_response_body = resource.fetch('ReportResponseBody',false)
+      end
+
+      def http_headers
+        parts = []
+        parts << @headers unless @headers.nil? || @headers.empty?
+        unless @health_config_overrides.nil?
+          override_value = @health_config_overrides.is_a?(String) ?
+            @health_config_overrides :
+            JSON.generate(@health_config_overrides)
+          parts << "X-Health-Config-Overrides=#{override_value.gsub(' ', '%20')}"
+        end
+        parts.empty? ? nil : parts.join(' ')
       end
       
       def payload
@@ -69,7 +83,8 @@ module CfnGuardian
           'STATUS_CODE_MATCH' => @status_code
         }
         payload['BODY_REGEX_MATCH'] = @body_regex unless @body_regex.nil?
-        payload['HEADERS'] = @headers unless @headers.nil?
+        headers = http_headers
+        payload['HEADERS'] = headers unless headers.nil?
         payload['USER_AGENT'] = @user_agent unless @user_agent.nil?
         payload['PAYLOAD'] = @payload unless @payload.nil?
         payload['COMPRESSED'] = '1' if @compressed
