@@ -18,4 +18,4 @@ RUN addgroup -g 1000 guardian && \
 
 USER guardian
 
-RUN cfndsl -u
+RUN cfndsl -u 11.5.0

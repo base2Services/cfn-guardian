@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "thor", "~> 0.20"
-  spec.add_dependency 'cfndsl', '~> 1.0', '<2'
+  spec.add_dependency 'cfndsl', '~> 1.8'
   spec.add_dependency "terminal-table", '~> 1', '<2'
   spec.add_dependency 'term-ansicolor', '~> 1', '<2'
   spec.add_dependency 'aws-sdk-s3', '~> 1.119', '<2'
