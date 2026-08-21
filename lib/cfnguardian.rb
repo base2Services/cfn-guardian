@@ -539,7 +539,7 @@ module CfnGuardian
         Aws.config.update({region: ENV['AWS_DEFAULT_REGION']})
       else
         if required
-          raise Thor::Error "No AWS region found. Please suppy the region using option `--region` or setting environment variables `AWS_REGION` `AWS_DEFAULT_REGION`"
+          raise Thor::Error, "No AWS region found. Please supply the region using option `--region` or setting environment variables `AWS_REGION` `AWS_DEFAULT_REGION`"
         end
       end
     end
