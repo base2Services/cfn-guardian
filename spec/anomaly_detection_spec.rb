@@ -195,6 +195,25 @@ RSpec.describe 'Anomaly detection alarm support' do
         band_metric = metrics.find { |m| m['Id'] == 'ad1' }
         expect(band_metric['Expression']).to eq('ANOMALY_DETECTION_BAND(m1, 2)')
       end
+
+      it 'still emits EvaluateLowSampleCountPercentile when set, matching the standard alarm branch' do
+        alarm.evaluate_low_sample_count_percentile = 'ignore'
+        new_template = CfnDsl::CloudFormationTemplate.new
+        new_stack = CfnGuardian::Stacks::Resources.new(new_template)
+        new_stack.build_template([alarm])
+        output = JSON.parse(new_template.to_json)
+        alarm_resource = output['Resources'].values.first
+
+        expect(alarm_resource['Properties']['EvaluateLowSampleCountPercentile']).to eq('ignore')
+      end
+
+      it 'omits EvaluateLowSampleCountPercentile when not set' do
+        stack.build_template([alarm])
+        output = JSON.parse(template.to_json)
+        alarm_resource = output['Resources'].values.first
+
+        expect(alarm_resource['Properties']).not_to have_key('EvaluateLowSampleCountPercentile')
+      end
     end
 
     context 'with an anomaly detection alarm whose default statistic is an ExtendedStatistic' do
@@ -319,6 +338,50 @@ RSpec.describe 'Anomaly detection alarm support' do
                   'AnomalyDetection' => true,
                   'ComparisonOperator' => 'GreaterThanUpperThreshold',
                   'StandardDeviation' => -1
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid StandardDeviation/)
+      end
+    end
+
+    context 'when anomaly detection alarm has a StandardDeviation of .nan' do
+      it 'raises a validation error instead of compiling a NaN into ANOMALY_DETECTION_BAND' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'AnomalyDetection' => true,
+                  'ComparisonOperator' => 'GreaterThanUpperThreshold',
+                  'StandardDeviation' => YAML.load('.nan')
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid StandardDeviation/)
+      end
+    end
+
+    context 'when anomaly detection alarm has a StandardDeviation of .inf' do
+      it 'raises a validation error instead of compiling an Infinity into ANOMALY_DETECTION_BAND' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'AnomalyDetection' => true,
+                  'ComparisonOperator' => 'GreaterThanUpperThreshold',
+                  'StandardDeviation' => YAML.load('.inf')
                 },
                 'StatusCheckFailed' => false
               }

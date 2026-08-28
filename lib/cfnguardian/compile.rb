@@ -221,8 +221,8 @@ module CfnGuardian
               @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} cannot set both Threshold and AnomalyDetection. Anomaly detection alarms use StandardDeviation to size the expected band instead of a static Threshold."
             end
 
-            if !resource.standard_deviation.nil? && (!resource.standard_deviation.is_a?(Numeric) || resource.standard_deviation <= 0)
-              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid StandardDeviation '#{resource.standard_deviation}'. Must be a positive number."
+            if !resource.standard_deviation.nil? && (!resource.standard_deviation.is_a?(Numeric) || !resource.standard_deviation.finite? || resource.standard_deviation <= 0)
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid StandardDeviation '#{resource.standard_deviation}'. Must be a finite positive number."
             end
 
             %w(metric_name namespace).each do |property|

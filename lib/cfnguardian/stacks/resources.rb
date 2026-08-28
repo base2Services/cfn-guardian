@@ -93,6 +93,7 @@ module CfnGuardian
                 }
               ]
               ThresholdMetricId 'ad1'
+              EvaluateLowSampleCountPercentile alarm.evaluate_low_sample_count_percentile unless alarm.evaluate_low_sample_count_percentile.nil?
             else
               Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
               Statistic alarm.statistic if alarm.extended_statistic.nil?
