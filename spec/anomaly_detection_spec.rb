@@ -9,6 +9,7 @@ require 'cfnguardian/stacks/resources'
 require 'cfnguardian/resources/base'
 require 'cfnguardian/resources/ec2_instance'
 require 'cfnguardian/resources/sqs_queue'
+require 'cfnguardian/resources/application_targetgroup'
 require 'cfnguardian/compile'
 
 RSpec.describe 'Anomaly detection alarm support' do
@@ -37,6 +38,20 @@ RSpec.describe 'Anomaly detection alarm support' do
     it 'allows setting standard_deviation' do
       alarm.standard_deviation = 3
       expect(alarm.standard_deviation).to eq(3)
+    end
+
+    it 'does not expose a public threshold_overridden= writer' do
+      # threshold_overridden must only be settable internally via mark_threshold_overridden!,
+      # otherwise a YAML config could set ThresholdOverridden directly through
+      # update_object's generic setter dispatch and bypass validation.
+      expect(alarm.respond_to?(:threshold_overridden=)).to eq(false)
+      expect { alarm.threshold_overridden = true }.to raise_error(NoMethodError)
+    end
+
+    it 'marks threshold_overridden via the internal marker method' do
+      expect(alarm.threshold_overridden).to eq(false)
+      alarm.mark_threshold_overridden!
+      expect(alarm.threshold_overridden).to eq(true)
     end
 
     it 'does not mark threshold_overridden just from calling the plain accessor' do
@@ -181,6 +196,36 @@ RSpec.describe 'Anomaly detection alarm support' do
         expect(band_metric['Expression']).to eq('ANOMALY_DETECTION_BAND(m1, 2)')
       end
     end
+
+    context 'with an anomaly detection alarm whose default statistic is an ExtendedStatistic' do
+      let(:tg_resource) { { 'Id' => 'my-target-group', 'LoadBalancer' => 'my-alb' } }
+      let(:alarm) do
+        a = CfnGuardian::Models::ApplicationTargetGroupAlarm.new(tg_resource)
+        a.name = 'TargetResponseTime'
+        a.metric_name = 'TargetResponseTime'
+        a.extended_statistic = 'p95'
+        a.evaluation_periods = 5
+        a.alarm_action = 'Critical'
+        a.maintenance_groups = []
+        a.anomaly_detection = true
+        a.standard_deviation = 2
+        a.comparison_operator = 'GreaterThanUpperThreshold'
+        a
+      end
+
+      it 'uses the ExtendedStatistic (not the default Statistic) as the MetricStat.Stat' do
+        stack.build_template([alarm])
+        output = JSON.parse(template.to_json)
+        alarm_resource = output['Resources'].values.first
+        metrics = alarm_resource['Properties']['Metrics']
+
+        raw_metric = metrics.find { |m| m['Id'] == 'm1' }
+        # alarm.statistic still defaults to 'Maximum' since only extended_statistic was set;
+        # the anomaly Metrics must prefer the ExtendedStatistic, matching the non-anomaly path.
+        expect(alarm.statistic).to eq('Maximum')
+        expect(raw_metric['MetricStat']['Stat']).to eq('p95')
+      end
+    end
   end
 
   describe 'Validation' do
@@ -302,6 +347,50 @@ RSpec.describe 'Anomaly detection alarm support' do
             }
           })
         }.to raise_error(CfnGuardian::ValidationError, /cannot set both SearchExpression and AnomalyDetection/)
+      end
+    end
+
+    context 'when AnomalyDetection is set to a non-boolean value' do
+      it 'raises a validation error instead of silently generating a static alarm' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'AnomalyDetection' => 'true',
+                  'ComparisonOperator' => 'GreaterThanUpperThreshold'
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid AnomalyDetection value/)
+      end
+    end
+
+    context 'when a config tries to set ThresholdOverridden directly to bypass the conflict check' do
+      it 'still raises the Threshold/AnomalyDetection conflict error' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'AnomalyDetection' => true,
+                  'ComparisonOperator' => 'GreaterThanUpperThreshold',
+                  'Threshold' => 80,
+                  'ThresholdOverridden' => false
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /cannot set both Threshold and AnomalyDetection/)
       end
     end
 

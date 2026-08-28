@@ -74,7 +74,7 @@ module CfnGuardian
                   MetricName: alarm.metric_name
                 },
                 Period: alarm.period,
-                Stat: alarm.statistic
+                Stat: alarm.extended_statistic.nil? ? alarm.statistic : alarm.extended_statistic
               }
               metric_stat[:Metric][:Dimensions] = alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
               metric_stat[:Unit] = alarm.unit unless alarm.unit.nil?

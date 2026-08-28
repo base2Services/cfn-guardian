@@ -6,7 +6,8 @@ module CfnGuardian
     class BaseAlarm
       
       attr_reader :type,
-        :resource_hash
+        :resource_hash,
+        :threshold_overridden
 
       attr_accessor :group,
         :name,
@@ -35,8 +36,7 @@ module CfnGuardian
         :search_expression,
         :search_aggregation,
         :anomaly_detection,
-        :standard_deviation,
-        :threshold_overridden
+        :standard_deviation
 
       def initialize(resource)
         @type = 'Alarm'
@@ -75,6 +75,15 @@ module CfnGuardian
       def metric_name=(metric_name)
         raise ArgumentError.new("metric_name '#{metric_name}' must be of type String, provided type '#{metric_name.class}'") unless metric_name.is_a?(String)
         @metric_name=metric_name
+      end
+
+      # Internal-only marker used to track that Threshold was explicitly set via a
+      # config override (as opposed to a resource group's own default_alarms
+      # definition). This is intentionally not exposed as a public writer so a
+      # YAML config cannot set ThresholdOverridden directly and bypass the
+      # "can't combine Threshold and AnomalyDetection" validation.
+      def mark_threshold_overridden!
+        @threshold_overridden = true
       end
     end
     
