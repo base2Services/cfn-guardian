@@ -174,6 +174,31 @@ RSpec.describe CfnGuardian::DisplayFormatter do
       expect(strip_ansi(stddev_row[2])).to eq('2.0')
     end
 
+    it 'parses a deployed StandardDeviation rendered in scientific notation and does not report a false mismatch' do
+      # Ruby's Float#to_s switches to scientific notation for very small finite values
+      # (0.000001.to_s => "1.0e-06"), and add_alarm (stacks/resources.rb) embeds that
+      # to_s form directly into the ANOMALY_DETECTION_BAND expression it generates. Build
+      # the fixture the same way, so this exercises exactly what a real deployed alarm
+      # with a tiny StandardDeviation would look like.
+      small_stddev = 0.000001
+      expect(small_stddev.to_s).to eq('1.0e-06') # sanity check the premise still holds
+
+      alarm = build_alarm(anomaly_detection: true, standard_deviation: small_stddev)
+      metric_alarm = build_metric_alarm(
+        alarm: alarm,
+        threshold_metric_id: 'ad1',
+        band_expression: "ANOMALY_DETECTION_BAND(m1, #{small_stddev})"
+      )
+
+      formatter = CfnGuardian::DisplayFormatter.new([alarm])
+      rows = formatter.compare_alarms([metric_alarm]).first[:rows]
+
+      stddev_row = row_by_name(rows, 'StandardDeviation')
+      expect(stddev_row).not_to be_nil
+      expect(strip_ansi(stddev_row[2])).to eq(small_stddev.to_s)
+      expect(row_matches?(stddev_row)).to eq(true)
+    end
+
     it 'reports AnomalyDetection as different when local config wants anomaly detection but the deployed alarm is still a static alarm' do
       alarm = build_alarm(anomaly_detection: true, standard_deviation: 2)
       metric_alarm = build_metric_alarm(alarm: alarm, threshold_metric_id: nil, threshold: 80.0)

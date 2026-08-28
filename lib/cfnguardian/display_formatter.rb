@@ -208,14 +208,17 @@ module CfnGuardian
     # Extracts the StandardDeviation from the deployed ANOMALY_DETECTION_BAND(m1, <stddev>)
     # expression referenced by ThresholdMetricId. This is approximate: it assumes the band
     # expression is in the same shape cfn-guardian generates, and returns nil if it can't be
-    # found or parsed (e.g. an anomaly alarm not managed by cfn-guardian).
+    # found or parsed (e.g. an anomaly alarm not managed by cfn-guardian). The number pattern
+    # also matches scientific notation (e.g. "1.0e-06"), since add_alarm embeds Ruby's
+    # Float#to_s form of StandardDeviation and to_s switches to that notation for very
+    # small (or very large) finite values.
     def deployed_standard_deviation(metric_alarm)
       return nil unless anomaly_detection_deployed?(metric_alarm)
 
       band_metric = (metric_alarm.metrics || []).find {|m| m.id == metric_alarm.threshold_metric_id}
       return nil if band_metric.nil? || band_metric.expression.nil?
 
-      match = band_metric.expression.match(/ANOMALY_DETECTION_BAND\([^,]+,\s*([-\d.]+)\s*\)/)
+      match = band_metric.expression.match(/ANOMALY_DETECTION_BAND\([^,]+,\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*\)/)
       match.nil? ? nil : match[1].to_f
     end
 
