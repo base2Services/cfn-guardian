@@ -476,5 +476,46 @@ RSpec.describe 'Anomaly detection alarm support' do
         }.to raise_error(CfnGuardian::ValidationError, /nil value for property/)
       end
     end
+
+    context 'when AnomalyDetection is explicitly false but ComparisonOperator is an anomaly-only operator' do
+      it 'raises a validation error instead of falling through to a static-threshold alarm' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'AnomalyDetection' => false,
+                  'ComparisonOperator' => 'GreaterThanUpperThreshold'
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /requires AnomalyDetection to be true/)
+      end
+    end
+
+    context 'when AnomalyDetection is not set (inherits the false default) but ComparisonOperator is an anomaly-only operator' do
+      it 'raises a validation error instead of falling through to a static-threshold alarm' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'ComparisonOperator' => 'LessThanLowerOrGreaterThanUpperThreshold'
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /requires AnomalyDetection to be true/)
+      end
+    end
   end
 end

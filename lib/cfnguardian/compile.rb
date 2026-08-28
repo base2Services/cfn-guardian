@@ -231,6 +231,11 @@ module CfnGuardian
               end
             end
           else
+            anomaly_only_operators = %w(GreaterThanUpperThreshold LessThanLowerOrGreaterThanUpperThreshold LessThanLowerThreshold)
+            if anomaly_only_operators.include?(resource.comparison_operator)
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has ComparisonOperator '#{resource.comparison_operator}' which requires AnomalyDetection to be true. Either set AnomalyDetection: true or use a static-threshold ComparisonOperator."
+            end
+
             %w(metric_name namespace).each do |property|
               if resource.send(property).nil?
                 @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
