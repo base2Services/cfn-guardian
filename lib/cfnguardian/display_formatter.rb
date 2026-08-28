@@ -58,30 +58,55 @@ module CfnGuardian
       @alarms.each do |alarm|
         alarm_name = CfnGuardian::CloudWatch.get_alarm_name(alarm)
         metric_alarm = metric_alarms.find {|ma| ma.alarm_name.include? alarm_name}
-        dimensions = metric_alarm.dimensions.map {|dim| {dim.name.to_sym => dim.value}}.inject(:merge)
         use_anomaly_detection = alarm.anomaly_detection == true
         deployed_anomaly_detection = anomaly_detection_deployed?(metric_alarm)
+
+        # A real deployed anomaly detection alarm has no top-level MetricName/Statistic/
+        # Period/Unit/Dimensions - CloudWatch only populates those nested inside the raw
+        # metric's MetricStat (see #deployed_metric_stat). Fall back to the top-level fields
+        # when the deployed alarm isn't a metric-math alarm at all (e.g. local config wants
+        # anomaly detection but the deployed alarm is still a plain static alarm).
+        metric_stat = deployed_metric_stat(metric_alarm)
+        if metric_stat
+          deployed_metric_name = metric_stat.metric.metric_name
+          deployed_dimensions = (metric_stat.metric.dimensions || []).map {|dim| {dim.name.to_sym => dim.value}}.inject(:merge)
+          deployed_period = metric_stat.period
+          deployed_statistic = metric_stat.stat
+          deployed_unit = metric_stat.unit
+        else
+          deployed_metric_name = metric_alarm.metric_name
+          deployed_dimensions = (metric_alarm.dimensions || []).map {|dim| {dim.name.to_sym => dim.value}}.inject(:merge)
+          deployed_period = metric_alarm.period
+          deployed_statistic = metric_alarm.statistic
+          deployed_unit = metric_alarm.unit
+        end
+
+        # An anomaly detection alarm's MetricStat.Stat holds whichever of Statistic/
+        # ExtendedStatistic cfn-guardian generated (see stacks/resources.rb#add_alarm), so
+        # compare that combined value here and suppress the separate ExtendedStatistic row
+        # below - the same way Threshold is already suppressed for anomaly alarms.
+        local_statistic = use_anomaly_detection ? (alarm.extended_statistic || alarm.statistic) : alarm.statistic
 
         rows = [
           ['ResourceId', alarm.resource_id, alarm.resource_id],
           ['ResourceHash', alarm.resource_hash, alarm.resource_hash],
           ['ResourceName', alarm.resource_name, alarm.resource_name],
           ['Enabled', alarm.enabled, true],
-          ['MetricName', alarm.metric_name, metric_alarm.metric_name],
-          ['Dimensions', alarm.dimensions, dimensions],
+          ['MetricName', alarm.metric_name, deployed_metric_name],
+          ['Dimensions', alarm.dimensions, deployed_dimensions],
           # A correctly deployed anomaly detection alarm has no static Threshold (it uses
           # ThresholdMetricId/Metrics instead), so comparing Threshold here would always show
           # as different. Compare AnomalyDetection/StandardDeviation below instead.
           ['Threshold', use_anomaly_detection ? nil : alarm.threshold.to_f, use_anomaly_detection ? nil : metric_alarm.threshold],
-          ['Period', alarm.period, metric_alarm.period],
+          ['Period', alarm.period, deployed_period],
           ['EvaluationPeriods', alarm.evaluation_periods, metric_alarm.evaluation_periods],
           ['ComparisonOperator', alarm.comparison_operator, metric_alarm.comparison_operator],
-          ['Statistic', alarm.statistic, metric_alarm.statistic],
+          ['Statistic', local_statistic, deployed_statistic],
           ['ActionsEnabled', alarm.actions_enabled, metric_alarm.actions_enabled],
           ['DatapointsToAlarm', alarm.datapoints_to_alarm, metric_alarm.datapoints_to_alarm],
-          ['ExtendedStatistic', alarm.extended_statistic, metric_alarm.extended_statistic],
+          ['ExtendedStatistic', use_anomaly_detection ? nil : alarm.extended_statistic, use_anomaly_detection ? nil : metric_alarm.extended_statistic],
           ['EvaluateLowSampleCountPercentile', alarm.evaluate_low_sample_count_percentile, metric_alarm.evaluate_low_sample_count_percentile],
-          ['Unit', alarm.unit, metric_alarm.unit],
+          ['Unit', alarm.unit, deployed_unit],
           ['TreatMissingData', alarm.treat_missing_data, metric_alarm.treat_missing_data],
           ['AlarmAction', alarm.alarm_action, alarm.alarm_action],
           ['OkActionDisabled', alarm.ok_action_disabled]
@@ -168,6 +193,16 @@ module CfnGuardian
     # ThresholdMetricId set (it references the ANOMALY_DETECTION_BAND expression in Metrics).
     def anomaly_detection_deployed?(metric_alarm)
       !metric_alarm.threshold_metric_id.nil? && !metric_alarm.threshold_metric_id.to_s.empty?
+    end
+
+    # For an anomaly detection alarm, CloudWatch does not populate the top-level MetricName/
+    # Namespace/Statistic/Period/Unit/Dimensions fields on describe_alarms - those live nested
+    # inside the raw metric's MetricStat, referenced by the Metrics array entry cfn-guardian
+    # generates with Id 'm1' (see stacks/resources.rb#add_alarm). Returns nil when the deployed
+    # alarm has no such entry (e.g. it's a plain static alarm, not managed via Metrics/MetricStat).
+    def deployed_metric_stat(metric_alarm)
+      raw_metric = (metric_alarm.metrics || []).find {|m| m.id == 'm1' && !m.metric_stat.nil?}
+      raw_metric.nil? ? nil : raw_metric.metric_stat
     end
 
     # Extracts the StandardDeviation from the deployed ANOMALY_DETECTION_BAND(m1, <stddev>)

@@ -7,12 +7,8 @@ require 'cfnguardian/models/alarm'
 require 'cfnguardian/display_formatter'
 
 RSpec.describe CfnGuardian::DisplayFormatter do
-  # Builds a local alarm config. Fields not relevant to the anomaly-detection
-  # comparison being tested (Statistic, ExtendedStatistic, etc.) are pinned to nil
-  # on both the local alarm and the fake deployed alarm below so they never
-  # contribute an unrelated diff - comparing those fields for an anomaly alarm is
-  # a separate, pre-existing approximation that this fix does not attempt to solve.
-  def build_alarm(anomaly_detection: false, standard_deviation: nil, threshold: 80)
+  # Builds a local alarm config.
+  def build_alarm(anomaly_detection: false, standard_deviation: nil, threshold: 80, statistic: nil)
     alarm = CfnGuardian::Models::BaseAlarm.new({ 'Id' => 'i-0123456789abcdef0' })
     alarm.group = 'Ec2Instance'
     alarm.name = 'CPUUtilizationHigh'
@@ -21,22 +17,35 @@ RSpec.describe CfnGuardian::DisplayFormatter do
     alarm.dimensions = { InstanceId: 'i-0123456789abcdef0' }
     alarm.threshold = threshold
     alarm.comparison_operator = anomaly_detection ? 'GreaterThanUpperThreshold' : 'GreaterThanThreshold'
-    alarm.statistic = nil
+    alarm.statistic = statistic
     alarm.anomaly_detection = anomaly_detection
     alarm.standard_deviation = standard_deviation
     alarm
   end
 
-  def build_metric_alarm(alarm:, threshold_metric_id: nil, band_expression: nil, threshold: nil)
+  # Builds a fake describe_alarms response for the deployed side.
+  #
+  # When threshold_metric_id is set (a deployed anomaly detection alarm), MetricName/
+  # Namespace/Statistic/Period/Unit/Dimensions are left unset at the top level and only
+  # populated inside Metrics[0].MetricStat - matching what a REAL CloudWatch metric-math
+  # alarm looks like in describe_alarms (a fixture that populated those top-level fields
+  # directly, as an earlier version of this spec did, would mask a comparison bug that
+  # only shows up against a real deployed anomaly alarm).
+  def build_metric_alarm(alarm:, threshold_metric_id: nil, band_expression: nil, threshold: nil, deployed_stat: 'Maximum')
     metrics = nil
     if threshold_metric_id
       metrics = [
         Aws::CloudWatch::Types::MetricDataQuery.new(
           id: 'm1',
           metric_stat: Aws::CloudWatch::Types::MetricStat.new(
-            metric: Aws::CloudWatch::Types::Metric.new(namespace: alarm.namespace, metric_name: alarm.metric_name),
+            metric: Aws::CloudWatch::Types::Metric.new(
+              namespace: alarm.namespace,
+              metric_name: alarm.metric_name,
+              dimensions: alarm.dimensions.map {|k, v| Aws::CloudWatch::Types::Dimension.new(name: k.to_s, value: v)}
+            ),
             period: alarm.period,
-            stat: 'Maximum'
+            stat: deployed_stat,
+            unit: alarm.unit
           ),
           return_data: true
         ),
@@ -50,19 +59,19 @@ RSpec.describe CfnGuardian::DisplayFormatter do
 
     Aws::CloudWatch::Types::MetricAlarm.new(
       alarm_name: CfnGuardian::CloudWatch.get_alarm_name(alarm),
-      metric_name: alarm.metric_name,
-      namespace: alarm.namespace,
-      dimensions: alarm.dimensions.map {|k, v| Aws::CloudWatch::Types::Dimension.new(name: k.to_s, value: v)},
+      metric_name: threshold_metric_id ? nil : alarm.metric_name,
+      namespace: threshold_metric_id ? nil : alarm.namespace,
+      dimensions: threshold_metric_id ? [] : alarm.dimensions.map {|k, v| Aws::CloudWatch::Types::Dimension.new(name: k.to_s, value: v)},
       threshold: threshold,
-      period: alarm.period,
+      period: threshold_metric_id ? nil : alarm.period,
       evaluation_periods: alarm.evaluation_periods,
       comparison_operator: alarm.comparison_operator,
-      statistic: nil,
+      statistic: threshold_metric_id ? nil : deployed_stat,
       actions_enabled: alarm.actions_enabled,
       datapoints_to_alarm: alarm.datapoints_to_alarm,
       extended_statistic: nil,
       evaluate_low_sample_count_percentile: alarm.evaluate_low_sample_count_percentile,
-      unit: alarm.unit,
+      unit: threshold_metric_id ? nil : alarm.unit,
       treat_missing_data: alarm.treat_missing_data,
       threshold_metric_id: threshold_metric_id,
       metrics: metrics
@@ -192,6 +201,57 @@ RSpec.describe CfnGuardian::DisplayFormatter do
       threshold_row = row_by_name(rows, 'Threshold')
       expect(threshold_row).not_to be_nil
       expect(row_matches?(threshold_row)).to eq(true)
+    end
+
+    it 'does not report a false MetricName/Dimensions/Period/Statistic/Unit difference for a correctly deployed anomaly alarm' do
+      alarm = build_alarm(anomaly_detection: true, standard_deviation: 2, statistic: 'Average')
+      alarm.unit = 'Percent'
+      metric_alarm = build_metric_alarm(
+        alarm: alarm,
+        threshold_metric_id: 'ad1',
+        band_expression: 'ANOMALY_DETECTION_BAND(m1, 2)',
+        deployed_stat: 'Average'
+      )
+
+      # Sanity check the fixture is realistic: a real deployed anomaly alarm has no
+      # top-level MetricName/Namespace/Statistic/Period/Unit, only the nested MetricStat.
+      expect(metric_alarm.metric_name).to be_nil
+      expect(metric_alarm.statistic).to be_nil
+      expect(metric_alarm.period).to be_nil
+      expect(metric_alarm.unit).to be_nil
+
+      formatter = CfnGuardian::DisplayFormatter.new([alarm])
+      rows = formatter.compare_alarms([metric_alarm]).first[:rows]
+
+      %w(MetricName Dimensions Period Statistic Unit).each do |name|
+        row = row_by_name(rows, name)
+        expect(row).not_to be_nil
+        expect(row_matches?(row)).to eq(true), "expected #{name} row #{row.inspect} to match"
+      end
+      expect(row_by_name(rows, 'ExtendedStatistic')).to be_nil
+    end
+
+    it 'reports a genuine MetricName/Statistic difference for a deployed anomaly alarm nested in MetricStat' do
+      alarm = build_alarm(anomaly_detection: true, standard_deviation: 2, statistic: 'Average')
+      deployed_alarm_config = build_alarm(anomaly_detection: true, standard_deviation: 2, statistic: 'Average')
+      deployed_alarm_config.metric_name = 'DiskReadOps'
+      metric_alarm = build_metric_alarm(
+        alarm: deployed_alarm_config,
+        threshold_metric_id: 'ad1',
+        band_expression: 'ANOMALY_DETECTION_BAND(m1, 2)',
+        deployed_stat: 'Sum'
+      )
+
+      formatter = CfnGuardian::DisplayFormatter.new([alarm])
+      rows = formatter.compare_alarms([metric_alarm]).first[:rows]
+
+      metric_name_row = row_by_name(rows, 'MetricName')
+      expect(metric_name_row).not_to be_nil
+      expect(row_matches?(metric_name_row)).to eq(false)
+
+      statistic_row = row_by_name(rows, 'Statistic')
+      expect(statistic_row).not_to be_nil
+      expect(row_matches?(statistic_row)).to eq(false)
     end
   end
 end

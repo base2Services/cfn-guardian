@@ -391,6 +391,47 @@ RSpec.describe 'Anomaly detection alarm support' do
       end
     end
 
+    context 'when StandardDeviation is set but AnomalyDetection is omitted' do
+      it 'raises a validation error instead of silently discarding an invalid StandardDeviation' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'StandardDeviation' => -1
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /invalid StandardDeviation/)
+      end
+    end
+
+    context 'when StandardDeviation is set but AnomalyDetection is explicitly false' do
+      it 'raises a validation error even when the StandardDeviation value itself is valid' do
+        expect {
+          compile_config({
+            'Resources' => {
+              'Ec2Instance' => [{ 'Id' => 'i-0123456789abcdef0' }]
+            },
+            'Templates' => {
+              'Ec2Instance' => {
+                'CPUUtilizationHigh' => {
+                  'AnomalyDetection' => false,
+                  'StandardDeviation' => 2
+                },
+                'StatusCheckFailed' => false
+              }
+            }
+          })
+        }.to raise_error(CfnGuardian::ValidationError, /StandardDeviation.*AnomalyDetection is not true/)
+      end
+    end
+
     context 'when both SearchExpression and AnomalyDetection are set' do
       it 'raises a validation error' do
         expect {
