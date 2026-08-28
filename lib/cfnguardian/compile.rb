@@ -190,6 +190,10 @@ module CfnGuardian
       @resources.each do |resource|
         case resource.type
         when 'Alarm'
+          if resource.search_expression && resource.anomaly_detection
+            @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} cannot set both SearchExpression and AnomalyDetection. They both rely on the mutually exclusive Metrics property."
+          end
+
           if resource.search_expression
             if !resource.search_expression.is_a?(String) || resource.search_expression.strip.empty?
               @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has an invalid SearchExpression. Must be a non-empty string."
@@ -201,6 +205,25 @@ module CfnGuardian
                 resource.search_aggregation = normalized
               else
                 @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid SearchAggregation '#{resource.search_aggregation}'. Must be one of: #{valid_aggregations.join(', ')}."
+              end
+            end
+          elsif resource.anomaly_detection
+            valid_operators = %w(GreaterThanUpperThreshold LessThanLowerOrGreaterThanUpperThreshold LessThanLowerThreshold)
+            unless valid_operators.include?(resource.comparison_operator)
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid ComparisonOperator '#{resource.comparison_operator}' for an AnomalyDetection alarm. Must be one of: #{valid_operators.join(', ')}."
+            end
+
+            if resource.threshold_overridden
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} cannot set both Threshold and AnomalyDetection. Anomaly detection alarms use StandardDeviation to size the expected band instead of a static Threshold."
+            end
+
+            if !resource.standard_deviation.nil? && (!resource.standard_deviation.is_a?(Numeric) || resource.standard_deviation <= 0)
+              @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has invalid StandardDeviation '#{resource.standard_deviation}'. Must be a positive number."
+            end
+
+            %w(metric_name namespace).each do |property|
+              if resource.send(property).nil?
+                @errors << "CfnGuardian::AlarmPropertyError - alarm #{resource.name} for resource #{resource.resource_id} has nil value for property #{property.to_camelcase}. This could be due to incorrect spelling of a default alarm name or missing property #{property.to_camelcase} on a new alarm."
               end
             end
           else

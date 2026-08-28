@@ -251,6 +251,10 @@ module CfnGuardian::Resource
       logger.debug("overriding #{obj.type} property '#{attr}' with value #{value} for resource id: #{obj.resource_id}")
       begin
         obj.send("#{attr.to_underscore}=",value.clone)
+        # Track that Threshold was set via a config override (as opposed to a resource
+        # group's own default_alarms definition) so validate_resources can detect a
+        # config that sets both a static Threshold and AnomalyDetection.
+        obj.threshold_overridden = true if attr.to_underscore == 'threshold' && obj.respond_to?(:threshold_overridden=)
       rescue NoMethodError => e
         if !e.message.match?(/inherit/)
           logger.warn "Unknown property '#{attr}' for type: #{obj.type} and resource id: #{obj.resource_id}"

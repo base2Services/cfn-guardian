@@ -7,7 +7,7 @@ module CfnGuardian
       
       attr_reader :type,
         :resource_hash
-        
+
       attr_accessor :group,
         :name,
         :metric_name,
@@ -33,8 +33,11 @@ module CfnGuardian
         :additional_notifiers,
         :tags,
         :search_expression,
-        :search_aggregation
-      
+        :search_aggregation,
+        :anomaly_detection,
+        :standard_deviation,
+        :threshold_overridden
+
       def initialize(resource)
         @type = 'Alarm'
         @group = nil
@@ -43,6 +46,7 @@ module CfnGuardian
         @namespace = nil
         @dimensions = nil
         @threshold = 0
+        @threshold_overridden = false
         @period = 60
         @evaluation_periods = 1
         @comparison_operator = 'GreaterThanThreshold'
@@ -64,12 +68,14 @@ module CfnGuardian
         @tags = {}
         @search_expression = nil
         @search_aggregation = nil
+        @anomaly_detection = false
+        @standard_deviation = nil
       end
-      
+
       def metric_name=(metric_name)
         raise ArgumentError.new("metric_name '#{metric_name}' must be of type String, provided type '#{metric_name.class}'") unless metric_name.is_a?(String)
         @metric_name=metric_name
-      end      
+      end
     end
     
     class AcmAlarm < BaseAlarm

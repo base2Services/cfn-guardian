@@ -24,3 +24,4 @@
 10. [Dimension Variables](variables.md)
 11. [Search Expression Alarms](search_expressions.md)
 12. [Alarm Tags](alarm_tags.md)
+13. [Anomaly Detection Alarms](anomaly_detection.md)

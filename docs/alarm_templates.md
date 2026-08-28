@@ -142,3 +142,19 @@ Templates:
       EvaluationPeriods: 10
       DatapointsToAlarm: 6
 ```
+
+## Anomaly Detection
+
+Instead of a static `Threshold`, an alarm can compare a metric against a CloudWatch anomaly detection band by setting `AnomalyDetection: true` along with one of the anomaly-specific `ComparisonOperator` values. `StandardDeviation` (default `2`) controls how wide the expected band is.
+
+```yaml
+Templates:
+  Ec2Instance:
+    CPUUtilizationHigh:
+      AnomalyDetection: true
+      StandardDeviation: 2
+      ComparisonOperator: GreaterThanUpperThreshold
+      EvaluationPeriods: 3
+```
+
+`Threshold` cannot be combined with `AnomalyDetection`. See [Anomaly Detection Alarms](anomaly_detection.md) for the full property reference, valid `ComparisonOperator` values, and more examples.

@@ -34,6 +34,7 @@ module CfnGuardian
         actions = alarm.alarm_action.kind_of?(Array) ? alarm.alarm_action.map{|action| Ref(action)} : [Ref(alarm.alarm_action)]
         actions.concat alarm.maintenance_groups.map {|mg| Ref(mg)} if alarm.maintenance_groups.any?
         use_search = alarm.search_expression.is_a?(String) && !alarm.search_expression.strip.empty?
+        use_anomaly_detection = alarm.anomaly_detection == true
 
         @template.declare do
           CloudWatch_Alarm("#{alarm.resource_hash}#{alarm.group}#{alarm.name.gsub(/[^0-9a-zA-Z]/i, '')}#{alarm.type}"[0..255]) do
@@ -42,7 +43,9 @@ module CfnGuardian
             AlarmName CfnGuardian::CloudWatch.get_alarm_name(alarm)
             ComparisonOperator alarm.comparison_operator
             EvaluationPeriods alarm.evaluation_periods
-            Threshold alarm.threshold
+            # Threshold and ThresholdMetricId are mutually exclusive on AWS::CloudWatch::Alarm -
+            # an anomaly detection alarm uses ThresholdMetricId (set below) instead of a static Threshold.
+            Threshold alarm.threshold unless use_anomaly_detection
             AlarmActions actions
             OKActions actions unless alarm.ok_action_disabled
             TreatMissingData alarm.treat_missing_data unless alarm.treat_missing_data.nil?
@@ -63,6 +66,33 @@ module CfnGuardian
                   ReturnData: true
                 }
               ]
+            elsif use_anomaly_detection
+              band_width = alarm.standard_deviation || 2
+              metric_stat = {
+                Metric: {
+                  Namespace: alarm.namespace,
+                  MetricName: alarm.metric_name
+                },
+                Period: alarm.period,
+                Stat: alarm.statistic
+              }
+              metric_stat[:Metric][:Dimensions] = alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
+              metric_stat[:Unit] = alarm.unit unless alarm.unit.nil?
+
+              Metrics [
+                {
+                  Id: 'm1',
+                  MetricStat: metric_stat,
+                  ReturnData: true
+                },
+                {
+                  Id: 'ad1',
+                  Expression: "ANOMALY_DETECTION_BAND(m1, #{band_width})",
+                  Label: "#{alarm.metric_name} (expected)",
+                  ReturnData: true
+                }
+              ]
+              ThresholdMetricId 'ad1'
             else
               Dimensions alarm.dimensions.map {|k,v| {Name: k, Value: v}} unless alarm.dimensions.nil?
               Statistic alarm.statistic if alarm.extended_statistic.nil?
