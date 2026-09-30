@@ -34,6 +34,7 @@ CfnGuardian is a AWS monitoring tool with a few capabilities:
 - EC2 Instances
 - ECS Clusters
 - ECS Services
+- ECS Scheduled Tasks
 - EFS
 - Classic LoadBalancers
 - Lambda Functions
