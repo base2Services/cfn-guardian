@@ -271,6 +271,18 @@ module CfnGuardian
       end
     end
 
+    class ECSScheduledTaskAlarm < BaseAlarm
+      def initialize(resource)
+        super(resource)
+        @group = 'ECSScheduledTask'
+        @namespace = 'ECS/ContainerInsights'
+        @dimensions = { ClusterName: resource['Id'] }
+        @dimensions[:TaskDefinitionFamily] = resource['TaskDefinitionFamily'] if resource.has_key?('TaskDefinitionFamily')
+        # scheduled tasks only publish metrics while they are running
+        @treat_missing_data = 'notBreaching'
+      end
+    end
+
     class EKSContainerInsightsClusterAlarm < BaseAlarm
       def initialize(resource)
         super(resource)
