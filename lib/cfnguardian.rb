@@ -304,7 +304,7 @@ module CfnGuardian
         raise Thor::Error, 'one of `--config YAML` or `--defaults` must be supplied'
       end
       
-      compiler = CfnGuardian::Compile.new(config_file)
+      compiler = CfnGuardian::Compile.new(config_file, false)
       compiler.get_resources
       alarms = filter_compiled_alarms(compiler.alarms,options[:filter])
 
