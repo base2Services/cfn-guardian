@@ -118,8 +118,12 @@ module CfnGuardian
                 logger.fatal "'#{@templates[group]['Inherit']}' resource group doesn't exist and is unable to be inherited from"
                 exit(1)
               end
-            else
+            elsif resource_group_names.include?(group)
               logger.error(e)
+              next
+            else
+              error = unknown_resource_group_error(group)
+              @errors << error unless @errors.include?(error)
               next
             end
           end
@@ -320,6 +324,19 @@ module CfnGuardian
       end
 
       return default_event_subscriptions
+    end
+
+    private
+
+    def resource_group_names
+      (CfnGuardian::Resource.constants - [:Base]).select { |name| CfnGuardian::Resource.const_get(name).is_a?(Class) }.map(&:to_s)
+    end
+
+    def unknown_resource_group_error(group)
+      message = "CfnGuardian::UnknownResourceGroupError - '#{group}' is not a valid resource group."
+      suggestion = resource_group_names.find { |name| name.downcase == group.to_s.downcase }
+      message += " Did you mean '#{suggestion}'?" if suggestion
+      message
     end
 
   end
