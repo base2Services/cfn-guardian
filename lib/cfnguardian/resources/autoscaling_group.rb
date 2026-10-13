@@ -22,9 +22,9 @@ module CfnGuardian::Resource
       event_subscription = CfnGuardian::Models::AutoScalingGroupEventSubscription.new(@resource)
       event_subscription.name = 'LaunchUnsuccessful'
       event_subscription.detail_type = 'EC2 Instance Launch Unsuccessful'
+      event_subscription.source = 'aws.autoscaling'
       event_subscription.detail = {
-        'instance-id' => [@resource['Id']],
-        'state' => ['terminated']
+        'AutoScalingGroupName' => [@resource['Id']],
       }
       @event_subscriptions.push(event_subscription)
     end
