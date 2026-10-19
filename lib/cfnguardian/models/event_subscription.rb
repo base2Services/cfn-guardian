@@ -95,6 +95,30 @@ module CfnGuardian
       end
     end
 
+    class ECSScheduledTaskEventSubscription < BaseEventSubscription
+      def initialize(resource)
+        super(resource)
+        @source = 'aws.ecs'
+        @detail_type = 'ECS Task State Change'
+        @hash = Digest::MD5.hexdigest [resource['Id'], resource['TaskDefinitionFamily']].to_json
+        @scope = {
+          'clusterArn' => ["arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/#{resource['Id']}"],
+          # tasks started by an ECS service have a group of service:<name>
+          'group' => [{ 'anything-but' => { 'prefix' => 'service:' } }]
+        }
+        if resource.has_key?('TaskDefinitionFamily')
+          # the trailing colon stops family `app` matching `app-v2`
+          @scope['taskDefinitionArn'] = [{ 'prefix' => "arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/#{resource['TaskDefinitionFamily']}:" }]
+        end
+      end
+
+      # Always scope to the resource's cluster and family, including custom and
+      # inherited subscriptions that set their own Detail.
+      def detail
+        return @detail.merge(@scope)
+      end
+    end
+
     class AcmEventSubscription < BaseEventSubscription; end
     class ApiGatewayEventSubscription < BaseEventSubscription; end
     class ApplicationTargetGroupEventSubscription < BaseEventSubscription; end
