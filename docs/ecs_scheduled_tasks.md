@@ -61,6 +61,8 @@ EventSubscriptions:
 
 There are no default alarms, as scheduled tasks only publish metrics while they run. If [Container Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html) is enabled on the cluster, alarms can be added under `Templates`. They use the `ECS/ContainerInsights` namespace with the `ClusterName` dimension, plus `TaskDefinitionFamily` if set, and treat missing data as not breaching.
 
+Alarms are named `guardian-ECSScheduledTask-<Id>-<AlarmName>`, or `guardian-ECSScheduledTask-<Id>-<TaskDefinitionFamily>-<AlarmName>` when a family is set, so a cluster-wide entry and family entries on the same cluster each get their own alarm.
+
 ```yaml
 Templates:
   ECSScheduledTask:

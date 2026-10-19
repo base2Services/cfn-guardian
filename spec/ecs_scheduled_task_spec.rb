@@ -111,9 +111,75 @@ RSpec.describe CfnGuardian::Resource::ECSScheduledTask do
       expect(alarm.treat_missing_data).to eq('notBreaching')
       expect(alarm.threshold).to eq(1800)
     end
+
+    context 'when a cluster has several entries' do
+      let(:templates) { { 'MemoryUtilizedHigh' => { 'MetricName' => 'MemoryUtilized', 'Threshold' => 1800 } } }
+
+      def alarm_for(resource)
+        described_class.new(resource).get_alarms('ECSScheduledTask', templates).first
+      end
+
+      it 'keeps the name and hash of a cluster-wide alarm unchanged' do
+        alarm = alarm_for({ 'Id' => 'cluster' })
+        expect(alarm.resource_hash).to eq(Digest::MD5.hexdigest('cluster'))
+        expect(CfnGuardian::CloudWatch.get_alarm_name(alarm)).to eq('guardian-ECSScheduledTask-cluster-MemoryUtilizedHigh')
+      end
+
+      it 'includes the family in the name of a family alarm' do
+        alarm = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'a' })
+        expect(CfnGuardian::CloudWatch.get_alarm_name(alarm)).to eq('guardian-ECSScheduledTask-cluster-a-MemoryUtilizedHigh')
+      end
+
+      it 'does not collide between a cluster-wide and a family entry' do
+        wide = alarm_for({ 'Id' => 'cluster' })
+        family = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'a' })
+        expect(wide.resource_hash).not_to eq(family.resource_hash)
+        expect(CfnGuardian::CloudWatch.get_alarm_name(wide)).not_to eq(CfnGuardian::CloudWatch.get_alarm_name(family))
+      end
+
+      it 'does not collide between two families' do
+        a = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'a' })
+        b = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'b' })
+        expect(a.resource_hash).not_to eq(b.resource_hash)
+        expect(CfnGuardian::CloudWatch.get_alarm_name(a)).not_to eq(CfnGuardian::CloudWatch.get_alarm_name(b))
+      end
+
+      it 'uses an explicit Name for the alarm name' do
+        alarm = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'a', 'Name' => 'nightly' })
+        expect(CfnGuardian::CloudWatch.get_alarm_name(alarm)).to eq('guardian-ECSScheduledTask-nightly-MemoryUtilizedHigh')
+      end
+    end
   end
 
   describe 'compiled template' do
+    it 'renders an alarm for both a cluster-wide and a family entry on the same cluster' do
+      Dir.mktmpdir do |tmpdir|
+        Dir.chdir(tmpdir) do
+          File.write('alarms.yaml', {
+            'Resources' => { 'ECSScheduledTask' => [
+              { 'Id' => 'example-cluster' },
+              { 'Id' => 'example-cluster', 'TaskDefinitionFamily' => 'example-a' },
+              { 'Id' => 'example-cluster', 'TaskDefinitionFamily' => 'example-b' }
+            ] },
+            'Templates' => { 'ECSScheduledTask' => { 'MemoryUtilizedHigh' => { 'MetricName' => 'MemoryUtilized', 'Threshold' => 1800 } } }
+          }.to_yaml)
+          compile = CfnGuardian::Compile.new('alarms.yaml', false)
+          compile.get_resources
+          compile.compile_templates('guardian.compiled.yaml')
+
+          resources = YAML.load_file('out/guardian.compiled.yaml')['Resources']
+          alarms = resources.select { |_, v| v['Type'] == 'AWS::CloudWatch::Alarm' }
+          names = alarms.values.map { |v| v['Properties']['AlarmName'] }
+          expect(names).to contain_exactly(
+            'guardian-ECSScheduledTask-example-cluster-MemoryUtilizedHigh',
+            'guardian-ECSScheduledTask-example-cluster-example-a-MemoryUtilizedHigh',
+            'guardian-ECSScheduledTask-example-cluster-example-b-MemoryUtilizedHigh'
+          )
+          expect(alarms.keys).to include("#{Digest::MD5.hexdigest('example-cluster')}ECSScheduledTaskMemoryUtilizedHighAlarm")
+        end
+      end
+    end
+
     it 'renders EventBridge rules targeting the Events topic' do
       Dir.mktmpdir do |tmpdir|
         Dir.chdir(tmpdir) do

@@ -277,7 +277,12 @@ module CfnGuardian
         @group = 'ECSScheduledTask'
         @namespace = 'ECS/ContainerInsights'
         @dimensions = { ClusterName: resource['Id'] }
-        @dimensions[:TaskDefinitionFamily] = resource['TaskDefinitionFamily'] if resource.has_key?('TaskDefinitionFamily')
+        if resource.has_key?('TaskDefinitionFamily')
+          @dimensions[:TaskDefinitionFamily] = resource['TaskDefinitionFamily']
+          # keep family alarms distinct from the cluster-wide and other family alarms on the same cluster
+          @resource_hash = Digest::MD5.hexdigest [resource['Id'], resource['TaskDefinitionFamily']].to_json
+          @resource_name = "#{resource['Id']}-#{resource['TaskDefinitionFamily']}" if @resource_name.nil?
+        end
         # scheduled tasks only publish metrics while they are running
         @treat_missing_data = 'notBreaching'
       end
