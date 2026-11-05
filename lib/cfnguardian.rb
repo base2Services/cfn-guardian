@@ -503,7 +503,7 @@ module CfnGuardian
     def disable_alarms
       set_region(options[:region],true)
       
-      alarm_names = CfnGuardian::CloudWatch.get_alarm_names(options[:group],options[:alarm_prefix])
+      alarm_names = maintenance_alarm_names()
       CfnGuardian::CloudWatch.disable_alarms(alarm_names)
       
       logger.info "Disabled #{alarm_names.length} alarms"
@@ -522,13 +522,25 @@ module CfnGuardian
     def enable_alarms
       set_region(options[:region],true)
       
-      alarm_names = CfnGuardian::CloudWatch.get_alarm_names(options[:group],options[:alarm_prefix])
+      alarm_names = maintenance_alarm_names()
       CfnGuardian::CloudWatch.enable_alarms(alarm_names)
       
       logger.info "#{alarm_names.length} alarms enabled"
     end
     
     private
+    
+    def maintenance_alarm_names()
+      if !options[:alarms].nil? && !options[:alarms].empty?
+        return options[:alarms]
+      end
+      
+      if options[:group].nil? && options[:alarm_prefix].nil?
+        raise Thor::Error, 'one of `--alarms`, `--group` or `--alarm-prefix` must be supplied'
+      end
+      
+      return CfnGuardian::CloudWatch.get_alarm_names(options[:group],options[:alarm_prefix])
+    end
     
     def set_region(region,required)
       if !region.nil?
