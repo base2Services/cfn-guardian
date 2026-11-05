@@ -45,8 +45,8 @@ Resources:
 | ElastiCacheReplicationGroup | Id               |
 | ElasticFileSystem           | Id               |
 | Ec2Instance                 | Id               |
-| EcsCluster                  | Id               |
-| EcsService                  | Id, Cluster      |
+| ECSCluster                  | Id               |
+| ECSService                  | Id, Cluster      |
 | NetworkTargetGroup          | Id, LoadBalancer |
 | ApplicationTargetGroup      | Id, LoadBalancer |
 | ElasticLoadBalancer         | Id               |
