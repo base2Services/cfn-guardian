@@ -243,7 +243,10 @@ module CfnGuardian
       end
       
       def payload
-        return {'Domain' => @domain}.to_json
+        return {
+          'Domain' => @domain,
+          'Region' => @region
+        }.to_json
       end
     end
     
