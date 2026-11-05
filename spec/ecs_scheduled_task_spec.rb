@@ -28,7 +28,7 @@ RSpec.describe CfnGuardian::Resource::ECSScheduledTask do
       failed = subscriptions({ 'Id' => 'batch-jobs' }).find { |s| s.name == 'TaskFailed' }
       expect(failed.detail).to eq({
         'lastStatus' => ['STOPPED'],
-        'containers' => { 'exitCode' => [{ 'anything-but' => 0 }] },
+        'containers' => { 'exitCode' => [{ 'numeric' => ['>', 0] }] },
         'clusterArn' => [cluster_arn],
         'group' => standalone
       })
@@ -127,7 +127,7 @@ RSpec.describe CfnGuardian::Resource::ECSScheduledTask do
 
       it 'includes the family in the name of a family alarm' do
         alarm = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'a' })
-        expect(CfnGuardian::CloudWatch.get_alarm_name(alarm)).to eq('guardian-ECSScheduledTask-cluster-a-MemoryUtilizedHigh')
+        expect(CfnGuardian::CloudWatch.get_alarm_name(alarm)).to eq('guardian-ECSScheduledTask-cluster:a-MemoryUtilizedHigh')
       end
 
       it 'does not collide between a cluster-wide and a family entry' do
@@ -142,6 +142,12 @@ RSpec.describe CfnGuardian::Resource::ECSScheduledTask do
         b = alarm_for({ 'Id' => 'cluster', 'TaskDefinitionFamily' => 'b' })
         expect(a.resource_hash).not_to eq(b.resource_hash)
         expect(CfnGuardian::CloudWatch.get_alarm_name(a)).not_to eq(CfnGuardian::CloudWatch.get_alarm_name(b))
+      end
+
+      it 'does not collide between a family entry and a cluster whose name contains the family' do
+        family = alarm_for({ 'Id' => 'batch', 'TaskDefinitionFamily' => 'jobs' })
+        wide = alarm_for({ 'Id' => 'batch-jobs' })
+        expect(CfnGuardian::CloudWatch.get_alarm_name(family)).not_to eq(CfnGuardian::CloudWatch.get_alarm_name(wide))
       end
 
       it 'uses an explicit Name for the alarm name' do
@@ -172,8 +178,8 @@ RSpec.describe CfnGuardian::Resource::ECSScheduledTask do
           names = alarms.values.map { |v| v['Properties']['AlarmName'] }
           expect(names).to contain_exactly(
             'guardian-ECSScheduledTask-example-cluster-MemoryUtilizedHigh',
-            'guardian-ECSScheduledTask-example-cluster-example-a-MemoryUtilizedHigh',
-            'guardian-ECSScheduledTask-example-cluster-example-b-MemoryUtilizedHigh'
+            'guardian-ECSScheduledTask-example-cluster:example-a-MemoryUtilizedHigh',
+            'guardian-ECSScheduledTask-example-cluster:example-b-MemoryUtilizedHigh'
           )
           expect(alarms.keys).to include("#{Digest::MD5.hexdigest('example-cluster')}ECSScheduledTaskMemoryUtilizedHighAlarm")
         end
@@ -200,7 +206,7 @@ RSpec.describe CfnGuardian::Resource::ECSScheduledTask do
           pattern = JSON.parse(rule['Properties']['EventPattern']['Fn::Sub'])
           expect(pattern['source']).to eq(['aws.ecs'])
           expect(pattern['detail-type']).to eq(['ECS Task State Change'])
-          expect(pattern['detail']['containers']).to eq({ 'exitCode' => [{ 'anything-but' => 0 }] })
+          expect(pattern['detail']['containers']).to eq({ 'exitCode' => [{ 'numeric' => ['>', 0] }] })
           expect(pattern['detail']['group']).to eq([{ 'anything-but' => { 'prefix' => 'service:' } }])
           expect(rule['Properties']['Targets'].first['Arn']).to eq({ 'Ref' => 'Events' })
         end

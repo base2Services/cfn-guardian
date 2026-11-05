@@ -36,7 +36,7 @@ Both are sent to the `Events` topic by default.
 | `TaskFailed` | A task stops and any of its containers has a non-zero exit code |
 | `TaskFailedToStart` | A task stops with stop code `TaskFailedToStart`, e.g. the image can't be pulled or a secret can't be fetched |
 
-EventBridge matches `exitCode` against every container in the task, so a sidecar (such as a log router) that exits non-zero will also trigger `TaskFailed`.
+A container with no exit code (null or missing, e.g. one that never started) doesn't match. EventBridge matches `exitCode` against every container in the task, so a sidecar (such as a log router) that exits non-zero will also trigger `TaskFailed`.
 
 ## Overriding Defaults
 
@@ -61,7 +61,7 @@ EventSubscriptions:
 
 There are no default alarms, as scheduled tasks only publish metrics while they run. If [Container Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html) is enabled on the cluster, alarms can be added under `Templates`. They use the `ECS/ContainerInsights` namespace with the `ClusterName` dimension, plus `TaskDefinitionFamily` if set, and treat missing data as not breaching.
 
-Alarms are named `guardian-ECSScheduledTask-<Id>-<AlarmName>`, or `guardian-ECSScheduledTask-<Id>-<TaskDefinitionFamily>-<AlarmName>` when a family is set, so a cluster-wide entry and family entries on the same cluster each get their own alarm.
+Alarms are named `guardian-ECSScheduledTask-<Id>-<AlarmName>`, or `guardian-ECSScheduledTask-<Id>:<TaskDefinitionFamily>-<AlarmName>` when a family is set, so a cluster-wide entry and family entries on the same cluster each get their own alarm.
 
 ```yaml
 Templates:
@@ -75,7 +75,7 @@ Templates:
 
 ## Missed Runs
 
-The event subscriptions only fire when a task runs and fails. They won't fire if the schedule never launches a task. If `RunTask` itself fails (for example on a bad network configuration), ECS creates no task and emits no events. That shows up in the EventBridge rule's or schedule's `FailedInvocations` metric instead.
+The event subscriptions only fire when a task runs and fails. They won't fire if the schedule never launches a task. If `RunTask` itself fails (for example on a bad network configuration), ECS creates no task and emits no events. That shows up in the launcher's own metrics instead: `FailedInvocations` in the `AWS/Events` namespace for an EventBridge rule, or `TargetErrorCount` and `InvocationDroppedCount` in the `AWS/Scheduler` namespace for EventBridge Scheduler (Scheduler doesn't publish `FailedInvocations`).
 
 To catch a missed run, add a `LogGroup` metric filter that counts a line the task logs on success, and alarm when the count is below 1 over the schedule interval. A metric filter with no matches publishes no data, so the alarm must treat missing data as breaching. See [log group metric filters](custom_checks/log_group_metric_filters.md).
 

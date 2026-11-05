@@ -11,7 +11,9 @@ module CfnGuardian::Resource
       event_subscription.name = 'TaskFailed'
       event_subscription.detail = {
         'lastStatus' => ['STOPPED'],
-        'containers' => { 'exitCode' => [{ 'anything-but' => 0 }] }
+        # numeric matching skips containers with a null or missing exit code,
+        # which `anything-but: 0` would match
+        'containers' => { 'exitCode' => [{ 'numeric' => ['>', 0] }] }
       }
       @event_subscriptions.push(event_subscription)
 

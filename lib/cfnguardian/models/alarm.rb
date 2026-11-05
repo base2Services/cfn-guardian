@@ -279,9 +279,11 @@ module CfnGuardian
         @dimensions = { ClusterName: resource['Id'] }
         if resource.has_key?('TaskDefinitionFamily')
           @dimensions[:TaskDefinitionFamily] = resource['TaskDefinitionFamily']
-          # keep family alarms distinct from the cluster-wide and other family alarms on the same cluster
+          # keep family alarms distinct from the cluster-wide and other family alarms on the same cluster.
+          # ECS cluster and family names can't contain a colon, so cluster `a` with family `b`
+          # can't share an alarm name with a cluster called `a-b`
           @resource_hash = Digest::MD5.hexdigest [resource['Id'], resource['TaskDefinitionFamily']].to_json
-          @resource_name = "#{resource['Id']}-#{resource['TaskDefinitionFamily']}" if @resource_name.nil?
+          @resource_name = "#{resource['Id']}:#{resource['TaskDefinitionFamily']}" if @resource_name.nil?
         end
         # scheduled tasks only publish metrics while they are running
         @treat_missing_data = 'notBreaching'
